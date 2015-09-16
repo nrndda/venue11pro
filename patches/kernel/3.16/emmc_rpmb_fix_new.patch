@@ -1,0 +1,42 @@
+--- a/drivers/mmc/card/block.c	2014-11-19 12:08:08.559131783 +0300
++++ b/drivers/mmc/card/block.c	2014-11-19 12:42:04.683039699 +0300
+@@ -1025,6 +1025,19 @@
+ 	md->reset_done &= ~type;
+ }
+ 
++int mmc_access_rpmb(struct mmc_queue *mq)
++{
++       struct mmc_blk_data *md = mq->data;
++       /*
++        * If this is a RPMB partition access, return ture
++        */
++       if (md && md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
++               return true;
++
++       return false;
++}
++EXPORT_SYMBOL_GPL(mmc_access_rpmb);
++
+ static int mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+ {
+ 	struct mmc_blk_data *md = mq->data;
+--- a/drivers/mmc/card/queue.c	2014-10-25 12:24:49.000000000 +0400
++++ b/drivers/mmc/card/queue.c	2014-11-19 12:40:54.827186392 +0300
+@@ -38,7 +38,7 @@
+ 		return BLKPREP_KILL;
+ 	}
+ 
+-	if (mq && mmc_card_removed(mq->card))
++	if (mq && (mmc_card_removed(mq->card) || mmc_access_rpmb(mq)))
+ 		return BLKPREP_KILL;
+ 
+ 	req->cmd_flags |= REQ_DONTPREP;
+--- a/drivers/mmc/card/queue.h	2014-10-03 19:57:35.000000000 +0400
++++ b/drivers/mmc/card/queue.h	2014-11-19 12:41:21.757866450 +0300
+@@ -73,4 +73,6 @@
+ extern int mmc_packed_init(struct mmc_queue *, struct mmc_card *);
+ extern void mmc_packed_clean(struct mmc_queue *);
+ 
++extern int mmc_access_rpmb(struct mmc_queue *);
++
+ #endif

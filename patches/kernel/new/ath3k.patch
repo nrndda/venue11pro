@@ -1,0 +1,24 @@
+diff --git a/drivers/acpi/acpi_pnp.c b/drivers/acpi/acpi_pnp.c
+index b193f84..be8d967 100644
+--- a/drivers/acpi/acpi_pnp.c
++++ b/drivers/acpi/acpi_pnp.c
+@@ -166,6 +166,7 @@ static const struct acpi_device_id acpi_pnp_device_ids[] = {
+ 	{"DAV0336"},		/* Davicom ISA 33.6K Modem */
+ 	{"DMB1032"},		/* Creative Modem Blaster Flash56 DI5601-1 */
+ 	{"DMB2001"},		/* Creative Modem Blaster V.90 DI5660 */
++	{"DLAC3002"},		/* Dell Venue ath3k bluetooth */
+ 	{"ETT0002"},		/* E-Tech CyberBULLET PC56RVP */
+ 	{"FUJ0202"},		/* Fujitsu 33600 PnP-I2 R Plug & Play */
+ 	{"FUJ0205"},		/* Fujitsu FMV-FX431 Plug & Play */
+diff --git a/net/rfkill/rfkill-gpio.c b/net/rfkill/rfkill-gpio.c
+index d978f2f..3d0a037 100644
+--- a/net/rfkill/rfkill-gpio.c
++++ b/net/rfkill/rfkill-gpio.c
+@@ -172,6 +172,7 @@ static const struct acpi_device_id rfkill_acpi_match[] = {
+ 	{ "BCM2E3D", RFKILL_TYPE_BLUETOOTH },
+ 	{ "BCM2E40", RFKILL_TYPE_BLUETOOTH },
+ 	{ "BCM2E64", RFKILL_TYPE_BLUETOOTH },
++	{ "DLAC3002", RFKILL_TYPE_BLUETOOTH },
+ 	{ "BCM4752", RFKILL_TYPE_GPS },
+ 	{ "LNV4752", RFKILL_TYPE_GPS },
+ 	{ },

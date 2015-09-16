@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="2819", ENV{DISPLAY}=":0", ENV{XAUTHORITY}="/home/nrndda/.Xauthority", RUN+="/etc/udev/scripts/rotate_normal.sh"

@@ -1,0 +1,119 @@
+Module                  Size  Used by
+pci_stub               16384  1 
+vboxpci                24576  0 
+vboxnetadp             28672  0 
+vboxnetflt             28672  0 
+vboxdrv               311296  3 vboxnetadp,vboxnetflt,vboxpci
+binfmt_misc            20480  1 
+nls_iso8859_1          16384  1 
+joydev                 20480  0 
+hid_sensor_rotation    16384  0 
+hid_sensor_accel_3d    16384  0 
+hid_sensor_gyro_3d     16384  0 
+hid_sensor_als         16384  0 
+hid_sensor_magn_3d     16384  0 
+hid_sensor_incl_3d     16384  0 
+hid_sensor_trigger     16384  12 hid_sensor_gyro_3d,hid_sensor_incl_3d,hid_sensor_accel_3d,hid_sensor_rotation,hid_sensor_als,hid_sensor_magn_3d
+industrialio_triggered_buffer    16384  6 hid_sensor_gyro_3d,hid_sensor_incl_3d,hid_sensor_accel_3d,hid_sensor_rotation,hid_sensor_als,hid_sensor_magn_3d
+kfifo_buf              16384  1 industrialio_triggered_buffer
+industrialio           53248  9 hid_sensor_trigger,hid_sensor_gyro_3d,industrialio_triggered_buffer,hid_sensor_incl_3d,hid_sensor_accel_3d,hid_sensor_rotation,hid_sensor_als,kfifo_buf,hid_sensor_magn_3d
+hid_sensor_iio_common    16384  6 hid_sensor_gyro_3d,hid_sensor_incl_3d,hid_sensor_accel_3d,hid_sensor_rotation,hid_sensor_als,hid_sensor_magn_3d
+pn544_mei              16384  0 
+mei_phy                16384  1 pn544_mei
+hid_multitouch         20480  0 
+pn544                  20480  1 pn544_mei
+hci                    45056  2 pn544,mei_phy
+nfc                    90112  2 hci,pn544
+hid_sensor_hub         20480  8 hid_sensor_trigger,hid_sensor_gyro_3d,hid_sensor_incl_3d,hid_sensor_accel_3d,hid_sensor_rotation,hid_sensor_als,hid_sensor_magn_3d,hid_sensor_iio_common
+gpio_keys              16384  0 
+snd_soc_sst_baytrail_pcm    28672  2 
+snd_soc_sst_dsp        45056  1 snd_soc_sst_baytrail_pcm
+dell_wmi               16384  0 
+snd_soc_sst_byt_rt5640_mach    16384  0 
+sparse_keymap          16384  1 dell_wmi
+dcdbas                 16384  0 
+intel_rapl             20480  0 
+intel_soc_dts_thermal    16384  0 
+intel_powerclamp       20480  0 
+coretemp               16384  0 
+kvm_intel             139264  0 
+kvm                   417792  1 kvm_intel
+crc32_pclmul           16384  0 
+aesni_intel            20480  0 
+aes_i586               20480  1 aesni_intel
+xts                    16384  1 aesni_intel
+lrw                    16384  1 aesni_intel
+gf128mul               16384  2 lrw,xts
+ablk_helper            16384  1 aesni_intel
+cryptd                 16384  1 ablk_helper
+cdc_mbim               16384  0 
+qcserial               16384  0 
+cdc_wdm                20480  1 cdc_mbim
+usb_wwan               20480  1 qcserial
+cdc_ncm                28672  1 cdc_mbim
+usbserial              40960  2 qcserial,usb_wwan
+usbnet                 40960  2 cdc_mbim,cdc_ncm
+mii                    16384  1 usbnet
+dm_multipath           24576  0 
+scsi_dh                16384  1 dm_multipath
+lpc_ich                20480  0 
+snd_intel_sst_acpi     16384  0 
+mei_txe                20480  0 
+snd_intel_sst_core     65536  1 snd_intel_sst_acpi
+mei                    73728  3 pn544_mei,mei_phy,mei_txe
+snd_soc_rt5640         69632  2 snd_soc_sst_byt_rt5640_mach
+iosf_mbi               16384  2 intel_soc_dts_thermal,intel_rapl
+snd_soc_sst_mfld_platform    65536  1 snd_intel_sst_core
+i2c_hid                20480  0 
+snd_soc_rl6231         16384  1 snd_soc_rt5640
+mac_hid                16384  0 
+dw_dmac                16384  0 
+dw_dmac_core           24576  2 dw_dmac,snd_soc_sst_dsp
+snd_soc_core          167936  4 snd_soc_rt5640,snd_soc_sst_baytrail_pcm,snd_soc_sst_byt_rt5640_mach,snd_soc_sst_mfld_platform
+snd_compress           20480  1 snd_soc_core
+snd_pcm_dmaengine      16384  1 snd_soc_core
+snd_pcm                94208  5 snd_soc_rt5640,snd_soc_core,snd_soc_sst_baytrail_pcm,snd_soc_sst_mfld_platform,snd_pcm_dmaengine
+snd_seq_midi           16384  0 
+snd_seq_midi_event     16384  1 snd_seq_midi
+snd_rawmidi            28672  1 snd_seq_midi
+soc_button_array       16384  0 
+snd_seq                57344  2 snd_seq_midi_event,snd_seq_midi
+snd_seq_device         16384  3 snd_seq,snd_rawmidi,snd_seq_midi
+snd_timer              28672  2 snd_pcm,snd_seq
+processor_thermal_device    16384  0 
+int3403_thermal        16384  0 
+int3402_thermal        16384  0 
+snd                    69632  12 snd_soc_core,snd_timer,snd_pcm,snd_seq,snd_rawmidi,snd_soc_sst_mfld_platform,snd_seq_device,snd_compress
+int3400_thermal        16384  0 
+acpi_thermal_rel       16384  1 int3400_thermal
+acpi_pad               16384  0 
+soundcore              16384  1 snd
+i2c_designware_platform    16384  0 
+pwm_lpss_platform      16384  0 
+i2c_designware_core    16384  1 i2c_designware_platform
+snd_soc_sst_acpi       16384  0 
+spi_pxa2xx_platform    24576  0 
+pwm_lpss               16384  1 pwm_lpss_platform
+8250_dw                16384  0 
+ath6kl_sdio            20480  0 
+ath6kl_core           147456  1 ath6kl_sdio
+cfg80211              462848  1 ath6kl_core
+parport_pc             32768  0 
+ppdev                  20480  0 
+lp                     20480  0 
+parport                40960  3 lp,ppdev,parport_pc
+autofs4                40960  3 
+hid_generic            16384  0 
+usbhid                 49152  0 
+hid                    98304  5 i2c_hid,hid_multitouch,hid_generic,hid_sensor_hub,usbhid
+mmc_block              32768  5 
+i915                  937984  5 
+i2c_algo_bit           16384  1 i915
+drm_kms_helper        110592  1 i915
+drm                   286720  7 i915,drm_kms_helper
+uas                    24576  0 
+usb_storage            57344  2 uas
+wmi                    20480  1 dell_wmi
+video                  20480  1 i915
+sdhci_acpi             16384  0 
+sdhci                  45056  1 sdhci_acpi

@@ -1,0 +1,1041 @@
+  +------------------------------------------------------------------------+
+  |    This report is created by ASTRA32 v.2.06  .  Aug-09-2014 22:08:59   |
+  +------------------------------------------------------------------------+
+                               NRNDDA_DELL
+                               
+     Registered To:            Cody Kraus
+     License Type:             Professional for 5 computers
+                               
+                  +-----------------------------------------+
+                  |              System Summary             |
+                  +-----------------------------------------+
+  Processor 
+     Processor:                Future Intel
+     CPU Clock:                1466.7 MHz
+     Level 1 Cache:            8 x 0+0 kB (data+instr.)
+     Level 2 Cache:            8 x 0 kB
+  Motherboard
+     Motherboard Vendor:       Unknown
+     BIOS Version:             Unknown
+     Chipset Vendor:           Intel Corporation
+     Chipset:                  Unknown Device
+     Southbridge Vendor:       Intel Corporation
+     Southbridge:              Unknown Device
+     DMI/SMBIOS Version:       Not Present
+  Memory
+     Memory Size:              1994560 kB (1947.81 MB)
+     System Memory:            1948 MB
+  Storage
+  Video
+     Monitor Vendor:           Sharp
+     Monitor Model:            615V2ÅLQ108M1 (SHP 140B)
+     Video Chip Vendor:        Intel Corporation
+     Video Chip:               Unknown Device
+     Video Memory Size:        1062784 kB
+  Operating System
+     Operating System:         MS Windows  Unknown (101) Unknown (101) (6.2.9200)
+     Windows Folder:           C:\Windows
+  Network
+     Network Name:             NRNDDA_DELL
+     Interface Description:    ?????????? Bluetooth (?????? ????) #2
+     MAC Address:              88-12-4E-8A-25-2E
+     Adapter Vendor:           Dell Computer
+     Adapter Name:             Unknown Device
+     Interface Description:    Dell Wireless 5570e HSPA+ (42Mbps) Mobile Broadband Card
+     MAC Address:              B4-93-B5-5A-40-56
+     Interface Description:    ??????????? ??????? Wi-Fi Direct (??????????)
+     MAC Address:              BA-12-4E-0A-25-81
+     Interface Description:    Dell Wireless 1538 802.11 a/g/n Adapter
+     MAC Address:              88-12-4E-0A-25-81
+  Ports
+     LPT Ports:                LPT1(61D0h) LPT2(488Bh) LPT3(90D6h) 
+     COM Ports:                COM1(71C4h) COM2(C081h) COM3(D4D3h) COM4(920Ah) 
+                               
+                  +-----------------------------------------+
+                  |               Motherboard               |
+                  +-----------------------------------------+
+  Motherboard
+     Motherboard Vendor:       Unknown
+     Vendor URL:               Unknown
+     BIOS Version:             Unknown
+     BIOS Date:                D}Z,Wı”i
+     Chipset Vendor:           Intel Corporation
+     Chipset:                  Unknown Device
+     Southbridge Vendor:       Intel Corporation
+     Southbridge:              Unknown Device
+                               
+                  +-----------------------------------------+
+                  |                  CPU                    |
+                  +-----------------------------------------+
+  CPU 
+     Processor:                Future Intel
+     Coprocessor:              Internal
+     CPU Clock:                1466.7 MHz
+     Level 1 Cache:            8 x 0+0 kB (data+instr.)
+     Level 2 Cache:            8 x 0 kB
+     Platform ID:              Unknown (1)
+     Vendor:                   GenuineIntel
+     Processor Name:           Intel(R) Atom(TM) CPU  Z3770  @ 1.46GHz
+     Processor Type:           Original OEM Processor
+     CPUID:                    Family: 6, Model: 7, Stepping: 3
+     Ext. Family/Model:        Family: -, Model: 3
+     Brand ID:                 Not Supported
+     Number of Cores:          8
+     Logical CPU Count:        16
+     Max CPUID Level:          11
+     Max ExtCPUID Level:       80000008h
+     Code Name:                None
+     Core Stepping:            Unknown
+     MSR 0000002Ah:            00000000h:40080000h
+     MSR 00000017h:            00040000h:9014124Eh
+  Instruction Set
+     Floating-Point Unit On-Chip:         [X]
+     IA MMX Technology:                   [X]
+     SSE Instruction Set:                 [X]
+     SSE2 Instruction Set:                [X]
+     SSE3 Instruction Set:                [X]
+     Supplemental SSE3 Instruction Set:   [X]
+     SSE4.1 Instruction Set:              [X]
+     SSE4.2 Instruction Set:              [X]
+     Advanced Vector Extensions (AVX):    [ ]
+     FMA Instructions Set:                [ ]
+     AES Instructions Set:                [X]
+     Intel Extended Memory 64 Tech.:      [X]
+     Intel Architecture - 64 (IA-64):     [ ]
+     AMD MMX Instruction Extensions:      [ ]
+     AMD 3DNow! Instructions:             [ ]
+     AMD 3DNow! Extensions:               [ ]
+     AMD 3DNow! Prefetch:                 [X]
+     AMD SSE4A Extensions:                [ ]
+     AMD SSE5 Extensions:                 [ ]
+     AMD Misaligned SSE:                  [ ]
+     AMD64 Architecture:                  [ ]
+     Cyrix Extended MMX:                  [ ]
+     CMPXCHG8 Instruction Supported:      [X]
+     CMPXCHG16 Instruction Supported:     [X]
+     Fast System Call:                    [X]
+     Conditional Move Instruction:        [X]
+     CLFLUSH Insruction Supported:        [X]
+     Fast Save and Restore:               [X]
+     Monitor/MWAIT Instructions:          [X]
+     SYSCALL/SYSRET Instructions:         [ ]
+     LAHF/SAHF Instructions:              [X]
+     POPCNT Insruction Supported:         [X]
+     XSAVE Insructions Supported:         [ ]
+     OS Supports XSAVE Instructions:      [ ]
+     PCLMULQDQ Instruction Supported:     [X]
+     MOVBE Insruction Supported:          [X]
+     AMD RDTSCP Insruction Supported:     [X]
+     AMD Fast Save and Restore:           [ ]
+     AMD SKINIT, STGI, DEV Supported:     [ ]
+  Processor Features
+     Virtual Mode Extension:              [X]
+     Debugging Extension:                 [X]
+     Page Size Extension:                 [X]
+     Time Stamp Counter:                  [X]
+     Model Specific Registers:            [X]
+     Physical Address Extension:          [X]
+     Machine Check Exception:             [X]
+     On-chip APIC Hardware Supported:     [X]
+     Memory Type Range Registers:         [X]
+     Page Global Enable:                  [X]
+     Machine Check Architecture:          [X]
+     Page Attribute Table:                [X]
+     36-bit Page Size Extension:          [X]
+     Processor Serial Number:             [ ]
+     Debug Store:                         [X]
+     64-bit Debug Store:                  [X]
+     Self-Snoop:                          [X]
+     Hyper-Threading Technology:          [X]
+     Pending Break Enable:                [X]
+     CPL-Qualified Debug Store:           [X]
+     L1 Context ID:                       [ ]
+     Send Task Priority Messages:         [X]
+     Direct Cache Access:                 [ ]
+     Performance Capabilities MSR:        [X]
+     x2APIC Architecture:                 [ ]
+     Advanced Bit Manipulation:           [ ]
+     OS Visible Workaround:               [ ]
+     Instruction Based Sampling:          [ ]
+     Intel Virtualization Technology:     [X]
+     Intel Trusted Execution Technology:  [ ]
+     Intel Turbo Boost Technology:        [X]
+     Intel Execute Disable Bit:           [X]
+     AMD Secure Virtual Machine:          [ ]
+     AMD Model-Specific Registers:        [ ]
+     AMD Multiprocessing Capable:         [ ]
+     AMD CMP Legacy Mode:                 [ ]
+     AMD CR8 in Legacy Mode:              [ ]
+     AMD Ext. APIC Register Space:        [ ]
+     AMD Watchdog Timer:                  [ ]
+     AMD 1-GB Large Page:                 [ ]
+  Power Management
+     ACPI Supported:                      [X]
+     Thermal Monitor Supported:           [X]
+     Thermal Monitor 2:                   [X]
+     Enhanced SpeedStep Technology:       [X]
+     Digital Thermal Sensor:              [X]
+     Operating Point Protection:          [X]
+     AMD Temperature Sensor:              [ ]
+     AMD Frequency ID Control:            [ ]
+     AMD Voltage ID Control:              [ ]
+     AMD Thermal Trip:                    [ ]
+     AMD Thermal Monitoring:              [ ]
+     AMD Software Thermal Control:        [ ]
+     AMD Invariant TSC:                   [X]
+     AMD 100MHz Multiplier Steps:         [ ]
+     AMD Hardware P-State Control:        [ ]
+                               
+                  +-----------------------------------------+
+                  |                CPU Cache                |
+                  +-----------------------------------------+
+  Level 1 Instruction Cache
+     Size:                     8 x 0 kB
+     Associativity:            off
+     Lines per Tag:            0
+     Line Size:                0 byte
+     TLB 4K Pages:             
+       Number of Entries:      0
+       Associativity:          off
+  Level 1 Data Cache
+     Size:                     8 x 0 kB
+     Associativity:            off
+     Lines per Tag:            0
+     Line Size:                0 byte
+     TLB 4K Pages:             
+       Number of Entries:      128
+       Associativity:          4-way
+  Level 2 Cache
+     Size:                     8 x 0 kB
+     Associativity:            off
+     Lines per Tag:            0
+     Line Size:                0 byte
+                               
+                  +-----------------------------------------+
+                  |                  BIOS                   |
+                  +-----------------------------------------+
+  BIOS
+     Motherboard Vendor:       Unknown
+     Vendor URL:               Unknown
+     BIOS Version:             Unknown
+     BIOS Date:                D}Z,Wı”i
+     MP Specification Ver.:    Not Supported
+     DMI/SMBIOS Version:       Not Present
+                               
+                  +-----------------------------------------+
+                  |             PCI/AGP Devices             |
+                  +-----------------------------------------+
+  Bus: 00h, Device: 00h, Function: 00h         
+     Vendor (8086h):           Intel Corporation
+     Device (0F00h):           Unknown Device
+     Subsys Vendor (1028h):    Dell Computer Corp
+     Subsystem ID (0603h):     Unknown
+     Class (06h):              Bridge
+     SubClass (00h):           PCI/CPU
+     Revision:                 09h
+     Interface:                00h
+  Device Properties
+     Device Timing:            Fast
+     Memory Access:            [X]
+     I/O Access:               [X]
+     Bus Master:               [X]
+     66 MHz Speed Support:     [ ]
+  Device Resources
+  Driver
+     Driver Status:            The device is working properly
+     Manufacturer:             (??????????? ????????? ??????????)
+     Device Description:       ??????????? ???? PCI  - CPU
+     Device Class:             System
+     Device Location:          PCI-???? 0, ?????????? 0, ??????? 0
+     Driver Provider:          Microsoft
+     Driver Version:           6.3.9600.17031
+     Driver Date:              6-21-2006
+     Inf File:                 machine.inf
+     Hardware ID:              PCI\VEN_8086&DEV_0F00&SUBSYS_06031028&REV_09
+     Compatible ID:            PCI\VEN_8086&DEV_0F00&REV_09
+                               
+  Bus: 00h, Device: 02h, Function: 00h         
+     Vendor (8086h):           Intel Corporation
+     Device (0F31h):           Unknown Device
+     Subsys Vendor (1028h):    Dell Computer Corp
+     Subsystem ID (0603h):     Unknown
+     Class (03h):              Display
+     SubClass (00h):           VGA
+     Revision:                 09h
+     Interface:                00h
+  Device Properties
+     Device Timing:            Fast
+     Memory Access:            [X]
+     I/O Access:               [X]
+     Bus Master:               [X]
+     66 MHz Speed Support:     [ ]
+  Device Resources
+     Memory Address:           90000000h - 903FFFFFh
+     Memory Address:           80000000h - 8FFFFFFFh
+     Base I/O Port:            00001000h - 00001007h
+  Driver
+     Driver Status:            The device is working properly
+     Manufacturer:             Intel Corporation
+     Device Description:       Intel(R) HD Graphics
+     Device Class:             Display
+     Device Location:          PCI-???? 0, ?????????? 2, ??????? 0
+     Driver Provider:          Intel Corporation
+     Driver Version:           10.18.10.3366
+     Driver Date:              11-26-2013
+     Inf File:                 oem11.inf
+     Service Name:             igfx
+     Hardware ID:              PCI\VEN_8086&DEV_0F31&SUBSYS_06031028&REV_09
+     Compatible ID:            PCI\VEN_8086&DEV_0F31&REV_09
+                               
+  Bus: 00h, Device: 14h, Function: 00h         
+     Vendor (8086h):           Intel Corporation
+     Device (0F35h):           Unknown Device
+     Subsys Vendor (1028h):    Dell Computer Corp
+     Subsystem ID (0603h):     Unknown
+     Class (0Ch):              Serial
+     SubClass (03h):           USB
+     Revision:                 09h
+     Interface:                30h
+  Device Properties
+     Device Timing:            Medium
+     Memory Access:            [X]
+     I/O Access:               [ ]
+     Bus Master:               [X]
+     66 MHz Speed Support:     [ ]
+  Device Resources
+     Memory Address:           90800000h - 9080FFFFh
+  Driver
+     Driver Status:            The device is working properly
+     Manufacturer:             ????????????? ????-?????????? USB xHCI
+     Device Description:       xHCI-??????????? ????-?????????? USB
+     Friendly Name:            ??????????? ????-?????????? Intel(R) USB 3.0 0100 (??????????)
+     Device Class:             USB
+     Device Location:          PCI-???? 0, ?????????? 20, ??????? 0
+     Driver Provider:          Microsoft
+     Driver Version:           6.3.9600.17031
+     Driver Date:              2-21-2014
+     Inf File:                 usbxhci.inf
+     Service Name:             USBXHCI
+     Hardware ID:              PCI\VEN_8086&DEV_0F35&SUBSYS_06031028&REV_09
+     Compatible ID:            PCI\VEN_8086&DEV_0F35&REV_09
+                               
+  Bus: 00h, Device: 1Ah, Function: 00h         
+     Vendor (8086h):           Intel Corporation
+     Device (0F18h):           Unknown Device
+     Subsys Vendor (1028h):    Dell Computer Corp
+     Subsystem ID (0603h):     Unknown
+     Class (10h):              En/Decryption
+     SubClass (80h):           Other
+     Revision:                 09h
+     Interface:                00h
+  Device Properties
+     Device Timing:            Fast
+     Memory Access:            [ ]
+     I/O Access:               [ ]
+     Bus Master:               [ ]
+     66 MHz Speed Support:     [ ]
+  Device Resources
+     Memory Address:           90700000h - 907FFFFFh
+     Memory Address:           90600000h - 906FFFFFh
+  Driver
+     Driver Status:            The device is working properly
+     Manufacturer:             Intel
+     Device Description:       Intel(R) Trusted Execution Engine Interface 
+     Device Class:             System
+     Device Location:          PCI-???? 0, ?????????? 26, ??????? 0
+     Driver Provider:          Intel
+     Driver Version:           1.0.0.1054
+     Driver Date:              8-4-2013
+     Inf File:                 oem18.inf
+     Service Name:             TXEI
+     Hardware ID:              PCI\VEN_8086&DEV_0F18&SUBSYS_06031028&REV_09
+     Compatible ID:            PCI\VEN_8086&DEV_0F18&REV_09
+                               
+  Bus: 00h, Device: 1Fh, Function: 00h         
+     Vendor (8086h):           Intel Corporation
+     Device (0F1Ch):           Unknown Device
+     Subsys Vendor (1028h):    Dell Computer Corp
+     Subsystem ID (0603h):     Unknown
+     Class (06h):              Bridge
+     SubClass (01h):           PCI/ISA
+     Revision:                 09h
+     Interface:                00h
+  Device Properties
+     Device Timing:            Medium
+     Memory Access:            [X]
+     I/O Access:               [X]
+     Bus Master:               [X]
+     66 MHz Speed Support:     [ ]
+  Device Resources
+  Driver
+     Driver Status:            The device is working properly
+     Manufacturer:             (??????????? ????????? ??????????)
+     Device Description:       ??????????? ???? PCI - ISA
+     Device Class:             System
+     Device Location:          PCI-???? 0, ?????????? 31, ??????? 0
+     Driver Provider:          Microsoft
+     Driver Version:           6.3.9600.17031
+     Driver Date:              6-21-2006
+     Inf File:                 machine.inf
+     Service Name:             msisadrv
+     Hardware ID:              PCI\VEN_8086&DEV_0F1C&SUBSYS_06031028&REV_09
+     Compatible ID:            PCI\VEN_8086&DEV_0F1C&REV_09
+                               
+                  +-----------------------------------------+
+                  |              Memory Modules             |
+                  +-----------------------------------------+
+     This chipset is not supported
+                               
+                  +-----------------------------------------+
+                  |                   HDD                   |
+                  +-----------------------------------------+
+     ATA/ATAPI drives not found
+                               
+                  +-----------------------------------------+
+                  |              Storage (ASPI)             |
+                  +-----------------------------------------+
+     ASPI devices not found
+                               
+                  +-----------------------------------------+
+                  |              Logical Drives             |
+                  +-----------------------------------------+
+  Local Drives
+  C:[OS]
+     Drive Letter:             C:
+     Drive Type:               Fixed Disk
+     Volume Label:             OS
+     File System:              NTFS
+     Volume Serial Number:     B633-4603
+     Total Size:               51.1 GB
+     Free Space:               34.8 GB (68.2%)
+  D:
+     Drive Letter:             D:
+     Drive Type:               Removable Disk
+  W:[WINRETOOLS]
+     Drive Letter:             W:
+     Drive Type:               Fixed Disk
+     Volume Label:             WINRETOOLS
+     File System:              NTFS
+     Volume Serial Number:     A025-5832
+     Total Size:               750.0 MB
+     Free Space:               366.1 MB (48.8%)
+  X:[WINRETOOLS]
+     Drive Letter:             X:
+     Drive Type:               Fixed Disk
+     Volume Label:             WINRETOOLS
+     File System:              NTFS
+     Volume Serial Number:     A025-5832
+     Total Size:               750.0 MB
+     Free Space:               366.1 MB (48.8%)
+  Y:[PBR Image]
+     Drive Letter:             Y:
+     Drive Type:               Fixed Disk
+     Volume Label:             PBR Image
+     File System:              NTFS
+     Volume Serial Number:     2AC3-A411
+     Total Size:               5.8 GB
+     Free Space:               781.8 MB (13.2%)
+                               
+                  +-----------------------------------------+
+                  |               USB Devices               |
+                  +-----------------------------------------+
+  USB Device 1
+     Vendor (413Ch):           Dell Computer
+     Device (81A4h):           Unknown Device
+     Manufacturer:              
+     Product:                   
+     Serial Number:             
+     Device Version:           0.06
+     Class (00h):              Unknown
+     SubClass (00h):           Unknown
+     Protocol (00h):           Unknown
+     Configuration:            
+     USB Version:              2.00
+     Speed:                    480 Mb/s
+     Transfer Type:            Bulk/Interrupt
+     Data Packet Size:         64 bytes
+     Max Power:                500 mA Remote Wakeup
+  Driver
+     Driver Status:            The device is working properly
+     Manufacturer:             Microsoft
+     Device Description:       ????????????? ??????? ????????? ?????????????? ????
+     Friendly Name:            Dell Wireless 5570e HSPA+ (42Mbps) Mobile Broadband Card
+     Device Class:             Net
+     Device Location:          0000.0014.0000.003.000.000.000.000.000
+     Driver Provider:          Microsoft
+     Driver Version:           6.3.9600.16453
+     Driver Date:              10-31-2013
+     Inf File:                 netwmbclass.inf
+     Service Name:             wmbclass
+     Hardware ID:              USB\VID_413C&PID_81A4&REV_0006&MI_0c
+     Compatible ID:            USB\Class_02&SubClass_0e&Prot_00
+  Interface 1
+     Class (FFh):              Vendor Specific Class
+     SubClass (00h):           Unknown
+     Protocol (00h):           Unknown
+     Interface:                
+  Interface 2
+     Class (FFh):              Vendor Specific Class
+     SubClass (00h):           Unknown
+     Protocol (00h):           Unknown
+     Interface:                
+  Interface 3
+     Class (FFh):              Vendor Specific Class
+     SubClass (FFh):           Vendor Specific Subclass
+     Protocol (FFh):           Vendor Specific Protocol
+     Interface:                
+  Interface 4
+     Class (FFh):              Vendor Specific Class
+     SubClass (FFh):           Vendor Specific Subclass
+     Protocol (FFh):           Vendor Specific Protocol
+     Interface:                
+                               
+  USB Device 2
+     Vendor (06CBh):           Synaptics
+     Device (2819h):           Unknown Device
+     Manufacturer:             
+     Product:                  Synaptics T Pad V 01.30
+     Serial Number:            0670FF545053894987202608
+     Device Version:           0.20
+     Class (00h):              Unknown
+     SubClass (00h):           Unknown
+     Protocol (00h):           Unknown
+     Configuration:            
+     USB Version:              2.00
+     Speed:                    480 Mb/s
+     Transfer Type:            Interrupt
+     Data Packet Size:         64 bytes
+     Max Power:                500 mA Remote Wakeup
+  Driver
+     Driver Status:            The device is working properly
+     Manufacturer:             (??????????? USB ????-??????????)
+     Device Description:       ????????? USB ??????????
+     Device Class:             USB
+     Device Location:          Port_#0004.Hub_#0001
+     Driver Provider:          Microsoft
+     Driver Version:           6.3.9600.16442
+     Driver Date:              6-21-2006
+     Inf File:                 usb.inf
+     Service Name:             usbccgp
+     Hardware ID:              USB\VID_06CB&PID_2819&REV_0020
+     Compatible ID:            USB\DevClass_00&SubClass_00&Prot_00
+  Interface 1
+     Class (03h):              Human Interface Devices
+     SubClass (01h):           Boot Interface Subclass
+     Protocol (02h):           Mouse
+     Interface:                
+  Driver
+     Driver Status:            The device is working properly
+     Manufacturer:             (??????????? ????????? ??????????)
+     Device Description:       USB-?????????? ?????
+     Device Class:             HIDClass
+     Device Location:          0000.0014.0000.004.000.000.000.000.000
+     Driver Provider:          Microsoft
+     Driver Version:           6.3.9600.17041
+     Driver Date:              6-21-2006
+     Inf File:                 input.inf
+     Service Name:             HidUsb
+     Hardware ID:              USB\VID_06CB&PID_2819&REV_0020&MI_00
+     Compatible ID:            USB\Class_03&SubClass_01&Prot_02
+  Interface 2
+     Class (03h):              Human Interface Devices
+     SubClass (01h):           Boot Interface Subclass
+     Protocol (01h):           Keyboard
+     Interface:                STMicroelectronics KB V1.24
+  Driver
+     Driver Status:            The device is working properly
+     Manufacturer:             (??????????? ????????? ??????????)
+     Device Description:       USB-?????????? ?????
+     Device Class:             HIDClass
+     Device Location:          0000.0014.0000.004.000.000.000.000.000
+     Driver Provider:          Microsoft
+     Driver Version:           6.3.9600.17041
+     Driver Date:              6-21-2006
+     Inf File:                 input.inf
+     Service Name:             HidUsb
+     Hardware ID:              USB\VID_06CB&PID_2819&REV_0020&MI_01
+     Compatible ID:            USB\Class_03&SubClass_01&Prot_01
+  Interface 3
+     Class (03h):              Human Interface Devices
+     SubClass (01h):           Boot Interface Subclass
+     Protocol (00h):           None
+     Interface:                STMicroelectronics CCB V1.24
+  Driver
+     Driver Status:            The device is working properly
+     Manufacturer:             (??????????? ????????? ??????????)
+     Device Description:       USB-?????????? ?????
+     Device Class:             HIDClass
+     Device Location:          0000.0014.0000.004.000.000.000.000.000
+     Driver Provider:          Microsoft
+     Driver Version:           6.3.9600.17041
+     Driver Date:              6-21-2006
+     Inf File:                 input.inf
+     Service Name:             HidUsb
+     Hardware ID:              USB\VID_06CB&PID_2819&REV_0020&MI_02
+     Compatible ID:            USB\Class_03&SubClass_01&Prot_00
+                               
+                  +-----------------------------------------+
+                  |            Physical Printers            |
+                  +-----------------------------------------+
+     LPT/PnP or USB printer not found
+                               
+                  +-----------------------------------------+
+                  |            Installed Printers           |
+                  +-----------------------------------------+
+  Local Printers
+  Installed Printer 1
+     Printer Name:             Microsoft XPS Document Writer
+     Printer Port:             PORTPROMPT:
+     Default Printer:          Yes
+     Printer Type:             Local
+     Print Processor:          winprint
+     Data Type:                RAW
+                               
+  Installed Printer 2
+     Printer Name:             Fax
+     Printer Port:             SHRFAX:
+     Default Printer:          No
+     Printer Type:             Local
+     Print Processor:          winprint
+     Data Type:                RAW
+                               
+                  +-----------------------------------------+
+                  |                 Network                 |
+                  +-----------------------------------------+
+  Network
+     Network Name:             NRNDDA_DELL
+     User Name:                nrndd_000
+     User Role:                Administrator
+     Logon Domain:             nrndda_dell
+  Interface 1
+     Description:              ?????????? Bluetooth (?????? ????) #2
+     MAC Address:              88-12-4E-8A-25-2E
+     Adapter Type:             Ethernet
+     Link Speed:               3.0 Mbps
+     MTU Size:                 1500 byte
+     Adapter Status:           Enabled
+     Operational Status:       Non Operational
+     DHCP Server:              Unknown
+     Gateway:                  0.0.0.0
+  Interface 2
+     Adapter Vendor:           Dell Computer
+     Adapter Name:             Unknown Device
+     Bus Type:                 USB
+     Description:              Dell Wireless 5570e HSPA+ (42Mbps) Mobile Broadband Card
+     MAC Address:              B4-93-B5-5A-40-56
+     Adapter Type:             Unknown (243)
+     Link Speed:               0 bps
+     MTU Size:                 4064 byte
+     Adapter Status:           Enabled
+     Operational Status:       Non Operational
+     DHCP Enabled:             No
+     Gateway:                  0.0.0.0
+  Interface 3
+     Description:              ??????????? ??????? Wi-Fi Direct (??????????)
+     MAC Address:              BA-12-4E-0A-25-81
+     Adapter Type:             Unknown (71)
+     Link Speed:               0 bps
+     MTU Size:                 1500 byte
+     Adapter Status:           Enabled
+     Operational Status:       Non Operational
+     DHCP Server:              Unknown
+     Gateway:                  0.0.0.0
+  Interface 4
+     Description:              Dell Wireless 1538 802.11 a/g/n Adapter
+     MAC Address:              88-12-4E-0A-25-81
+     Adapter Type:             Unknown (71)
+     Link Speed:               65.0 Mbps
+     MTU Size:                 1500 byte
+     Adapter Status:           Enabled
+     Operational Status:       Operational
+     DHCP Server:              10.0.0.1
+     IP Address:               10.0.0.15
+     IP Address Subnet Mask:   255.255.255.0
+     Gateway:                  10.0.0.1
+     DNS Server:               10.0.0.1
+     Primary WINS:             10.0.0.1
+                               
+                  +-----------------------------------------+
+                  |                 Monitor                 |
+                  +-----------------------------------------+
+  Monitor
+     Monitor Vendor:           Sharp
+     Monitor Model:            615V2ÅLQ108M1 (SHP 140B)
+     Viewable Size:            10.7" (27.3 sm)
+     Serial Number:            0
+     Manufacture Date:         February 2014
+     EDID Version:             1.4
+     Monitor ID:               SHP140B
+     Aspect Ratio:             16:9
+     Horizontal Size:          24 sm
+     Vertical Size:            13 sm
+     Gamma Factor:             2.200
+     Display Type:             RGB Color
+     Input Signal:             Digital
+     Internal Vendor:          615V2ÅLQ108M1
+  DPMS Features
+     Active Off:               [ ]
+     Suspend:                  [ ]
+     Standby:                  [ ]
+  Supported Modes
+  Driver
+     Driver Status:            The device is working properly
+     Manufacturer:             (??????????? ????????)
+     Device Description:       ????????????? ??????? PnP
+     Device Class:             Monitor
+     Driver Provider:          Microsoft
+     Driver Version:           6.3.9600.16384
+     Driver Date:              6-21-2006
+     Inf File:                 monitor.inf
+     Service Name:             monitor
+     Hardware ID:              MONITOR\SHP140B
+     Compatible ID:            *PNP09FF
+                               
+                  +-----------------------------------------+
+                  |                  Video                  |
+                  +-----------------------------------------+
+  Video
+     Video Chip Vendor:        Intel Corporation
+     Video Chip:               Unknown Device
+     Subsystem Vendor:         Dell Computer Corp
+     Video Memory Size:        1062784 kB
+     Bus Type:                 PCI
+  Driver
+     Driver Status:            The device is working properly
+     Manufacturer:             Intel Corporation
+     Device Description:       Intel(R) HD Graphics
+     Device Class:             Display
+     Device Location:          PCI-???? 0, ?????????? 2, ??????? 0
+     Driver Provider:          Intel Corporation
+     Driver Version:           10.18.10.3366
+     Driver Date:              11-26-2013
+     Inf File:                 oem11.inf
+     Service Name:             igfx
+     Hardware ID:              PCI\VEN_8086&DEV_0F31&SUBSYS_06031028&REV_09
+     Compatible ID:            PCI\VEN_8086&DEV_0F31&REV_09
+                               
+                  +-----------------------------------------+
+                  |          Drivers Troubleshooter         |
+                  +-----------------------------------------+
+  List of Problem Devices
+     All devices are working properly
+                               
+                  +-----------------------------------------+
+                  |                 Windows                 |
+                  +-----------------------------------------+
+  Windows
+     Operating System:         MS Windows  Unknown (101) Unknown (101) (6.2.9200)
+     OS Language:              ??????? (??????)
+     Windows Folder:           C:\Windows
+     Installation Date:        June 06, 2014
+     Kernel Type:              Multiprocessor Free
+     Licensed Processors:      0
+     Registered Owner:         nrndda@hotmail.com
+     Registered Organization:  
+     Product ID:               00258-60105-65318-AAOEM
+     System UpTime:            0 Hour(s) 28 Minutes 14 Seconds
+     IE Version:               9.11.9600.17031
+     DirectX Version:          DirectX 9.0c (4.09.00.0904)
+  Regional Settings
+     Country:                  United States
+     Language:                 English
+     Time Zone:                ?????????? ????? (????) (GMT+4)
+     Currency Name:            US Dollar
+     Measurment System:        U.S.
+     ANSI Code Page:           1252
+     OEM Code Page:            437
+                               
+                  +-----------------------------------------+
+                  |            Installed Programs           |
+                  +-----------------------------------------+
+  Installed Programs
+     Sysinfo Lab ASTRA32 - Advanced System Information Tool 2.06
+     Dell My Dell Client Framework v1.0.0.3
+     McAfee, Inc. McAfee LiveSafe ñ Internet Security v12.8.409
+     PC-Doctor, Inc. My Dell v3.5.6426.22
+     Sierra Wireless, Inc. Sierra Wireless Dell Mobile Broadband Driver Package v3.12.1310.4003
+     Total Commander 7.04 PowerPack
+     Dell Products, LP Dell Digital Delivery v2.8.5000.0
+     Dell My Dell Client Framework v1.0.0.3
+     Dell Inc. Dell Backup and Recovery v1.6.2.0
+     Intel Corporation Intel(R) Trusted Execution Engine v1.0.0.1054
+     Qualcomm Atheros Mobile Qualcomm Atheros Driver Installation Program v9.0
+     Intel Corporation Intel(R) Trusted Execution Engine Driver v1.0.0.1054
+     Qualcomm Atheros Bluetooth UART Driver v2.2.0.19
+     Microsoft Corporation Microsoft Office v15.0.4569.1506
+     Dell Inc. Dell Backup and Recovery - Support Software v1.6.2.0
+     Intel Corporation Intel(R) Trusted Execution Engine v1.1.1.1
+     Dell Inc. Dell Update v1.1.1054.0
+     Microsoft Corporation Update for Microsoft en-us Dictionary v16.1.958.1
+     Intel Corporation Intel(R) Processor Graphics v10.18.10.3366
+     PC-Doctor, Inc. DSC/AA Factory Installer v3.5.6426.22
+                               
+                  +-----------------------------------------+
+                  |                  Debug                  |
+                  +-----------------------------------------+
+  PCI/AGP Devices Dump
+
+  B:00h D:00h F:00h V:8086h D:0F00h Unknown Device
+
+        0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  
+  00:  86 80 00 0F 07 00 00 00 09 00 00 06 00 00 00 00 
+  10:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  20:  00 00 00 00 00 00 00 00 00 00 00 00 28 10 03 06 
+  30:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  40:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  50:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  60:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  70:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  80:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  90:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  A0:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  B0:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  C0:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  D0:  00 00 00 00 A6 A6 00 00 00 00 00 00 00 00 00 00 
+  E0:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  F0:  5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+  B:00h D:02h F:00h V:8086h D:0F31h Unknown Device
+
+        0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  
+  00:  86 80 31 0F 07 04 10 00 09 00 00 03 00 00 00 00 
+  10:  00 00 00 90 00 00 00 00 08 00 00 80 00 00 00 00 
+  20:  01 10 00 00 00 00 00 00 00 00 00 00 28 10 03 06 
+  30:  00 00 00 00 D0 00 00 00 00 00 00 00 00 01 00 00 
+  40:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  50:  11 02 00 00 00 00 00 00 00 00 00 00 01 00 00 7B 
+  60:  00 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  70:  01 00 E0 7A 07 00 00 00 00 00 00 00 00 00 00 00 
+  80:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  90:  05 B0 01 00 0C F0 E0 FE 62 49 00 00 00 00 00 00 
+  A0:  00 00 00 00 13 00 06 03 00 00 00 00 00 00 00 00 
+  B0:  09 00 07 01 00 00 00 00 00 00 00 00 00 00 00 00 
+  C0:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  D0:  01 90 22 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  E0:  00 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  F0:  00 00 00 00 00 00 00 00 D1 0F 01 00 10 70 C8 79 
+
+  B:00h D:14h F:00h V:8086h D:0F35h Unknown Device
+
+        0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  
+  00:  86 80 35 0F 06 04 90 02 09 30 03 0C 00 00 00 00 
+  10:  04 00 80 90 00 00 00 00 00 00 00 00 00 00 00 00 
+  20:  00 00 00 00 00 00 00 00 00 00 00 00 28 10 03 06 
+  30:  00 00 00 00 70 00 00 00 00 00 00 00 00 01 00 00 
+  40:  FD 01 04 80 8F C6 CF 83 00 00 00 00 00 00 00 00 
+  50:  5F 6E CE 0B 00 00 00 00 00 00 00 00 00 00 00 00 
+  60:  30 20 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  70:  01 80 C2 C1 08 00 00 00 00 00 00 00 00 00 00 00 
+  80:  05 00 B7 00 0C F0 E0 FE 00 00 00 00 B8 49 00 00 
+  90:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  A0:  00 01 04 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  B0:  8F 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  C0:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  D0:  3F 00 00 00 3F 00 00 00 01 00 00 00 01 00 00 00 
+  E0:  30 2C 00 00 00 00 00 00 00 00 00 00 D8 D8 00 00 
+  F0:  00 00 00 00 00 00 00 00 1A 0F 09 01 00 00 00 00 
+
+  B:00h D:1Ah F:00h V:8086h D:0F18h Unknown Device
+
+        0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  
+  00:  86 80 18 0F 00 05 10 00 09 00 80 10 00 00 00 00 
+  10:  00 00 70 90 00 00 60 90 00 00 00 00 00 00 00 00 
+  20:  00 00 00 00 00 00 00 00 00 00 00 00 28 10 03 06 
+  30:  00 00 00 00 80 00 00 00 00 00 00 00 00 01 00 00 
+  40:  C5 00 00 1F 00 40 00 80 00 00 00 62 00 00 00 00 
+  50:  41 00 F8 7E 04 01 00 00 00 00 00 00 00 00 00 00 
+  60:  00 00 00 10 01 00 00 00 00 00 00 00 00 00 00 00 
+  70:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  80:  01 A0 03 48 0B 01 00 00 00 00 00 00 00 00 00 00 
+  90:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  A0:  05 00 00 00 0C F0 E0 FE B3 49 00 00 00 00 00 00 
+  B0:  00 00 00 40 02 00 00 00 00 00 00 00 00 00 00 00 
+  C0:  09 10 00 00 00 00 00 7F 00 00 00 01 00 00 00 00 
+  D0:  08 30 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  E0:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  F0:  00 00 00 00 00 00 00 00 1A 0F 09 01 00 00 00 00 
+
+  B:00h D:1Fh F:00h V:8086h D:0F1Ch Unknown Device
+
+        0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  
+  00:  86 80 1C 0F 07 01 10 02 09 00 01 06 00 00 80 00 
+  10:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  20:  00 00 00 00 00 00 00 00 00 00 00 00 28 10 03 06 
+  30:  00 00 00 00 E0 00 00 00 00 00 00 00 00 00 00 00 
+  40:  03 04 00 00 02 30 D0 FE 03 05 00 00 02 C0 D0 FE 
+  50:  02 80 D0 FE 02 10 D0 FE 02 00 F0 FE 02 50 D0 FE 
+  60:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  70:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  80:  01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  90:  01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  A0:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  B0:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  C0:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  D0:  00 00 00 00 00 00 00 00 CF FF 00 00 00 00 00 00 
+  E0:  09 00 0C 10 00 00 00 00 00 00 00 00 00 00 00 00 
+  F0:  01 C0 D1 FE 00 00 00 00 1A 0F 09 01 03 03 00 00 
+
+  CPU Dump
+  
+  Processor:                Future Intel
+  Processor Name:           Intel(R) Atom(TM) CPU  Z3770  @ 1.46GHz
+  Code Name:                None
+  Core Stepping:            Unknown
+  
+  MaxCPUID = 0000000Bh
+  MaxExtCPUID = 80000008h
+  CPUID with EAX=00h
+    EAX = 0000000Bh
+    EBX = 756E6547h
+    ECX = 6C65746Eh
+    EDX = 49656E69h
+  CPUID with EAX=01h
+    EAX = 00030673h
+    EBX = 04100800h
+    ECX = 43D8E3BFh
+    EDX = BFEBFBFFh
+  CPUID with EAX=02h
+    EAX = 61B3A001h
+    EBX = 0000FFC2h
+    ECX = 00000000h
+    EDX = 00000000h
+  CPUID with EAX=03h
+    EAX = 00000000h
+    EBX = 00000000h
+    ECX = 00000000h
+    EDX = 00000000h
+  CPUID with EAX=04h
+    EAX = 1C000121h
+    EBX = 0140003Fh
+    ECX = 0000003Fh
+    EDX = 00000001h
+  CPUID with EAX=05h
+    EAX = 00000040h
+    EBX = 00000040h
+    ECX = 00000003h
+    EDX = 33000020h
+  CPUID with EAX=06h
+    EAX = 00000007h
+    EBX = 00000002h
+    ECX = 00000009h
+    EDX = 00000000h
+  CPUID with EAX=07h
+    EAX = 00000000h
+    EBX = 00002282h
+    ECX = 00000000h
+    EDX = 00000000h
+  CPUID with EAX=08h
+    EAX = 00000000h
+    EBX = 00000000h
+    ECX = 00000000h
+    EDX = 00000000h
+  CPUID with EAX=09h
+    EAX = 00000000h
+    EBX = 00000000h
+    ECX = 00000000h
+    EDX = 00000000h
+  CPUID with EAX=0Ah
+    EAX = 07280203h
+    EBX = 00000000h
+    ECX = 00000000h
+    EDX = 00004503h
+  CPUID with EAX=0Bh
+    EAX = 00000001h
+    EBX = 00000001h
+    ECX = 00000100h
+    EDX = 00000004h
+  CPUID with EAX=80000000h
+    EAX = 80000008h
+    EBX = 00000000h
+    ECX = 00000000h
+    EDX = 00000000h
+  CPUID with EAX=80000001h
+    EAX = 00000000h
+    EBX = 00000000h
+    ECX = 00000101h
+    EDX = 28100000h
+  CPUID with EAX=80000002h
+    EAX = 20202020h
+    EBX = 20202020h
+    ECX = 65746E49h
+    EDX = 2952286Ch
+  CPUID with EAX=80000003h
+    EAX = 6F744120h
+    EBX = 4D54286Dh
+    ECX = 50432029h
+    EDX = 5A202055h
+  CPUID with EAX=80000004h
+    EAX = 30373733h
+    EBX = 20402020h
+    ECX = 36342E31h
+    EDX = 007A4847h
+  CPUID with EAX=80000005h
+    EAX = 00000000h
+    EBX = 00000000h
+    ECX = 00000000h
+    EDX = 00000000h
+  CPUID with EAX=80000006h
+    EAX = 00000000h
+    EBX = 00000000h
+    ECX = 04008040h
+    EDX = 00000000h
+  CPUID with EAX=80000007h
+    EAX = 00000000h
+    EBX = 00000000h
+    ECX = 00000000h
+    EDX = 00000100h
+  CPUID with EAX=80000008h
+    EAX = 00003024h
+    EBX = 00000000h
+    ECX = 00000000h
+    EDX = 00000000h
+  MSR: 0000002Ah
+    EDX = 00000000h
+    EAX = 40080000h
+  MSR: 00000017h
+    EDX = 00040000h
+    EAX = 9014124Eh
+  CPU Clock
+   1.46670000000000E+0003
+
+  [CPU]
+  Future Intel
+  1466.7 MHz
+  Unknown MHz
+  Intel(R) Atom(TM) CPU  Z3770  @ 1.46GHz
+  None
+  Unknown
+
+  [USBList]
+  U 413C Dell Computer !!  !!Microsoft
+   81A4 Unknown Device !!  !!????????????? ??????? ????????? ?????????????? ????
+  U 06CB Synaptics !! !!(??????????? USB ????-??????????)
+   2819 Unknown Device !!Synaptics T Pad V 01.30 !!????????? USB ??????????
+
+  [Monitor]
+  M SHP Sharp !!615V2ÅLQ108M1 !!(??????????? ????????)
+   140B 615V2ÅLQ108M1 (SHP 140B) !! !!????????????? ??????? PnP
+
+  [PCI]
+  V 8086 Intel Corporation !!(??????????? ????????? ??????????)
+   0F00 Unknown Device !!??????????? ???? PCI  - CPU
+  V 8086 Intel Corporation !!Intel Corporation
+   0F31 Unknown Device !!Intel(R) HD Graphics
+  V 8086 Intel Corporation !!????????????? ????-?????????? USB xHCI
+   0F35 Unknown Device !!xHCI-??????????? ????-?????????? USB
+  V 8086 Intel Corporation !!Intel
+   0F18 Unknown Device !!Intel(R) Trusted Execution Engine Interface 
+  V 8086 Intel Corporation !!(??????????? ????????? ??????????)
+   0F1C Unknown Device !!??????????? ???? PCI - ISA
+
+  [BIOS]
+  
+
+  [Chipset]
+  80860F00 09 80860F1C 09
+  Intel Corporation
+  Unknown Device
+  Intel Corporation
+  Unknown Device
+
+                                [End of Report]                               

@@ -1,0 +1,14 @@
+diff --git a/drivers/hid/hid-core.c b/drivers/hid/hid-core.c
+index 8ed66fd..cbe9874 100644
+--- a/drivers/hid/hid-core.c
++++ b/drivers/hid/hid-core.c
+@@ -783,7 +783,8 @@ static int hid_scan_report(struct hid_device *hid)
+ 	* Vendor specific handlings
+ 	*/
+ 	if ((hid->vendor == USB_VENDOR_ID_SYNAPTICS) &&
+-	    (hid->group == HID_GROUP_GENERIC))
++	    (hid->group == HID_GROUP_GENERIC) &&
++	    (hid->product != 0x2819))
+ 		/* hid-rmi should take care of them, not hid-generic */
+ 		hid->group = HID_GROUP_RMI;
+ 

@@ -1,0 +1,43 @@
+diff --git a/tests/drv_module_reload b/tests/drv_module_reload
+index 5cbff89..82c67bd 100755
+--- a/tests/drv_module_reload
++++ b/tests/drv_module_reload
+@@ -24,6 +24,14 @@ rmmod snd_hda_intel &> /dev/null
+ 
+ #ignore errors in ips - gen5 only
+ rmmod intel_ips &> /dev/null
++
++# vlv only for now:
++# due to platform device model limitation, need unload ipvr manually
++if lsmod | grep ipvr &> /dev/null ; then
++	echo Need manually unload ipvr.ko.
++	rmmod ipvr
++fi
++
+ rmmod i915
+ #ignore errors in intel-gtt, often built-in
+ rmmod intel-gtt &> /dev/null
+@@ -31,6 +39,11 @@ rmmod intel-gtt &> /dev/null
+ rmmod drm_kms_helper &> /dev/null
+ rmmod drm &> /dev/null
+ 
++if lsmod | grep ipvr &> /dev/null ; then
++	echo WARNING: ipvr.ko still loaded!
++	exit 1
++fi
++
+ if lsmod | grep i915 &> /dev/null ; then
+ 	echo WARNING: i915.ko still loaded!
+ 	exit 1
+@@ -41,6 +54,9 @@ fi
+ modprobe i915
+ echo 1 > /sys/class/vtconsole/vtcon1/bind
+ 
++# for vlv, load VED driver
++modprobe ipvr
++
+ modprobe snd_hda_intel
+ 
+ # try to run something
+-- 
+2.1.0

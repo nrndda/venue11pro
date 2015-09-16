@@ -1,0 +1,2732 @@
+diff --git a/Makefile.am b/Makefile.am
+index 3cb516c..035d937 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -33,6 +33,10 @@ if HAVE_INTEL
+ INTEL_SUBDIR = intel
+ endif
+ 
++if HAVE_IPVR
++IPVR_SUBDIR = ipvr
++endif
++
+ if HAVE_NOUVEAU
+ NOUVEAU_SUBDIR = nouveau
+ endif
+@@ -57,7 +61,7 @@ if HAVE_TEGRA
+ TEGRA_SUBDIR = tegra
+ endif
+ 
+-SUBDIRS = . $(LIBKMS_SUBDIR) $(INTEL_SUBDIR) $(NOUVEAU_SUBDIR) $(RADEON_SUBDIR) $(OMAP_SUBDIR) $(EXYNOS_SUBDIR) $(FREEDRENO_SUBDIR) $(TEGRA_SUBDIR) tests man
++SUBDIRS = . $(LIBKMS_SUBDIR) $(INTEL_SUBDIR) $(IPVR_SUBDIR) $(NOUVEAU_SUBDIR) $(RADEON_SUBDIR) $(OMAP_SUBDIR) $(EXYNOS_SUBDIR) $(FREEDRENO_SUBDIR) $(TEGRA_SUBDIR) tests man
+ 
+ libdrm_la_LTLIBRARIES = libdrm.la
+ libdrm_ladir = $(libdir)
+diff --git a/Makefile.sources b/Makefile.sources
+index 566f7b5..819a0cb 100644
+--- a/Makefile.sources
++++ b/Makefile.sources
+@@ -18,6 +18,7 @@ LIBDRM_INCLUDE_H_FILES := \
+ 	include/drm/drm_mode.h \
+ 	include/drm/drm_sarea.h \
+ 	include/drm/i915_drm.h \
++	include/drm/ipvr_drm.h \
+ 	include/drm/mach64_drm.h \
+ 	include/drm/mga_drm.h \
+ 	include/drm/nouveau_drm.h \
+diff --git a/configure.ac b/configure.ac
+index c88a1c5..9fea4db 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -68,6 +68,11 @@ AC_ARG_ENABLE(intel,
+ 	      [Enable support for intel's KMS API (default: auto)]),
+ 	      [INTEL=$enableval], [INTEL=auto])
+ 
++AC_ARG_ENABLE(ipvr,
++	      AS_HELP_STRING([--disable-ipvr],
++	      [Enable support for valeyview's IPVR hardware decode (default: auto)]),
++	      [IPVR=$enableval], [IPVR=auto])
++
+ AC_ARG_ENABLE(radeon,
+ 	      AS_HELP_STRING([--disable-radeon],
+ 	      [Enable support for radeon's KMS API (default: auto)]),
+@@ -209,7 +214,7 @@ if test "x$drm_cv_atomic_primitives" = "xlibatomic-ops"; then
+ 	AC_DEFINE(HAVE_LIB_ATOMIC_OPS, 1, [Enable if you have libatomic-ops-dev installed])
+ fi
+ 
+-if test "x$INTEL" != "xno" -o "x$RADEON" != "xno" -o "x$NOUVEAU" != "xno"; then
++if test "x$INTEL" != "xno" -o "x$IPVR" != "xno" -o "x$RADEON" != "xno" -o "x$NOUVEAU" != "xno"; then
+ 	if test "x$drm_cv_atomic_primitives" = "xnone"; then
+ 		if test "x$INTEL" != "xauto"; then
+ 			if test "x$INTEL" != "xno"; then
+@@ -219,6 +224,14 @@ if test "x$INTEL" != "xno" -o "x$RADEON" != "xno" -o "x$NOUVEAU" != "xno"; then
+ 			AC_MSG_WARN([Disabling libdrm_intel. It depends on atomic operations, which were not found for your compiler/cpu. Try compiling with -march=native, or install the libatomics-op-dev package.])
+ 			INTEL=no
+ 		fi
++		if test "x$IPVR" != "xauto"; then
++			if test "x$IPVR" != "xno"; then
++				AC_MSG_ERROR([libdrm_ipvr depends upon atomic operations, which were not found for your compiler/cpu. Try compiling with -march=native, or install the libatomics-op-dev package, or, failing both of 
+those, disable support for IPVR by passing --disable-ipvr to ./configure])
++			fi
++		else
++			AC_MSG_WARN([Disabling libdrm_ipvr. It depends on atomic operations, which were not found for your compiler/cpu. Try compiling with -march=native, or install the libatomics-op-dev package.])
++			IPVR=no
++		fi
+ 		if test "x$RADEON" != "xauto"; then
+ 			if test "x$RADEON" != "xno"; then
+ 				AC_MSG_ERROR([libdrm_radeon depends upon atomic operations, which were not found for your compiler/cpu. Try compiling with -march=native, or install the libatomics-op-dev package, or, failing both 
+of those, disable support for Radeon GPUs by passing --disable-radeon to ./configure])
+@@ -242,6 +255,9 @@ if test "x$INTEL" != "xno" -o "x$RADEON" != "xno" -o "x$NOUVEAU" != "xno"; then
+ 				*) INTEL=no ;;
+ 			esac
+ 		fi
++		if test "x$IPVR" != "xno"; then
++			IPVR=yes
++		fi
+ 		if test "x$RADEON" != "xno"; then
+ 			RADEON=yes
+ 		fi
+@@ -279,6 +295,11 @@ if test "x$INTEL" = xyes; then
+ 	AC_DEFINE(HAVE_INTEL, 1, [Have intel support])
+ fi
+ 
++AM_CONDITIONAL(HAVE_IPVR, [test "x$IPVR" = xyes])
++if test "x$IPVR" = xyes; then
++	AC_DEFINE(HAVE_PVR, 1, [Have ipvr support])
++fi
++
+ AM_CONDITIONAL(HAVE_VMWGFX, [test "x$VMWGFX" = xyes])
+ if test "x$VMWGFX" = xyes; then
+ 	AC_DEFINE(HAVE_VMWGFX, 1, [Have vmwgfx kernel headers])
+@@ -403,6 +424,8 @@ AC_CONFIG_FILES([
+ 	libkms/libkms.pc
+ 	intel/Makefile
+ 	intel/libdrm_intel.pc
++	ipvr/Makefile
++	ipvr/libdrm_ipvr.pc
+ 	radeon/Makefile
+ 	radeon/libdrm_radeon.pc
+ 	nouveau/Makefile
+@@ -433,6 +456,7 @@ echo "$PACKAGE_STRING will be compiled with:"
+ echo ""
+ echo "  libkms         $LIBKMS"
+ echo "  Intel API      $INTEL"
++echo "  Ipvr API       $IPVR"
+ echo "  vmwgfx API     $VMWGFX"
+ echo "  Radeon API     $RADEON"
+ echo "  Nouveau API    $NOUVEAU"
+diff --git a/include/drm/ipvr_drm.h b/include/drm/ipvr_drm.h
+new file mode 100644
+index 0000000..fade9a3
+--- /dev/null
++++ b/include/drm/ipvr_drm.h
+@@ -0,0 +1,259 @@
++/**************************************************************************
++ * ipvr_drm.h: IPVR header file exported to user space
++ *
++ * Copyright (c) 2014 Intel Corporation, Hillsboro, OR, USA
++ * All Rights Reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms and conditions of the GNU General Public License,
++ * version 2, as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along with
++ * this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
++ *
++ * Authors:
++ *    Fei Jiang <fei.jiang at intel.com>
++ *    Yao Cheng <yao.cheng at intel.com>
++ *
++ **************************************************************************/
++
++
++/* this file only define structs and macro which need export to user space */
++#ifndef _IPVR_DRM_H_
++#define _IPVR_DRM_H_
++
++#include <drm/drm.h>
++struct drm_ipvr_context_create {
++	/* passed ctx_info, including codec, profile info */
++#define IPVR_CONTEXT_TYPE_VED   (0x1)
++	__u32 ctx_type;
++	/* returned back ctx_id */
++	__u32 ctx_id;
++	/*
++	 * following tiling strides for VED are supported:
++	 * stride 0: 512 for scheme 0, 1024 for scheme 1
++	 * stride 1: 1024 for scheme 0, 2048 for scheme 1
++	 * stride 2: 2048 for scheme 0, 4096 for scheme 1
++	 * stride 3: 4096 for scheme 0
++	 */
++	__u32 tiling_stride;
++	/*
++	 * scheme 0: tile is 256x16, while minimal tile stride is 512
++	 * scheme 1: tile is 512x8, while minimal tile stride is 1024
++	 */
++	__u32 tiling_scheme;
++};
++
++struct drm_ipvr_context_destroy {
++	__u32 ctx_id;
++	__u32 pad64;
++};
++
++/* ioctl used for querying info from driver */
++enum drm_ipvr_misc_key {
++	IPVR_DEVICE_INFO,
++};
++struct drm_ipvr_get_info {
++	__u64 key;
++	__u64 value;
++};
++
++struct drm_ipvr_gem_relocation_entry {
++	/**
++	 * Handle of the buffer being pointed to by this relocation entry.
++	 *
++	 * It's appealing to make this be an index into the mm_validate_entry
++	 * list to refer to the buffer, but this allows the driver to create
++	 * a relocation list for state buffers and not re-write it per
++	 * exec using the buffer.
++	 */
++	__u32 target_handle;
++
++	/**
++	 * Value to be added to the offset of the target buffer to make up
++	 * the relocation entry.
++	 */
++	__u32 delta;
++
++	/** Offset in the buffer the relocation entry will be written into */
++	__u64 offset;
++
++	/**
++	 * Offset value of the target buffer that the relocation entry was last
++	 * written as.
++	 *
++	 * If the buffer has the same offset as last time, we can skip syncing
++	 * and writing the relocation.  This value is written back out by
++	 * the execbuffer ioctl when the relocation is written.
++	 */
++	__u64 presumed_offset;
++
++	/**
++	 * Target memory domains read by this operation.
++	 */
++	__u32 read_domains;
++
++	/**
++	 * Target memory domains written by this operation.
++	 *
++	 * Note that only one domain may be written by the whole
++	 * execbuffer operation, so that where there are conflicts,
++	 * the application will get -EINVAL back.
++	 */
++	__u32 write_domain;
++};
++
++struct drm_ipvr_gem_exec_object {
++	/**
++	 * User's handle for a buffer to be bound into the MMU for this
++	 * operation.
++	 */
++	__u32 handle;
++
++	/** Number of relocations to be performed on this buffer */
++	__u32 relocation_count;
++	/**
++	 * Pointer to array of struct drm_i915_gem_relocation_entry containing
++	 * the relocations to be performed in this buffer.
++	 */
++	__u64 relocs_ptr;
++
++	/** Required alignment in graphics aperture */
++	__u64 alignment;
++
++	/**
++	 * Returned value of the updated offset of the object, for future
++	 * presumed_offset writes.
++	 */
++	__u64 offset;
++
++#define IPVR_EXEC_OBJECT_NEED_FENCE (1 << 0)
++#define IPVR_EXEC_OBJECT_SUBMIT     (1 << 1)
++	__u64 flags;
++
++	__u64 rsvd1;
++	__u64 rsvd2;
++};
++
++struct drm_ipvr_gem_execbuffer {
++	/**
++	 * List of gem_exec_object2 structs
++	 */
++	__u64 buffers_ptr;
++	__u32 buffer_count;
++
++	/** Offset in the batchbuffer to start execution from. */
++	__u32 exec_start_offset;
++	/** Bytes used in batchbuffer from batch_start_offset */
++	__u32 exec_len;
++
++	/**
++	 * ID of hardware context.
++	 */
++	__u32 ctx_id;
++
++	__u64 flags;
++	__u64 rsvd1;
++	__u64 rsvd2;
++};
++
++enum ipvr_cache_level
++{
++	IPVR_CACHE_UNCACHED,
++	IPVR_CACHE_WRITEBACK,
++	IPVR_CACHE_WRITECOMBINE,
++	IPVR_CACHE_MAX,
++};
++
++struct drm_ipvr_gem_create {
++	/*
++	 * Requested size for the object.
++	 * The (page-aligned) allocated size for the object will be returned.
++	 */
++	__u64 size;
++	__u64 rounded_size;
++	__u64 mmu_offset;
++	/*
++	 * Returned handle for the object.
++	 * Object handles are nonzero.
++	 */
++	__u32 handle;
++	__u32 tiling;
++
++	__u32 cache_level;
++	__u32 pad64;
++	/*
++	 * Handle used for user to mmap BO
++	 */
++	__u64 map_offset;
++};
++
++struct drm_ipvr_gem_busy {
++	/* Handle of the buffer to check for busy */
++	__u32 handle;
++
++	/*
++	 * Return busy status (1 if busy, 0 if idle).
++	 * The high word is used to indicate on which rings the object
++	 * currently resides:
++	 *  16:31 - busy (r or r/w) rings (16 render, 17 bsd, 18 blt, etc)
++	 */
++	__u32 busy;
++};
++
++struct drm_ipvr_gem_mmap_offset {
++	/** Handle for the object being mapped. */
++	__u32 handle;
++	__u32 pad64;
++	/**
++	 * Fake offset to use for subsequent mmap call
++	 *
++	 * This is a fixed-size type for 32/64 compatibility.
++	 */
++	__u64 offset;
++};
++
++struct drm_ipvr_gem_wait {
++	/* Handle of BO we shall wait on */
++	__u32 handle;
++	__u32 flags;
++	/** Number of nanoseconds to wait, Returns time remaining. */
++	__s64 timeout_ns;
++};
++
++/*
++ * IPVR GEM specific ioctls
++ */
++#define DRM_IPVR_CONTEXT_CREATE     0x00
++#define DRM_IPVR_CONTEXT_DESTROY    0x01
++#define DRM_IPVR_GET_INFO           0x02
++#define DRM_IPVR_GEM_EXECBUFFER     0x03
++#define DRM_IPVR_GEM_BUSY           0x04
++#define DRM_IPVR_GEM_CREATE         0x05
++#define DRM_IPVR_GEM_WAIT           0x06
++#define DRM_IPVR_GEM_MMAP_OFFSET    0x07
++
++#define DRM_IOCTL_IPVR_CONTEXT_CREATE	\
++	DRM_IOWR(DRM_COMMAND_BASE + DRM_IPVR_CONTEXT_CREATE, struct drm_ipvr_context_create)
++#define DRM_IOCTL_IPVR_CONTEXT_DESTROY	\
++	DRM_IOW(DRM_COMMAND_BASE + DRM_IPVR_CONTEXT_DESTROY, struct drm_ipvr_context_destroy)
++#define DRM_IOCTL_IPVR_GET_INFO		\
++	DRM_IOWR(DRM_COMMAND_BASE + DRM_IPVR_GET_INFO, struct drm_ipvr_get_info)
++#define DRM_IOCTL_IPVR_GEM_EXECBUFFER	\
++	DRM_IOWR(DRM_COMMAND_BASE + DRM_IPVR_GEM_EXECBUFFER, struct drm_ipvr_gem_execbuffer)
++#define DRM_IOCTL_IPVR_GEM_BUSY		\
++	DRM_IOWR(DRM_COMMAND_BASE + DRM_IPVR_GEM_BUSY, struct drm_ipvr_gem_busy)
++#define DRM_IOCTL_IPVR_GEM_CREATE	\
++	DRM_IOWR(DRM_COMMAND_BASE + DRM_IPVR_GEM_CREATE, struct drm_ipvr_gem_create)
++#define DRM_IOCTL_IPVR_GEM_WAIT		\
++	DRM_IOWR(DRM_COMMAND_BASE + DRM_IPVR_GEM_WAIT, struct drm_ipvr_gem_wait)
++#define DRM_IOCTL_IPVR_GEM_MMAP_OFFSET	\
++	DRM_IOWR(DRM_COMMAND_BASE + DRM_IPVR_GEM_MMAP_OFFSET, struct drm_ipvr_gem_mmap_offset)
++
++#endif
+diff --git a/ipvr/Makefile.am b/ipvr/Makefile.am
+new file mode 100644
+index 0000000..d4cd32b
+--- /dev/null
++++ b/ipvr/Makefile.am
+@@ -0,0 +1,57 @@
++# Copyright © 2014 Intel Corporation
++#
++# Permission is hereby granted, free of charge, to any person obtaining a
++# copy of this software and associated documentation files (the "Software"),
++# to deal in the Software without restriction, including without limitation
++# the rights to use, copy, modify, merge, publish, distribute, sublicense,
++# and/or sell copies of the Software, and to permit persons to whom the
++# Software is furnished to do so, subject to the following conditions:
++#
++# The above copyright notice and this permission notice (including the next
++# paragraph) shall be included in all copies or substantial portions of the
++# Software.
++#
++# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
++# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
++# IN THE SOFTWARE.
++#
++# Authors:
++#    Yao Cheng <yao.cheng at intel.com>
++
++include Makefile.sources
++
++AM_CFLAGS = \
++	$(WARN_CFLAGS) \
++	$(VISIBILITY_CFLAGS) \
++	-I$(top_srcdir) \
++	-I$(top_srcdir)/ipvr \
++	$(PTHREADSTUBS_CFLAGS) \
++	$(PCIACCESS_CFLAGS) \
++	$(VALGRIND_CFLAGS) \
++	-I$(top_srcdir)/include/drm
++
++libdrm_ipvr_la_LTLIBRARIES = libdrm_ipvr.la
++libdrm_ipvr_ladir = $(libdir)
++libdrm_ipvr_la_LDFLAGS = -version-number 0:1:0 -no-undefined
++libdrm_ipvr_la_LIBADD = ../libdrm.la \
++	@PTHREADSTUBS_LIBS@ \
++	@PCIACCESS_LIBS@ \
++	@CLOCK_LIB@
++
++libdrm_ipvr_la_SOURCES = $(LIBDRM_IPVR_FILES)
++
++ipvr_bufmgr_gem_o_CFLAGS = $(AM_CFLAGS) -c99
++
++libdrm_ipvrincludedir = ${includedir}/libdrm
++libdrm_ipvrinclude_HEADERS = $(LIBDRM_IPVR_H_FILES)
++
++# This may be interesting even outside of "make check", due to the -dump option.
++noinst_PROGRAMS = test_ipvr
++
++test_ipvr_LDADD = libdrm_ipvr.la ../libdrm.la ../intel/libdrm_intel.la -lpthread
++
++pkgconfig_DATA = libdrm_ipvr.pc
+diff --git a/ipvr/Makefile.sources b/ipvr/Makefile.sources
+new file mode 100644
+index 0000000..5103a02
+--- /dev/null
++++ b/ipvr/Makefile.sources
+@@ -0,0 +1,5 @@
++LIBDRM_IPVR_FILES := \
++	ipvr_bufmgr_gem.c
++
++LIBDRM_IPVR_H_FILES := \
++	ipvr_bufmgr.h
+diff --git a/ipvr/ipvr_bufmgr.h b/ipvr/ipvr_bufmgr.h
+new file mode 100644
+index 0000000..aa72737
+--- /dev/null
++++ b/ipvr/ipvr_bufmgr.h
+@@ -0,0 +1,132 @@
++/*
++ * Copyright 2014 Intel Corporation
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a
++ * copy of this software and associated documentation files (the "Software"),
++ * to deal in the Software without restriction, including without limitation
++ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
++ * and/or sell copies of the Software, and to permit persons to whom the
++ * Software is furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice (including the next
++ * paragraph) shall be included in all copies or substantial portions of the
++ * Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
++ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
++ * IN THE SOFTWARE.
++ *
++ * Authors:
++ *    Yao Cheng <yao.cheng at intel.com>
++ *
++ */
++#ifndef IPVR_BUFMGR_H
++#define IPVR_BUFMGR_H
++#include <stdio.h>
++#include <stdint.h>
++#include <stdio.h>
++
++typedef struct _drm_ipvr_bo drm_ipvr_bo;
++typedef struct _drm_ipvr_bufmgr drm_ipvr_bufmgr;
++typedef struct _drm_ipvr_context drm_ipvr_context;
++
++struct _drm_ipvr_bo {
++    /**
++     * Size in bytes of the buffer object.
++     *
++     * The size may be larger than the size originally requested for the
++     * allocation, such as being aligned to page size.
++     */
++    size_t size;
++
++    /** GEM handle of the BO */
++    uint32_t handle;
++
++    /**
++     * Last seen card virtual address (offset from the beginning of the
++     * aperture) for the object.  This should be used to fill relocation
++     * entries when calling drm_ipvr_gem_bo_emit_reloc()
++     */
++    uint64_t offset;
++
++    /**
++     * Virtual address for accessing the buffer data.  Only valid while
++     * mapped.
++     */
++    void *virt;
++
++    /** Buffer manager context associated with this buffer object */
++    drm_ipvr_bufmgr *bufmgr;
++};
++
++struct _drm_ipvr_bufmgr {
++    int debug;
++};
++
++struct _drm_ipvr_context
++{
++    /**
++     * context id for hardware to distinguish different clients
++     */
++    uint32_t ctx_id;
++
++    /**
++     * Commands on different context are submitted to different hardware
++     */
++    uint32_t ctx_type;
++
++    /** Buffer manager context associated with this buffer object */
++    drm_ipvr_bufmgr *bufmgr;
++};
++
++drm_ipvr_bufmgr *drm_ipvr_gem_bufmgr_init(int fd);
++
++void drm_ipvr_gem_bufmgr_destroy(drm_ipvr_bufmgr *bufmgr);
++
++int drm_ipvr_gem_bufmgr_get_device_info(drm_ipvr_bufmgr *bufmgr,
++            uint16_t *dev_id, uint16_t *caps);
++
++drm_ipvr_bo *drm_ipvr_gem_bo_alloc(drm_ipvr_bufmgr *bufmgr, drm_ipvr_context *ctx,
++            const char *name, size_t size,
++            uint8_t tiling, uint8_t cache_level);
++
++void drm_ipvr_gem_bo_reference(drm_ipvr_bo *bo);
++
++void drm_ipvr_gem_bo_unreference(drm_ipvr_bo *bo);
++
++int drm_ipvr_gem_bo_map(drm_ipvr_bo *bo, int write_enable);
++
++int drm_ipvr_gem_bo_unmap(drm_ipvr_bo *bo);
++
++void drm_ipvr_gem_bo_wait(drm_ipvr_bo *bo);
++
++int drm_ipvr_gem_bo_emit_reloc(drm_ipvr_bo *bo, uint64_t offset,
++            drm_ipvr_bo *target_bo, uint64_t target_offset, uint8_t skip_fence);
++
++int drm_ipvr_gem_bo_exec(drm_ipvr_bo *bo, uint64_t offset, size_t len,
++            int fence_in, int *fence_out);
++
++drm_ipvr_bo *drm_ipvr_gem_bo_create_from_name(drm_ipvr_bufmgr *bufmgr,
++            drm_ipvr_context *ctx, const char *name, uint32_t global_handle);
++
++int drm_ipvr_gem_bo_flink(drm_ipvr_bo *bo, uint32_t *global_handle);
++
++int drm_ipvr_gem_bo_export_to_prime(drm_ipvr_bo *bo, int *prime_fd);
++
++drm_ipvr_bo *drm_ipvr_gem_bo_create_from_prime(drm_ipvr_bufmgr *bufmgr,
++            drm_ipvr_context *ctx, const char *name, int prime_fd, size_t guessed_size);
++
++int drm_ipvr_gem_bo_busy(drm_ipvr_bo *bo);
++
++void drm_ipvr_gem_bo_remove_relocs(drm_ipvr_bo *bo, uint8_t recursive);
++
++drm_ipvr_context *drm_ipvr_gem_context_create(drm_ipvr_bufmgr *bufmgr,
++            uint32_t ctx_type, uint32_t tiling_stride, uint32_t tiling_mode);
++
++void drm_ipvr_gem_context_destroy(drm_ipvr_context *ctx);
++
++#endif
+diff --git a/ipvr/ipvr_bufmgr_gem.c b/ipvr/ipvr_bufmgr_gem.c
+new file mode 100644
+index 0000000..e382550
+--- /dev/null
++++ b/ipvr/ipvr_bufmgr_gem.c
+@@ -0,0 +1,1188 @@
++/**************************************************************************
++ *
++ * Copyright 2014 Intel Corporation
++ * All Rights Reserved.
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a
++ * copy of this software and associated documentation files (the
++ * "Software"), to deal in the Software without restriction, including
++ * without limitation the rights to use, copy, modify, merge, publish,
++ * distribute, sub license, and/or sell copies of the Software, and to
++ * permit persons to whom the Software is furnished to do so, subject to
++ * the following conditions:
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL
++ * THE COPYRIGHT HOLDERS, AUTHORS AND/OR ITS SUPPLIERS BE LIABLE FOR ANY CLAIM,
++ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
++ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
++ * USE OR OTHER DEALINGS IN THE SOFTWARE.
++ *
++ * The above copyright notice and this permission notice (including the
++ * next paragraph) shall be included in all copies or substantial portions
++ * of the Software.
++ *
++ *
++ **************************************************************************/
++/*
++ * Authors: Yao Cheng <yao.cheng at intel.com>
++ *
++ */
++
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#include <xf86drm.h>
++#include <xf86atomic.h>
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <assert.h>
++#include <pthread.h>
++#include <sys/ioctl.h>
++#include <sys/stat.h>
++#include <sys/time.h>
++#include <sys/types.h>
++#include <stdbool.h>
++#include <inttypes.h>
++
++#include "errno.h"
++#ifndef ETIME
++#define ETIME ETIMEDOUT
++#endif
++#include "libdrm.h"
++#include "libdrm_lists.h"
++#include "ipvr_bufmgr.h"
++#include "string.h"
++
++#include "ipvr_drm.h"
++
++static int debug_level = 3;
++
++typedef uint64_t nsecs_t;
++#define VERB(fmt, ...)    _DBGPRINT(0, fmt, ##__VA_ARGS__)
++#define DBG(fmt, ...)     _DBGPRINT(1, fmt, ##__VA_ARGS__)
++#define INFO(fmt, ...)    _DBGPRINT(2, fmt, ##__VA_ARGS__)
++#define WARN(fmt, ...)    _DBGPRINT(3, fmt, ##__VA_ARGS__)
++#define ERR(fmt, ...)     _DBGPRINT(4, fmt, ##__VA_ARGS__)
++#define _DBGPRINT(level, fmt, ...) \
++    do { \
++        if (debug_level <= level) { \
++            fprintf(stderr, fmt, ##__VA_ARGS__); \
++        } \
++    } while (false);
++
++#define IPVR_TIMEOUT_USEC 990000LL
++
++typedef struct _drm_ipvr_bo_gem drm_ipvr_bo_gem;
++
++typedef struct _drm_ipvr_reloc_target_info {
++    drm_ipvr_bo *bo;
++    uint64_t flags;
++} drm_ipvr_reloc_target;
++
++struct drm_ipvr_cache_bucket {
++    unsigned long size;
++    drmMMListHead head;
++    size_t count;
++    size_t  limit;
++};
++
++typedef struct _drm_ipvr_bufmgr_gem
++{
++    drm_ipvr_bufmgr base;
++    int fd;
++    pthread_mutex_t lock;
++    pthread_mutex_t list_lock;
++
++    struct drm_ipvr_gem_exec_object *exec_objs;
++    drm_ipvr_bo **exec_bos;
++    int exec_size;
++    int exec_count;
++    time_t time;
++    int max_relocs;
++
++    /* cache bucket of power-of-two */
++    int cache_bucket_size;
++
++    /* only cache linear BOs */
++    struct drm_ipvr_cache_bucket *cache_buckets;
++
++    /* seqno used to check BO's last operation oldness */
++    int exec_seq;
++} drm_ipvr_bufmgr_gem;
++
++typedef struct _drm_ipvr_bo_gem
++{
++    drm_ipvr_bo base;
++    const char *name;
++    /**
++     * Kenel-assigned global name for this object
++     */
++    unsigned int global_name;
++    atomic_t refcount;
++    uint32_t tiling;
++    uint32_t caching;
++    atomic_t mapcount;
++    struct drm_ipvr_gem_relocation_entry *relocs;
++    /*
++     * Handle for mmap
++     */
++    uint64_t map_offset;
++    /**
++     * Array of info structs corresponding to relocs[i].target_handle etc
++     */
++    drm_ipvr_reloc_target *reloc_target_info;
++    /** Number of entries in relocs */
++    int reloc_count;
++    /**
++     * Index of the buffer within the validation list while preparing a
++     * batchbuffer execution.
++     */
++    int validate_index;
++    /**
++     * Boolean of whether this buffer has been used as a relocation
++     * target and had its size accounted for, and thus can't have any
++     * further relocations added to it.
++     */
++    bool used_as_reloc_target;
++    /*bool                        is_vmap;*/
++    bool is_prime_imported;
++    /*void                        *user_virt;*/
++
++    /** BO cache list */
++    drmMMListHead cache_head;
++    /** Indicates the BO can be re-used or not after being recycled */
++    int reusable;
++
++    drm_ipvr_context *ctx;
++    int exec_seq;
++} drm_ipvr_bo_gem;
++
++static nsecs_t get_time_ns(void)
++{
++    struct timeval tv;
++    gettimeofday(&tv, NULL);
++    return tv.tv_sec * 1000000000LL + tv.tv_usec * 1000LL;
++}
++
++static struct drm_ipvr_cache_bucket *
++drm_ipvr_cache_bucket_for_size(drm_ipvr_bufmgr *bufmgr,
++                 size_t size, uint8_t tiling)
++{
++    int i;
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem*)bufmgr;
++
++    assert(tiling == 0);
++    for (i = 0; i < bufmgr_gem->cache_bucket_size; i++) {
++        struct drm_ipvr_cache_bucket *bucket =
++            &bufmgr_gem->cache_buckets[i];
++        if (bucket->size >= size) {
++            return bucket;
++        }
++    }
++    return NULL;
++}
++
++static int
++drm_ipvr_gem_bo_free(drm_ipvr_bo *bo)
++{
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem*) bo->bufmgr;
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem *) bo;
++    struct drm_gem_close arg;
++    int ret;
++    bool fence_destroyed = false;
++
++    /* Close this object */
++    arg.handle = bo->handle;
++
++    ret = drmIoctl(bufmgr_gem->fd, DRM_IOCTL_GEM_CLOSE, &arg);
++    if (ret != 0) {
++        ERR("%s: DRM_IOCTL_GEM_CLOSE \"%s\" handle 0x%x offset 0x%lx failed: %s\n",
++            __FUNCTION__, bo_gem->name,
++            bo->handle, bo->offset, strerror(errno));
++    }
++
++    if (bo_gem->relocs)
++        free(bo_gem->relocs);
++    if (bo_gem->reloc_target_info)
++        free(bo_gem->reloc_target_info);
++
++    DBG("%s: freed buf khandle \"%s\" hnd %x, offset 0x%lx, %s\n",
++        __FUNCTION__, bo_gem->name, bo->handle, bo->offset,
++        (fence_destroyed? "fence is destroyed": "no fence to destroy"));
++
++    memset(bo_gem, 0, sizeof(*bo_gem));
++    free(bo_gem);
++    return 0;
++}
++
++drm_public int drm_ipvr_gem_bo_map(drm_ipvr_bo *bo, int write_enable);
++drm_public int drm_ipvr_gem_bo_unmap(drm_ipvr_bo *bo);
++
++drm_public drm_ipvr_bo *drm_ipvr_gem_bo_alloc(drm_ipvr_bufmgr *bufmgr,
++            drm_ipvr_context *ctx,
++            const char *name, size_t size,
++            uint8_t tiling, uint8_t cache_level)
++{
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem*) bufmgr;
++    drm_ipvr_bo_gem *allocated_bo_gem = NULL;
++    int ret;
++    struct drm_ipvr_gem_create arg;
++    int reusable = 1;
++    bool alloc_from_cache = false;
++    size_t alloc_size = size;
++    struct drm_ipvr_cache_bucket *bucket = NULL;
++    int bo_movings = 0;
++    int bucket_free_before, bucket_free_after;
++    nsecs_t begin_ns, end_ns;
++    nsecs_t time_wait, time_bo_moving, time_fence_destroy, time_kernel_alloc;
++    nsecs_t now;
++    time_wait = time_bo_moving = time_fence_destroy = time_kernel_alloc = 0;
++    bucket_free_before = bucket_free_after = 0;
++
++    begin_ns = get_time_ns();
++    if (reusable)
++        bucket = drm_ipvr_cache_bucket_for_size(&bufmgr_gem->base, size, tiling);
++
++    if (reusable && !bucket) {
++        reusable = false;
++        WARN("%s size %zu cannot fit into any cache bucket, set as non-reusable\n",
++            __FUNCTION__, size);
++    }
++    if (reusable && bucket) {
++        /**
++         * only expand size when it's reusable
++         */
++        alloc_size = bucket->size;
++    }
++
++    if (reusable && bucket && !DRMLISTEMPTY(&bucket->head)) {
++        VERB("%s searching cached BOs in fast mode: free_list\n", __FUNCTION__);
++        now = get_time_ns();
++        pthread_mutex_lock(&bufmgr_gem->list_lock);
++        allocated_bo_gem = DRMLISTENTRY(drm_ipvr_bo_gem,
++                      bucket->head.next, cache_head);
++        if (bufmgr_gem->exec_seq - allocated_bo_gem->exec_seq < 5) {
++            alloc_from_cache = false;
++            allocated_bo_gem = NULL;
++        }
++        else if (!drm_ipvr_gem_bo_busy(&allocated_bo_gem->base)) {
++            alloc_from_cache = true;
++            DRMLISTDELINIT(&allocated_bo_gem->cache_head);
++            bucket->count--;
++        }
++        else {
++            drm_ipvr_gem_bo_wait(&allocated_bo_gem->base);
++            alloc_from_cache = true;
++            DRMLISTDELINIT(&allocated_bo_gem->cache_head);
++            bucket->count--;
++        }
++        pthread_mutex_unlock(&bufmgr_gem->list_lock);
++        time_wait += get_time_ns() - now;
++        VERB("%s got free BO from cache\n", __FUNCTION__);
++    }
++    else {
++        VERB("%s empty free_list, alloc_from kernel\n", __FUNCTION__);
++        alloc_from_cache = false;
++    }
++
++    if (!alloc_from_cache) {
++        allocated_bo_gem = calloc(1, sizeof(*allocated_bo_gem));
++        if (!allocated_bo_gem) {
++            ERR("%s: calloc failed: %s\n", __FUNCTION__, strerror(errno));
++            return NULL;
++        }
++
++        if (reusable)
++            arg.size = alloc_size;
++        else
++            arg.size = size;
++        arg.tiling = tiling;
++        arg.cache_level = cache_level;
++
++        now = get_time_ns();
++        ret = drmCommandWriteRead(bufmgr_gem->fd,
++                   DRM_IPVR_GEM_CREATE,
++                   &arg, sizeof(arg));
++
++        if (ret != 0) {
++            ERR("%s: IOCTL GEM_CREATE failed: %d\n",
++                __FUNCTION__, ret);
++            free(allocated_bo_gem);
++            allocated_bo_gem = NULL;
++            return NULL;
++        }
++        time_kernel_alloc = get_time_ns() - now;
++
++        allocated_bo_gem->base.bufmgr = bufmgr;
++        allocated_bo_gem->base.handle = arg.handle;
++        allocated_bo_gem->tiling = arg.tiling;
++        allocated_bo_gem->caching = arg.cache_level;
++        allocated_bo_gem->base.offset = arg.mmu_offset;
++        allocated_bo_gem->base.size = arg.rounded_size;
++        allocated_bo_gem->name = name;
++        allocated_bo_gem->base.virt = NULL;
++        allocated_bo_gem->map_offset = arg.map_offset;
++        allocated_bo_gem->is_prime_imported = false;
++        atomic_set(&allocated_bo_gem->mapcount, 0);
++
++        DBG("%s: allocated buf handle 0x%x from kernel, "
++            "offset 0x%lx, name \"%s\" size %lu, tiling %u, cache_level %u, bufmgr %p\n",
++            __FUNCTION__,
++            allocated_bo_gem->base.handle, allocated_bo_gem->base.offset, allocated_bo_gem->name,
++            allocated_bo_gem->base.size, allocated_bo_gem->tiling, allocated_bo_gem->caching, bufmgr);
++    }
++    else {
++        assert(allocated_bo_gem);
++        DBG("%s: allocated buf handle 0x%x from userspace cache, "
++            "offset 0x%lx, name \"%s\" size %lu, tiling %u, cache_level %u, bufmgr %p\n",
++            __FUNCTION__,
++            allocated_bo_gem->base.handle, allocated_bo_gem->base.offset, allocated_bo_gem->name,
++            allocated_bo_gem->base.size, allocated_bo_gem->tiling, allocated_bo_gem->caching, bufmgr);
++    }
++
++    allocated_bo_gem->name = name;
++    allocated_bo_gem->validate_index = -1;
++    allocated_bo_gem->ctx = ctx;
++    allocated_bo_gem->reusable = reusable;
++    allocated_bo_gem->exec_seq = -1;
++
++    atomic_set(&allocated_bo_gem->refcount, 1);
++    end_ns = get_time_ns();
++    if (bucket) {
++        bucket_free_after = bucket->count;
++    }
++    assert(atomic_read(&allocated_bo_gem->mapcount) == 0);
++
++    if (end_ns - begin_ns > 2 * 1000 * 1000) {
++        DBG("%s got from %s: \"%s\" hnd %u offset 0x%lx size %lu took %.2f ms, "
++            "(wait %.2f, "
++            "bo_moving %.2f, kernel_alloc %.2f), "
++            "bucket (%d/%zu)=>(%d/%zu)\n",
++            __FUNCTION__, (alloc_from_cache? "CACHE": "KERNEL"),
++            allocated_bo_gem->name, allocated_bo_gem->base.handle, allocated_bo_gem->base.offset,
++            allocated_bo_gem->base.size, (end_ns - begin_ns)/1000000.0,
++            time_wait/1000000.0,
++            bo_movings/1000000.0, time_kernel_alloc/1000000.0,
++            bucket_free_before, (bucket? bucket->limit: 0),
++            bucket_free_after, (bucket? bucket->limit: 0));
++    }
++    return &allocated_bo_gem->base;
++}
++
++drm_public void drm_ipvr_gem_bo_unreference(drm_ipvr_bo *bo);
++
++static void
++drm_ipvr_gem_bo_remove_reloc(drm_ipvr_bo *bo, int depth, uint8_t recursive)
++{
++    int i;
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem*)bo;
++    drm_ipvr_bo_gem *target_bo_gem;
++    for (i = 0; i < bo_gem->reloc_count; i++) {
++        if (bo_gem->reloc_target_info[i].bo != bo) {
++            target_bo_gem = (drm_ipvr_bo_gem*)bo_gem->reloc_target_info[i].bo;
++            VERB("%s (depth: %d) remove \"%s\" hnd %x off 0x%lx => \"%s\" hnd %x off 0x%lx\n",
++                __FUNCTION__, depth, bo_gem->name, bo_gem->base.handle, bo->offset,
++                target_bo_gem->name, target_bo_gem->base.handle, target_bo_gem->base.offset);
++            if (recursive)
++                drm_ipvr_gem_bo_remove_reloc(bo_gem->reloc_target_info[i].bo, depth + 1, true);
++            drm_ipvr_gem_bo_unreference(bo_gem->reloc_target_info[i].bo);
++        }
++        bo_gem->reloc_target_info[i].bo = NULL;
++        memset(&bo_gem->relocs[i], 0, sizeof(bo_gem->relocs[i]));
++    }
++    bo_gem->reloc_count = 0;
++}
++
++
++drm_public void
++drm_ipvr_gem_bo_remove_relocs(drm_ipvr_bo *bo, uint8_t recursive)
++{
++    drm_ipvr_gem_bo_remove_reloc(bo, 0, recursive);
++}
++
++drm_public void drm_ipvr_gem_bo_reference(drm_ipvr_bo *bo)
++{
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem *)bo;
++    atomic_inc(&bo_gem->refcount);
++    VERB("%s \"%s\" hnd 0x%x offset 0x%lx, refcount became %d\n",
++        __FUNCTION__, bo_gem->name, bo->handle, bo->offset, atomic_read(&bo_gem->refcount));
++}
++
++static void drm_ipvr_gem_bo_finalize(drm_ipvr_bo *bo)
++{
++    struct drm_ipvr_cache_bucket *bucket;
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem*)bo;
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem*)bo->bufmgr;
++    int mapcount;
++    /* add lock? */
++    /* Automatically unreference all the target buffers */
++    drm_ipvr_gem_bo_remove_relocs(bo, false);
++    mapcount = atomic_read(&bo_gem->mapcount);
++    if (mapcount != 0)
++        WARN("%s BO is finalized with mapcount %d\n", __FUNCTION__, mapcount);
++
++    assert(atomic_read(&bo_gem->mapcount) == 0);
++
++    bo_gem->validate_index = -1;
++
++    bucket = drm_ipvr_cache_bucket_for_size(bo->bufmgr, bo->size, bo_gem->tiling);
++
++    /* Put the buffer into our internal cache for reuse if we can. */
++    if (bo_gem->reusable && bucket != NULL) {
++        bo_gem->validate_index = -1;
++        DBG("%s adding bo \"%s\" hnd %x (offset 0x%lx) to internal cache\n",
++            __FUNCTION__, bo_gem->name, bo->handle, bo->offset);
++
++        pthread_mutex_lock(&bufmgr_gem->list_lock);
++        DRMLISTADDTAIL(&bo_gem->cache_head, &bucket->head);
++        bucket->count++;
++
++        pthread_mutex_unlock(&bufmgr_gem->list_lock);
++    } else {
++        VERB("%s freeing bo \"%s\" hnd %x (offset 0x%lx)\n",
++            __FUNCTION__, bo_gem->name, bo->handle, bo->offset);
++        drm_ipvr_gem_bo_free(bo);
++    }
++}
++
++drm_public void
++drm_ipvr_gem_bo_unreference(drm_ipvr_bo *bo)
++{
++    drm_ipvr_bo_gem * bo_gem = (drm_ipvr_bo_gem*)bo;
++    assert(atomic_read(&bo_gem->refcount) > 0);
++    if (atomic_dec_and_test(&bo_gem->refcount)) {
++        drm_ipvr_gem_bo_finalize(bo);
++    } else {
++        VERB("%s \"%s\" handle 0x%x offset 0x%lx, refcount became %d\n",
++            __FUNCTION__, bo_gem->name, bo->handle, bo->offset, atomic_read(&bo_gem->refcount));
++    }
++}
++
++drm_public int drm_ipvr_gem_bo_map(drm_ipvr_bo *bo, int write_enable)
++{
++    int ret;
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem *)bo->bufmgr;
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem*)bo;
++    struct drm_ipvr_gem_mmap_offset arg;
++    int prot = PROT_READ;
++
++    if (write_enable)
++        prot |= PROT_WRITE;
++    assert(atomic_read(&bo_gem->mapcount) >= 0);
++    /* maintain userspace mapping cache, to avoid unnecessary IOCTLs */
++    if (atomic_read(&bo_gem->mapcount) == 0 && !bo->virt) {
++        /* no need to call synccpu-grab, kernel do it automatically */
++        VERB("mmaping with handle %u\n", bo->handle);
++
++        if (!bo_gem->map_offset) {
++            memset(&arg, 0, sizeof(arg));
++            arg.handle = bo->handle;
++            ret = drmCommandWriteRead(bufmgr_gem->fd, DRM_IPVR_GEM_MMAP_OFFSET,
++                &arg, sizeof(arg));
++            if (ret < 0) {
++                ERR("%s: failed to get mmap offset at bo \"%s\" 0x%x: %d (%s)\n",
++                    __FUNCTION__, bo_gem->name, bo->handle, ret, strerror(ret));
++                return ret;
++            }
++            if (arg.offset == 0) {
++                ERR("%s: got invalid mmap offset 0x%llx at bo \"%s\" 0x%x: %d (%s)\n",
++                    __FUNCTION__, arg.offset, bo_gem->name, bo->handle, ret, strerror(ret));
++                return -ENOSPC;
++            }
++            bo_gem->map_offset = arg.offset;
++        }
++        bo->virt = drm_mmap(0, bo->size, prot,
++                   MAP_SHARED, bufmgr_gem->fd, bo_gem->map_offset);
++        if (bo->virt == MAP_FAILED) {
++            bo->virt = NULL;
++            ERR("%s: failed to drm_mmap bo \"%s\" with map_offset 0x%"PRIx64
++                " hnd 0x%x: %d (%s)\n",
++                __FUNCTION__, bo_gem->name, bo_gem->map_offset, bo->handle,
++                -errno, strerror(-errno));
++            return -errno;
++        }
++
++        VERB("%s: map for first time, \"%s\" hnd 0x%x (offset 0x%lx) (%s) -> %p\n",
++            __FUNCTION__, bo_gem->name, bo->handle, bo->offset, bo_gem->name, bo->virt);
++    }
++    else {
++        VERB("%s: already mapped, \"%s\" hnd 0x%x (offset 0x%lx) (%s) -> %p\n",
++            __FUNCTION__, bo_gem->name, bo->handle, bo->offset, bo_gem->name, bo->virt);
++    }
++    atomic_inc(&bo_gem->mapcount);
++    assert(bo->virt);
++    VERB("%s: map_count became %d\n",
++        __FUNCTION__, atomic_read(&bo_gem->mapcount));
++
++    return 0;
++}
++
++drm_public int
++drm_ipvr_gem_bo_unmap(drm_ipvr_bo *bo)
++{
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem*)bo;
++    int mapcount;
++
++    mapcount = atomic_read(&bo_gem->mapcount);
++    if (mapcount <= 0) {
++        VERB("%s: unexpected unmap() when mapcount is %d, ignore it\n", __FUNCTION__, mapcount);
++    }
++    else if (atomic_dec_and_test(&bo_gem->mapcount)) {
++        if (bo->virt)
++            drm_munmap(bo->virt, bo->size);
++        bo->virt = NULL;
++    }
++    VERB("%s: \"%s\" hnd 0x%x offset 0x%lx map_count became %d\n",
++        __FUNCTION__, bo_gem->name, bo->handle, bo->offset, atomic_read(&bo_gem->mapcount));
++    return 0;
++}
++
++drm_public void
++drm_ipvr_gem_bo_wait(drm_ipvr_bo *bo)
++{
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem*) bo->bufmgr;
++    drm_ipvr_bo_gem * bo_gem = (drm_ipvr_bo_gem*)bo;
++    struct drm_ipvr_gem_wait arg;
++    int ret;
++    VERB("%s: wait \"%s\" hnd 0x%x offset 0x%lx\n",
++        __FUNCTION__, bo_gem->name, bo->handle, bo->offset);
++
++    arg.handle = bo->handle;
++    arg.flags = 0;
++    ret = drmCommandWriteRead(bufmgr_gem->fd, DRM_IPVR_GEM_WAIT, &arg, sizeof(arg));
++    if (ret < 0) {
++        ERR("%s \"%s\" hnd %u offset 0x%lx failed, %d (%s)\n",
++            __FUNCTION__, bo_gem->name, bo->handle, bo->offset, ret, strerror(ret));
++    }
++}
++
++static unsigned
++drm_ipvr_time_diff(struct timeval *now, struct timeval *then)
++{
++    long long val;
++
++    val = now->tv_sec - then->tv_sec;
++    val *= 1000000LL;
++    val += now->tv_usec;
++    val -= then->tv_usec;
++    if (val < 1LL)
++        val = 1LL;
++
++    return (unsigned) val;
++}
++
++static int
++drm_ipvr_setup_reloc_list(drm_ipvr_bo *bo)
++{
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem *) bo;
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem *) bo->bufmgr;
++    unsigned int max_relocs = bufmgr_gem->max_relocs;
++
++    if (bo->size / 4 < max_relocs)
++        max_relocs = bo->size / 4;
++
++    bo_gem->relocs = malloc(max_relocs *
++                sizeof(struct drm_ipvr_gem_relocation_entry));
++    bo_gem->reloc_target_info = malloc(max_relocs *
++                       sizeof(drm_ipvr_reloc_target));
++    if (bo_gem->relocs == NULL || bo_gem->reloc_target_info == NULL) {
++        ERR("%s: failed to alloc relocs and reloc_target_info\n", __FUNCTION__);
++        free (bo_gem->relocs);
++        bo_gem->relocs = NULL;
++
++        free (bo_gem->reloc_target_info);
++        bo_gem->reloc_target_info = NULL;
++
++        return 1;
++    }
++
++    return 0;
++}
++
++drm_public int
++drm_ipvr_gem_bo_emit_reloc(drm_ipvr_bo *bo, uint64_t offset,
++                drm_ipvr_bo *target_bo, uint64_t target_offset, uint8_t skip_fence)
++{
++    int ret;
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem *) bo->bufmgr;
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem *) bo;
++    drm_ipvr_bo_gem *target_bo_gem = (drm_ipvr_bo_gem *) target_bo;
++    VERB("%s::%d\n", __func__, __LINE__);
++    /* Create a new relocation list if needed */
++    if (bo_gem->relocs == NULL) {
++        ret = drm_ipvr_setup_reloc_list(bo);
++        if (ret) {
++            ERR("%s failed: relocs = %p, setup_reloc_list returns %d (%s)\n",
++                __FUNCTION__, bo_gem->relocs, ret, strerror(ret));
++            return -ENOMEM;
++        }
++    }
++
++    /* Check overflow */
++    assert(bo_gem->reloc_count < bufmgr_gem->max_relocs);
++
++    /* Check args */
++    assert(offset <= bo->size - 4);
++
++    /* Make sure that we're not adding a reloc to something whose size has
++     * already been accounted for.
++     */
++    if (target_bo_gem != bo_gem) {
++         /* todo: check it */
++    }
++    /* An object needing a fence is a tiled buffer, so it won't have
++     * relocs to other buffers.
++     */
++    bo_gem->relocs[bo_gem->reloc_count].offset = offset;
++    bo_gem->relocs[bo_gem->reloc_count].delta = target_offset;
++    bo_gem->relocs[bo_gem->reloc_count].target_handle =
++        target_bo_gem->base.handle;
++    bo_gem->relocs[bo_gem->reloc_count].presumed_offset = target_bo->offset;
++    bo_gem->reloc_target_info[bo_gem->reloc_count].bo = target_bo;
++
++    if (target_bo != bo)
++        drm_ipvr_gem_bo_reference(target_bo);
++    bo_gem->reloc_target_info[bo_gem->reloc_count].flags = skip_fence?
++        0: IPVR_EXEC_OBJECT_NEED_FENCE;
++
++    bo_gem->reloc_count++;
++
++    VERB("%s emitted reloc: \"%s\" hnd %x (0x%lx) => \"%s\" hnd %x (0x%lx = 0x%lx+0x%lx)\n",
++        __FUNCTION__, bo_gem->name, bo->handle, bo->offset,
++        target_bo_gem->name, target_bo->handle,
++        target_bo->offset + target_offset, target_bo->offset, target_offset);
++    return 0;
++}
++
++drm_public drm_ipvr_bo *drm_ipvr_gem_bo_create_from_name(drm_ipvr_bufmgr *bufmgr,
++            drm_ipvr_context *ctx, const char *name, uint32_t global_handle)
++{
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem *) bufmgr;
++    drm_ipvr_bo_gem *bo_gem;
++    int ret;
++    struct drm_gem_open open_arg;
++
++    open_arg.name = global_handle;
++    ret = drmIoctl(bufmgr_gem->fd,
++               DRM_IOCTL_GEM_OPEN,
++               &open_arg);
++    if (ret) {
++        ERR("Couldn't reference %s handle 0x%08x: %s\n",
++            name, global_handle, strerror(errno));
++        return NULL;
++    }
++    bo_gem = calloc(1, sizeof(*bo_gem));
++    if (!bo_gem)
++        return NULL;
++
++    bo_gem->base.size = open_arg.size;
++    /**
++     * we don't know the presumed offset.
++     * kernel will fix it up during execution.
++     */
++    bo_gem->base.offset = 0;
++    bo_gem->base.bufmgr = bufmgr;
++    bo_gem->base.handle = open_arg.handle;
++    bo_gem->reusable = false;
++    bo_gem->tiling = 0;
++    bo_gem->caching = 0;
++    bo_gem->name = "flinked";
++    bo_gem->base.virt = NULL;
++    bo_gem->map_offset = 0;
++    atomic_set(&bo_gem->mapcount, 0);
++    atomic_set(&bo_gem->refcount, 1);
++    bo_gem->validate_index = -1;
++    bo_gem->ctx = ctx;
++    bo_gem->exec_seq = -1;
++    bo_gem->is_prime_imported = false;
++    bo_gem->global_name = global_handle;
++    DBG("bo_create_from_handle: %d (%s)\n", global_handle, bo_gem->name);
++
++    return &bo_gem->base;
++}
++
++drm_public int drm_ipvr_gem_bo_flink(drm_ipvr_bo *bo, uint32_t *global_handle)
++{
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem *) bo->bufmgr;
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem *) bo;
++    int ret;
++    struct drm_gem_flink flink;
++    if (!bo_gem->global_name) {
++        flink.handle = bo_gem->base.handle;
++
++        ret = drmIoctl(bufmgr_gem->fd, DRM_IOCTL_GEM_FLINK, &flink);
++        if (ret)
++            return ret;
++
++        bo_gem->global_name = flink.name;
++        bo_gem->reusable = false;
++    }
++
++    *global_handle = bo_gem->global_name;
++    return 0;
++}
++
++drm_public int
++drm_ipvr_gem_bo_export_to_prime(drm_ipvr_bo *bo, int *prime_fd)
++{
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem *) bo->bufmgr;
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem *) bo;
++    int ret;
++    ret = drmPrimeHandleToFD(bufmgr_gem->fd, bo_gem->base.handle,
++                   DRM_CLOEXEC, prime_fd);
++    if (ret) {
++        ERR("%s: failed calling drmPrimeHandleToFD: %d (%s)\n",
++            __FUNCTION__, ret, strerror(ret))
++        return ret;
++    }
++
++    bo_gem->reusable = false;
++
++    return 0;
++}
++
++drm_public drm_ipvr_bo*
++drm_ipvr_gem_bo_create_from_prime(drm_ipvr_bufmgr *bufmgr,
++            drm_ipvr_context *ctx, const char *name, int prime_fd, size_t guessed_size)
++{
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem *) bufmgr;
++    int ret;
++    uint32_t handle;
++    drm_ipvr_bo_gem *bo_gem;
++
++    ret = drmPrimeFDToHandle(bufmgr_gem->fd, prime_fd, &handle);
++    if (ret) {
++        ERR("%s: failed calling drmPrimeFDToHandle: %d (%s)\n",
++            __FUNCTION__, ret, strerror(ret))
++        return NULL;
++    }
++
++    /*
++     * See if the kernel has already returned this buffer to us. Just as
++     * for named buffers, we must not create two bo's pointing at the same
++     * kernel object
++     */
++    pthread_mutex_lock(&bufmgr_gem->lock);
++
++    bo_gem = calloc(1, sizeof(*bo_gem));
++    if (!bo_gem) {
++        pthread_mutex_unlock(&bufmgr_gem->lock);
++        return NULL;
++    }
++    /* Determine size of bo.  The fd-to-handle ioctl really should
++     * return the size, but it doesn't.  If we have kernel 3.12 or
++     * later, we can lseek on the prime fd to get the size.  Older
++     * kernels will just fail, in which case we fall back to the
++     * provided (estimated or guess size). */
++    ret = lseek(prime_fd, 0, SEEK_END);
++    if (ret != -1)
++        bo_gem->base.size = ret;
++    else
++        bo_gem->base.size = guessed_size;
++
++    bo_gem->base.bufmgr = bufmgr;
++    bo_gem->base.handle = handle;
++    bo_gem->tiling = 0;
++    bo_gem->caching = 0;
++    bo_gem->name = name;
++    bo_gem->base.virt = NULL;
++    bo_gem->map_offset = 0;
++    atomic_set(&bo_gem->mapcount, 0);
++    atomic_set(&bo_gem->refcount, 1);
++    bo_gem->validate_index = -1;
++    bo_gem->ctx = ctx;
++    bo_gem->reusable = false;
++    bo_gem->exec_seq = -1;
++    bo_gem->is_prime_imported = true;
++
++    pthread_mutex_unlock(&bufmgr_gem->lock);
++
++    return &bo_gem->base;
++}
++
++static int drm_ipvr_add_validate_buffer(drm_ipvr_bo *bo, uint64_t flags)
++{
++    drm_ipvr_bufmgr_gem *bufmgr_gem = NULL;
++    drm_ipvr_bo_gem *bo_gem = NULL;
++    int index;
++
++    if (!bo) {
++        ERR("%s, invalid bo %p\n", __FUNCTION__, bo);
++        return -EINVAL;
++    }
++    bo_gem = (drm_ipvr_bo_gem *) bo;
++    if (!(bo->bufmgr)) {
++        ERR("%s, invalid bo bufmgr %p for bo \"%s\" hnd %x (off 0x%lx)\n",
++            __FUNCTION__, bo->bufmgr, bo_gem->name, bo->handle, bo->offset);
++        return -EINVAL;
++    }
++
++    bufmgr_gem = (drm_ipvr_bufmgr_gem *)bo->bufmgr;
++
++    if (bo_gem->validate_index != -1) {
++        if (!(bufmgr_gem->exec_objs[bo_gem->validate_index].flags & IPVR_EXEC_OBJECT_NEED_FENCE)
++            && (flags & IPVR_EXEC_OBJECT_NEED_FENCE)) {
++            VERB("%s: already has validate_index %d, update flags: 0x%llx->0x%llx\n",
++                __FUNCTION__, bo_gem->validate_index,
++                bufmgr_gem->exec_objs[bo_gem->validate_index].flags,
++                IPVR_EXEC_OBJECT_NEED_FENCE | bufmgr_gem->exec_objs[bo_gem->validate_index].flags);
++            bufmgr_gem->exec_objs[bo_gem->validate_index].flags |= IPVR_EXEC_OBJECT_NEED_FENCE;
++        }
++        return 0;
++    }
++
++    /* Extend the array of validation entries as necessary. */
++    if (bufmgr_gem->exec_count == bufmgr_gem->exec_size) {
++        int new_size = bufmgr_gem->exec_size * 2;
++
++        if (new_size == 0)
++            new_size = 10;
++
++        bufmgr_gem->exec_objs =
++            realloc(bufmgr_gem->exec_objs,
++                sizeof(*bufmgr_gem->exec_objs) * new_size);
++        bufmgr_gem->exec_bos =
++            realloc(bufmgr_gem->exec_bos,
++                sizeof(*bufmgr_gem->exec_bos) * new_size);
++        bufmgr_gem->exec_size = new_size;
++    }
++
++    if (!bufmgr_gem->exec_objs || !bufmgr_gem->exec_bos) {
++        ERR("%s val_args = %p and exec_bos = %p\n",
++            __FUNCTION__, bufmgr_gem->exec_objs, bufmgr_gem->exec_bos);
++        return -ENOMEM;
++    }
++
++    index = bufmgr_gem->exec_count;
++    bo_gem->validate_index = index;
++    /* Fill in array entry */
++    if (bufmgr_gem->exec_objs && bufmgr_gem->exec_bos) {
++        bufmgr_gem->exec_objs[index].offset = bo->offset;
++        bufmgr_gem->exec_objs[index].handle = bo_gem->base.handle;
++        bufmgr_gem->exec_objs[index].flags = flags;
++        bufmgr_gem->exec_objs[index].relocs_ptr = (uintptr_t)bo_gem->relocs;
++        bufmgr_gem->exec_objs[index].relocation_count = bo_gem->reloc_count;
++        bufmgr_gem->exec_bos[index] = bo;
++
++        VERB("%s added validate buffer \"%s\" hnd %x (off 0x%lx) at [%d]\n",
++            __FUNCTION__, bo_gem->name, bo->handle, bo->offset, index);
++        bufmgr_gem->exec_count++;
++    }
++    return 0;
++}
++
++static int drm_ipvr_bo_process_reloc(drm_ipvr_bo *bo, uint64_t flags)
++{
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem *)bo;
++    int i;
++    int ret = 0;
++
++    /* Add the target to the validate list */
++    ret = drm_ipvr_add_validate_buffer(bo, flags);
++    if (ret != 0)
++        return ret;
++
++    if (bo_gem->relocs == NULL)
++        return 0;
++
++    for (i = 0; i < bo_gem->reloc_count; i++) {
++        drm_ipvr_bo *target_bo = bo_gem->reloc_target_info[i].bo;
++        uint64_t target_flags = bo_gem->reloc_target_info[i].flags;
++        if (target_bo == bo)
++            continue;
++
++        /* Continue walking the tree depth-first. */
++        ret = drm_ipvr_bo_process_reloc(target_bo, target_flags);
++        if (ret != 0)
++            return ret;
++    }
++
++    return ret;
++}
++
++drm_public int drm_ipvr_gem_bo_exec(drm_ipvr_bo *bo,
++            uint64_t offset, size_t len, int fence_in, int *fence_out)
++{
++    int ret;
++    int i;
++    struct timeval then, now;
++    bool have_then = false;
++    struct drm_ipvr_gem_execbuffer exec_arg;
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem *)bo;
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem*)bo->bufmgr;
++
++    pthread_mutex_lock(&bufmgr_gem->lock);
++
++    ret = drm_ipvr_bo_process_reloc(bo,
++        IPVR_EXEC_OBJECT_NEED_FENCE | IPVR_EXEC_OBJECT_SUBMIT);
++    if (ret != 0) {
++        ERR("%s bo_process_reloc2 failed: %d (%s)\n",
++            __FUNCTION__, ret, strerror(ret));
++        pthread_mutex_unlock(&bufmgr_gem->lock);
++        return ret;
++    }
++
++    VERB("%s finished the reloc/validate processing. exec_count=%d\n",
++        __FUNCTION__, bufmgr_gem->exec_count);
++    exec_arg.exec_start_offset = offset;
++    exec_arg.exec_len = len;
++    exec_arg.buffers_ptr = (uintptr_t)bufmgr_gem->exec_objs;
++    exec_arg.buffer_count = bufmgr_gem->exec_count;
++    exec_arg.ctx_id = bo_gem->ctx->ctx_id;
++    VERB("%s sending EXEC IOCTL to kernel with: cmdbuf_handle %x (0x%lx), size %zu, "
++        "buffer_list_count %u, ctx_id 0x%08x\n", __FUNCTION__, bo->handle,
++        bo->offset, len,
++        exec_arg.buffer_count, exec_arg.ctx_id);
++
++    bufmgr_gem->exec_seq ++;
++    do {
++        ret = drmCommandWriteRead(bufmgr_gem->fd,
++                   DRM_IPVR_GEM_EXECBUFFER,
++                   &exec_arg, sizeof(exec_arg));
++        if (ret == EAGAIN) {
++            if (!have_then) {
++                if (gettimeofday(&then, NULL)) {
++                    ERR("%s have no then, gettimeofday error.\n", __FUNCTION__);
++                    break;
++                }
++
++                have_then = true;
++            }
++            if (gettimeofday(&now, NULL)) {
++                ERR("%s: Gettimeofday error.\n", __FUNCTION__);
++                break;
++            }
++
++        }
++    } while ((ret == EAGAIN) && (drm_ipvr_time_diff(&now, &then) < IPVR_TIMEOUT_USEC));
++
++    if (ret) {
++        WARN("%s: command write return is %d\n", __FUNCTION__, ret);
++        goto out;
++    }
++
++    /* update the presumed_mmu_offsets
++     * in case we support eviction in IPVR driver later */
++    for (i = 0; i < bufmgr_gem->exec_count; i++) {
++        drm_ipvr_bo *bo = bufmgr_gem->exec_bos[i];
++        drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem *)bo;
++
++        /* Update the buffer offset to accelerate future exec */
++        if (bufmgr_gem->exec_objs[i].offset != bo->offset) {
++            VERB("BO \"%s\" hnd %x migrated: 0x%"PRIx64" -> 0x%llx\n",
++                bo_gem->name, bo->handle, bo->offset,
++                bufmgr_gem->exec_objs[i].offset);
++            bo->offset = bufmgr_gem->exec_objs[i].offset;
++        }
++        bo_gem->exec_seq = bufmgr_gem->exec_seq;
++    }
++
++    VERB("%s EXECBUFFER IOCTL succeeded\n", __FUNCTION__);
++out:
++    for (i = 0; i < bufmgr_gem->exec_count; i++) {
++        drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem*)bufmgr_gem->exec_bos[i];
++
++        /* Disconnect the buffer from the validate list */
++        bo_gem->validate_index = -1;
++        bufmgr_gem->exec_bos[i] = NULL;
++    }
++
++    /* autmatically decrease all bo's refcount in the reloc tree.
++     * VA created bo will be cached if unreferencing in vaRenderPicture.
++     * execbuf/mtxmsg/surface/colocated_buffer's refcount will become 1.
++     */
++    drm_ipvr_gem_bo_remove_relocs(bo, 1);
++
++    bufmgr_gem->exec_count = 0;
++    pthread_mutex_unlock(&bufmgr_gem->lock);
++    return 0;
++}
++
++drm_public int drm_ipvr_gem_bo_busy(drm_ipvr_bo *bo)
++{
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem*)bo->bufmgr;
++    drm_ipvr_bo_gem *bo_gem = (drm_ipvr_bo_gem *) bo;
++    struct drm_ipvr_gem_busy arg;
++    int ret;
++
++    arg.handle = bo->handle;
++
++    ret = drmCommandWriteRead(bufmgr_gem->fd, DRM_IPVR_GEM_BUSY, &arg, sizeof(arg));
++    if (ret == -EBUSY || (ret == 0 && arg.busy)) {
++        VERB("%s returns %d: buffer \"%s\" hnd %x (offset 0x%lx) param is busy\".\n",
++            __FUNCTION__, ret, bo_gem->name, bo->handle, bo->offset);
++        return 1;
++    }
++    else if (!ret && !arg.busy){
++        VERB("%s: buffer \"%s\" hnd %x (offset 0x%lx) param is free\".\n",
++            __FUNCTION__, bo_gem->name, bo->handle, bo->offset);
++        return 0;
++    }
++    else {
++        WARN("%s: checking buffer busy \"%s\" hnd %u (offset 0x%lx) "
++            "got unexpected result: %d (%s), busy state=%d, view it as free.\n",
++            __FUNCTION__, bo_gem->name, bo->handle, bo->offset, ret, strerror(ret), arg.busy);
++
++        return 0;
++    }
++}
++
++drm_public void drm_ipvr_gem_bufmgr_destroy(drm_ipvr_bufmgr *bufmgr)
++{
++    int j;
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem*)bufmgr;
++
++    if (bufmgr_gem->exec_bos)
++        free(bufmgr_gem->exec_bos);
++    if (bufmgr_gem->exec_objs)
++        free(bufmgr_gem->exec_objs);
++
++    if (bufmgr_gem->cache_buckets) {
++        for (j = 0; j < bufmgr_gem->cache_bucket_size; j++) {
++            struct drm_ipvr_cache_bucket *bucket =
++                &bufmgr_gem->cache_buckets[j];
++
++            while (!DRMLISTEMPTY(&bucket->head)) {
++                drm_ipvr_bo_gem *bo_gem;
++
++                bo_gem = DRMLISTENTRY(drm_ipvr_bo_gem,
++                              bucket->head.next, cache_head);
++
++                DRMLISTDELINIT(&bo_gem->cache_head);
++                bucket->count--;
++                assert(bo_gem->reloc_count == 0);
++                drm_ipvr_gem_bo_free(&bo_gem->base);
++            }
++        }
++
++        free(bufmgr_gem->cache_buckets);
++    }
++
++    pthread_mutex_destroy(&bufmgr_gem->lock);
++    pthread_mutex_destroy(&bufmgr_gem->list_lock);
++    free(bufmgr_gem);
++}
++
++drm_public void drm_ipvr_gem_context_destroy(drm_ipvr_context *ctx)
++{
++    int ret;
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem*)ctx->bufmgr;
++    struct drm_ipvr_context_destroy arg;
++    arg.ctx_id = ctx->ctx_id;
++
++    ret = drmCommandWriteRead(bufmgr_gem->fd, DRM_IPVR_CONTEXT_DESTROY, &arg, sizeof(arg));
++    if (ret != 0) {
++        ERR("%s: Error destroying context %u: %s .\n",
++            __FUNCTION__, ctx->ctx_id, strerror(ret));
++    }
++
++    free(ctx);
++}
++
++drm_public drm_ipvr_context*
++drm_ipvr_gem_context_create(drm_ipvr_bufmgr *bufmgr,
++            uint32_t ctx_type, uint32_t tiling_stride, uint32_t tiling_mode)
++{
++    int ret;
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem*)bufmgr;
++    struct drm_ipvr_context_create arg;
++    drm_ipvr_context *ctx = calloc(1, sizeof(drm_ipvr_context));
++    arg.ctx_type = ctx_type;
++    arg.tiling_stride = tiling_stride;
++    arg.tiling_scheme = tiling_mode;
++    ret = drmCommandWriteRead(bufmgr_gem->fd, DRM_IPVR_CONTEXT_CREATE, &arg, sizeof(arg));
++    if (ret != 0) {
++        ERR("%s: Error creating context %d: %s. tiling stride=%u, scheme=%u\n",
++            __FUNCTION__, ctx_type, strerror(ret),
++            arg.tiling_stride, arg.tiling_scheme);
++        free(ctx);
++        return NULL;
++    }
++    ctx->ctx_id = arg.ctx_id;
++    ctx->ctx_type = ctx_type;
++    ctx->bufmgr = bufmgr;
++
++    DBG("%s: successfully create drm context: id=%x, tiling stride=%u, scheme=%u\n",
++        __FUNCTION__, ctx->ctx_id, arg.tiling_stride, arg.tiling_scheme);
++    return ctx;
++}
++
++drm_public int drm_ipvr_gem_bufmgr_get_device_info(drm_ipvr_bufmgr *bufmgr,
++            uint16_t *dev_id, uint16_t *caps)
++{
++    struct drm_ipvr_get_info arg;
++    int ret;
++    drm_ipvr_bufmgr_gem *bufmgr_gem = (drm_ipvr_bufmgr_gem*)bufmgr;
++    arg.key = IPVR_DEVICE_INFO;
++    arg.value = 0;
++    ret = drmCommandWriteRead(bufmgr_gem->fd, DRM_IPVR_GET_INFO, &arg, sizeof(arg));
++    if (ret != 0) {
++        ERR("%s: Error getting device info: %s .\n",
++            __FUNCTION__, strerror(ret));
++        return ret;
++    }
++    *dev_id = (arg.value >> 16) & 0xffff;
++    *caps = arg.value & 0xffff;
++    return 0;
++}
++
++drm_public drm_ipvr_bufmgr *drm_ipvr_gem_bufmgr_init(int fd)
++{
++    drm_ipvr_bufmgr_gem * bufmgr_gem = NULL;
++    int j;
++
++    bufmgr_gem = calloc(1, sizeof(*bufmgr_gem));
++    if (bufmgr_gem == NULL) {
++        ERR("bufmgr init: calloc failed: %s\n", strerror(errno));
++        return NULL;
++    }
++
++    bufmgr_gem->fd = fd;
++
++    if (pthread_mutex_init(&bufmgr_gem->lock, NULL) != 0) {
++        ERR("bufmgr init: mutex init failed: %s\n", strerror(errno));
++        free(bufmgr_gem);
++        bufmgr_gem = NULL;
++        return NULL;
++    }
++    if (pthread_mutex_init(&bufmgr_gem->list_lock, NULL) != 0) {
++        ERR("bufmgr init: mutex init failed: %s\n", strerror(errno));
++        free(bufmgr_gem);
++        bufmgr_gem = NULL;
++        return NULL;
++    }
++
++    /* Hard code one.
++     */
++    bufmgr_gem->max_relocs = 32;
++
++    bufmgr_gem->exec_seq = -1;
++
++    /* init cache buckets */
++    /* 4KB, 8KB, 16KB, 32KB, 64KB, 128KB, 256KB, 512KB, 1MB, 2MB, 4MB, 8MB, 16MB, 32MB */
++    bufmgr_gem->cache_bucket_size = 14;
++    bufmgr_gem->cache_buckets = calloc(bufmgr_gem->cache_bucket_size,
++        sizeof(struct drm_ipvr_cache_bucket));
++    if (!bufmgr_gem->cache_buckets) {
++        ERR("%s failed to allocate cache buckets\n", __FUNCTION__);
++        return NULL;
++    }
++
++    for (j = 0; j < bufmgr_gem->cache_bucket_size; ++j) {
++        DRMINITLISTHEAD(&bufmgr_gem->cache_buckets[j].head);
++        bufmgr_gem->cache_buckets[j].size = 0x1000 << j;
++        bufmgr_gem->cache_buckets[j].limit = 2 << ((14 - j)/2);
++        bufmgr_gem->cache_buckets[j].count = 0;
++    }
++
++    DBG("%s created bufmgr %p with cache_bucket_size %u\n",
++        __FUNCTION__, &bufmgr_gem->base, bufmgr_gem->cache_bucket_size);
++
++    return &bufmgr_gem->base;
++}
+diff --git a/ipvr/libdrm_ipvr.pc.in b/ipvr/libdrm_ipvr.pc.in
+new file mode 100644
+index 0000000..34c5291
+--- /dev/null
++++ b/ipvr/libdrm_ipvr.pc.in
+@@ -0,0 +1,11 @@
++prefix=@prefix@
++exec_prefix=@exec_prefix@
++libdir=@libdir@
++includedir=@includedir@
++
++Name: libdrm_ipvr
++Description: Userspace interface to IPVR hardware decoder on valleyview
++Version: @PACKAGE_VERSION@
++Requires: libdrm
++Libs: -L${libdir} -ldrm_ipvr
++Cflags: -I${includedir} -I${includedir}/libdrm
+diff --git a/ipvr/test_ipvr.c b/ipvr/test_ipvr.c
+new file mode 100644
+index 0000000..acbee94
+--- /dev/null
++++ b/ipvr/test_ipvr.c
+@@ -0,0 +1,919 @@
++/**************************************************************************
++ * test_ioctl.c: it is gem ioctl unit test
++ *
++ * Copyright (c) 2014 Intel Corporation, Hillsboro, OR, USA
++ * All Rights Reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms and conditions of the GNU General Public License,
++ * version 2, as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along with
++ * this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
++ *
++ * Authors:
++ *    Yao Cheng <yao.cheng at intel.com>
++ *
++ **************************************************************************/
++
++/*
++ * This is a program to do stress test on ipvr driver and libdrm_ipvr,
++ * It creates multiple threads executing decode commands in parallel.
++ * Usage: test_ipvr -l <loop count> -t <thread count>
++ *
++ */
++
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#include <xf86drm.h>
++#include <xf86atomic.h>
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <assert.h>
++#include <pthread.h>
++#include <sys/ioctl.h>
++#include <sys/stat.h>
++#include <sys/time.h>
++#include <sys/types.h>
++#include <stdbool.h>
++#include <inttypes.h>
++#include <stdint.h>
++
++#include "errno.h"
++#ifndef ETIME
++#define ETIME ETIMEDOUT
++#endif
++#include "libdrm.h"
++#include "libdrm_lists.h"
++#include "ipvr_bufmgr.h"
++#include "string.h"
++
++#include "ipvr_drm.h"
++#include "../intel/intel_bufmgr.h"
++
++static inline void random_wait(void) {
++    usleep(rand()%5000);
++}
++
++static void random_mem_init(void *mem, size_t size)
++{
++    uint32_t i;
++    uint32_t *dword = (uint32_t*)mem;
++    for (i = 0; i < size/sizeof(uint32_t); ++i) {
++        *(dword++) = (uint32_t)rand();
++    }
++}
++
++#define exit_with_err(ret, fmt, ...) \
++    do { \
++        fprintf(stderr, fmt, ##__VA_ARGS__); \
++        exit(ret); \
++    } while (0);
++
++#define check_condition(cond) \
++    do { \
++        if (!(cond)) \
++            exit_with_err(-1, "failed at %s::%d: \"%s\"\n", __FILE__, __LINE__, #cond); \
++    } while (0);
++
++#define check_equal(a, b) \
++    do { \
++        if (a != b) \
++            exit_with_err(-1, "failed at %s::%d: %"PRIx64" == %"PRIx64"\n", \
++                __FILE__, __LINE__, (uint64_t)a, (uint64_t)b); \
++    } while (0);
++
++#define check_fd(fd) \
++    do { \
++        if (fd < 0) \
++            exit_with_err(ret, "failed at %s::%d: fd = %d\n", __FILE__, __LINE__, fd); \
++    } while (0);
++
++#define check_ret(ret) \
++    do { \
++        if (ret) \
++            exit_with_err(ret, "failed at %s::%d: %d (%s)\n", __FILE__, __LINE__, -ret, strerror(-ret)); \
++    } while (0);
++#define check_addr(addr) \
++    do { \
++        if (!addr) \
++            exit_with_err(-1, "failed at %s::%d: NULL address\n", __FILE__, __LINE__); \
++    } while (0);
++
++static unsigned char video_slice_data[] = {
++    0x00,0x00,0x01,0x65,0x88,0x84,0x00,0x57,0x87,0xc6,0xb2,0xd9,0xe6,0x75,0xbe,0x70,
++    0x28,0x14,0xc0,0xfb,0x61,0xa2,0x42,0xd8,0xca,0x67,0xa2,0xd0,0x3e,0x14,0x61,0x6d,
++    0x80,0xc0,0x2b,0x11,0x9d,0x92,0x47,0x73,0x04,0x87,0xe3,0xb0,0x8b,0x82,0xc9,0xf0,
++    0x8f,0xaf,0x35,0x28,0x6b,0x11,0xdf,0x9c,0xe9,0xa2,0xc5,0xb0,0x8e,0xed,0xda,0x0e,
++    0x3c,0x1c,0xb4,0xc0,0x00,0x00,0x00,0x00
++};
++
++static unsigned char video_cmd_data[] = {
++    0x00,0x00,0x00,0x90,0x08,0x00,0x0a,0x00,0x00,0x50,0x51,0x00,0x00,0x00,0x00,0x00,
++    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
++    0x19,0x00,0x10,0x80,0x10,0x04,0x00,0xe0,0x00,0x60,0x59,0x00,0xec,0x08,0x16,0x10,
++    0x00,0x60,0x02,0x00,0xa0,0x38,0x07,0x00,0xf4,0x28,0x08,0x00,0x2d,0x31,0x0a,0x00,
++    0x59,0x59,0x0b,0x00,0x7b,0x51,0x0c,0x00,0x96,0x11,0x0d,0x00,0xad,0xb1,0x0d,0x00,
++    0xbe,0x21,0x0e,0x00,0xc8,0x59,0x0e,0x00,0xcd,0x79,0x0e,0x00,0xd3,0xb1,0x0e,0x00,
++    0xd8,0xd1,0x0e,0x00,0xdd,0x09,0x0f,0x00,0xe7,0x71,0x0f,0x00,0xf6,0x01,0x00,0x00,
++    0xdd,0xa4,0x56,0x12,0x92,0x92,0x48,0x01,0x50,0x80,0x24,0x11,0x02,0x00,0x00,0x00,
++    0x02,0x2a,0x00,0x00,0x2a,0x28,0x08,0x01,0x01,0x00,0x00,0xb0,0x40,0x00,0x00,0x00,
++    0x45,0x00,0x00,0x00,0x45,0x00,0x00,0xa0,0x00,0xf0,0x5e,0x00,0x0c,0x08,0x01,0x10,
++    0x11,0x00,0x00,0x00,0x00,0x0a,0x05,0x10,0x00,0x37,0x00,0x00,0x05,0x02,0x1e,0x1e,
++    0x08,0x00,0x00,0x00,0x00,0x00,0x08,0x00,0x00,0x70,0x00,0x00,0x18,0x0a,0x01,0x10,
++    0x00,0x00,0x00,0x00,0x10,0x08,0x01,0x50,0x11,0x00,0x00,0x00,0xd8,0x0a,0x07,0x50,
++    0x00,0x37,0x00,0x00,0x05,0x02,0x1e,0x1e,0x08,0x00,0x00,0x00,0x00,0x00,0x08,0x00,
++    0x00,0x70,0x00,0x00,0x00,0x70,0x5f,0x00,0x00,0x00,0x00,0x00,0x00,0x07,0x38,0x50,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,0x10,
++    0x00,0x10,0x0a,0x50,0x0f,0xf0,0x00,0x00,0x0f,0xf0,0x00,0x00,0x00,0x10,0x21,0x04,
++    0x00,0xf0,0x50,0x00,0x00,0x30,0x51,0x00,0x00,0x00,0x00,0x00,0x00,0x60,0x51,0x00,
++    0x04,0x80,0x04,0x00,0x00,0x00,0x00,0x00,0x55,0x00,0x00,0x00,0x00,0x14,0x01,0x50,
++    0x08,0x00,0x0a,0x00,0x3c,0x10,0x02,0x50,0x00,0x00,0x00,0x00,0x00,0x02,0x00,0x00,
++    0x00,0x00,0x00,0x60
++};
++
++static unsigned char video_msg_data[] = {
++    0x14,0x81,0x80,0x01,0x11,0x49,0x85,0x00,0x00,0xd0,0x5b,0x00,0x95,0x70,0xee,0x31,
++    0x00,0x10,0x21,0x04
++};
++
++static int reference_cache_size = 512 * 1024;
++#define CLIP_WIDTH  16
++#define CLIP_HEIGHT 16
++
++static int pre_opened_fd;
++static drm_ipvr_bufmgr *pre_opened_bufmgr;
++
++#define RAND_MEM_SIZE (16 * 4096)
++static uint8_t rand_ipvr_mem[RAND_MEM_SIZE];
++static uint8_t rand_i915_mem[RAND_MEM_SIZE];
++static void* basic_ioctl_test(void* arg)
++{
++    struct drm_ipvr_gem_create create_arg;
++    struct drm_gem_close close_arg;
++    struct drm_gem_flink flink_arg;
++    struct drm_gem_open open_arg;
++    struct drm_ipvr_gem_mmap_offset map_offset_arg;
++    int fd, i915_fd, export_fd, i915_export_fd;
++    dri_bufmgr *i915_bufmgr;
++    dri_bo *i915_bo;
++    uint32_t global_name;
++    uint32_t *vaddr;
++    uint32_t import_handle;
++    int ret = 0;
++    int use_pre_opened = 1;
++    size_t create_size = 16 * 4096;
++    size_t i915_create_size = 2 * 4096;
++
++    if(rand() % 3)
++        use_pre_opened = 0;
++    if (use_pre_opened)
++        fd = pre_opened_fd;
++    else
++        fd = open("/dev/dri/card1", O_RDWR);
++
++    check_fd(fd);
++    i915_fd = open("/dev/dri/card0", O_RDWR);
++    check_fd(i915_fd);
++    i915_bufmgr = drm_intel_bufmgr_gem_init(i915_fd, 4096);
++    check_addr(i915_bufmgr);
++
++    /* create bo */
++    {
++        random_wait();
++        memset(&create_arg, 0, sizeof(create_arg));
++        create_arg.size = create_size;
++        create_arg.cache_level = 0;
++        create_arg.tiling = 0;
++        ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_CREATE, &create_arg, sizeof(create_arg));
++        check_ret(ret);
++    }
++
++    /* mmap bo*/
++    {
++        random_wait();
++        if (!create_arg.map_offset) {
++            map_offset_arg.handle = create_arg.handle;
++            ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_MMAP_OFFSET, &map_offset_arg, sizeof(map_offset_arg));
++            check_ret(ret);
++        }
++        random_wait();
++        vaddr = drm_mmap(NULL, create_arg.rounded_size, PROT_READ | PROT_WRITE,
++                   MAP_SHARED, fd, create_arg.map_offset);
++        check_addr (vaddr);
++        memcpy(vaddr, rand_ipvr_mem, create_size);
++        random_wait();
++        drm_munmap(vaddr, create_arg.rounded_size);
++    }
++
++    /* flink and open */
++    {
++        random_wait();
++        flink_arg.handle = create_arg.handle;
++        flink_arg.name = 0;
++        ret = drmIoctl(fd, DRM_IOCTL_GEM_FLINK, &flink_arg);
++        check_ret(ret);
++        global_name = flink_arg.name;
++
++        /* open from flink name */
++        open_arg.name = global_name;
++        random_wait();
++        ret = drmIoctl(fd, DRM_IOCTL_GEM_OPEN, &open_arg);
++        check_ret(ret);
++        check_equal (open_arg.size, create_arg.rounded_size)
++
++        /* mmap and verify the bo content */
++        map_offset_arg.handle = open_arg.handle;
++        random_wait();
++        ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_MMAP_OFFSET, &map_offset_arg, sizeof(map_offset_arg));
++        check_ret(ret);
++        /* mmap bo ioctl*/
++        random_wait();
++        vaddr = drm_mmap(NULL, open_arg.size, PROT_READ,
++                   MAP_SHARED, fd, map_offset_arg.offset);
++        check_addr(vaddr);
++        check_ret(memcmp(vaddr, rand_ipvr_mem, create_size));
++        random_wait();
++        drm_munmap(vaddr, create_arg.rounded_size);
++
++        /* close opened bo ioctl*/
++        random_wait();
++        close_arg.handle = open_arg.handle;
++        ret = drmIoctl(fd, DRM_IOCTL_GEM_CLOSE, &close_arg);
++        check_ret(ret);
++    }
++
++    /* test prime import */
++    {
++        random_wait();
++        i915_bo = dri_bo_alloc(i915_bufmgr, "to-be-exported", i915_create_size, 0x1000);
++        check_addr(i915_bo);
++        ret = dri_bo_map(i915_bo, 1);
++        check_ret(ret);
++        check_addr(i915_bo->virtual);
++        vaddr = i915_bo->virtual;
++        memcpy(i915_bo->virtual, rand_i915_mem, i915_create_size);
++        ret = dri_bo_unmap(i915_bo);
++        check_ret(ret);
++        random_wait();
++        ret = drm_intel_bo_gem_export_to_prime(i915_bo, &i915_export_fd);
++        check_ret(ret);
++        check_fd(i915_export_fd);
++        random_wait();
++        ret = drmPrimeFDToHandle(fd, i915_export_fd, &import_handle);
++        check_ret(ret);
++        map_offset_arg.handle = import_handle;
++        random_wait();
++        ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_MMAP_OFFSET, &map_offset_arg, sizeof(map_offset_arg));
++        check_ret(ret);
++        random_wait();
++        vaddr = drm_mmap(NULL, i915_create_size, PROT_READ,
++                   MAP_SHARED, fd, map_offset_arg.offset);
++        check_addr(vaddr);
++        check_ret(memcmp(vaddr, rand_i915_mem, i915_create_size));
++        random_wait();
++        ret = drm_munmap(vaddr, i915_create_size);
++        check_ret(ret);
++        random_wait();
++        close_arg.handle = import_handle;
++        ret = drmIoctl(fd, DRM_IOCTL_GEM_CLOSE, &close_arg);
++        check_ret(ret);
++        close(i915_export_fd);
++        dri_bo_unreference(i915_bo);
++    }
++
++    /* test prime export */
++    {
++        random_wait();
++        ret = drmPrimeHandleToFD(fd, create_arg.handle, 0, &export_fd);
++        check_ret(ret);
++        check_fd(export_fd);
++        random_wait();
++        i915_bo = drm_intel_bo_gem_create_from_prime(i915_bufmgr, export_fd, create_arg.rounded_size);
++        check_addr(i915_bo);
++        check_equal(i915_bo->size, create_size);
++        ret = drm_intel_gem_bo_map_gtt(i915_bo);
++        check_ret(ret);
++        check_addr(i915_bo->virtual);
++        //check_ret(memcmp(i915_bo->virtual, rand_ipvr_mem, create_size));
++        ret = dri_bo_unmap(i915_bo);
++        check_ret(ret);
++        random_wait();
++        dri_bo_unreference(i915_bo);
++        random_wait();
++        close(export_fd);
++    }
++
++    /* close bo ioctl*/
++    random_wait();
++    close_arg.handle = create_arg.handle;
++    ret = drmIoctl(fd, DRM_IOCTL_GEM_CLOSE, &close_arg);
++    check_ret(ret);
++
++    dri_bufmgr_destroy(i915_bufmgr);
++    close(i915_fd);
++    if (!use_pre_opened)
++        close(fd);
++
++    return NULL;
++}
++
++static void* decode_ioctl_test(void* args)
++{
++    struct drm_ipvr_context_create ctx_create_arg;
++    struct drm_ipvr_context_destroy ctx_destroy_arg;
++    struct drm_ipvr_gem_create create_arg;
++    struct drm_ipvr_gem_execbuffer exec_arg;
++    struct drm_ipvr_gem_wait wait_arg;
++    struct drm_ipvr_gem_busy busy_arg;
++    struct drm_gem_close close_arg;
++    struct drm_ipvr_gem_relocation_entry reloc_entries[6];
++    struct drm_ipvr_gem_exec_object exec_objs[7];
++    struct drm_ipvr_gem_exec_object *arg;
++    int fd, i915_fd, i915_export_fd;
++    dri_bufmgr *i915_bufmgr;
++    dri_bo *i915_bo;
++    uint32_t import_handle;
++    uint32_t *vaddr;
++    int i, ret = 0, ctx_type;
++    int use_pre_opened = 1;
++    if(rand() % 3)
++        use_pre_opened = 0;
++    if (use_pre_opened)
++        fd = pre_opened_fd;
++    else
++        fd = open("/dev/dri/card1", O_RDWR);
++
++    memset(exec_objs, 0, sizeof(7 * sizeof(struct drm_ipvr_gem_exec_object)));
++    memset(reloc_entries, 0, sizeof(6 * sizeof(struct drm_ipvr_gem_relocation_entry)));
++    check_fd(fd);
++    i915_fd = open("/dev/dri/card0", O_RDWR);
++    check_fd(i915_fd);
++    i915_bufmgr = drm_intel_bufmgr_gem_init(i915_fd, 4096);
++    check_addr(i915_bufmgr);
++
++    random_wait();
++    memset(&ctx_create_arg, 0, sizeof(ctx_create_arg));
++    ctx_type = IPVR_CONTEXT_TYPE_VED;
++    ctx_create_arg.ctx_type = ctx_type;
++    ctx_create_arg.tiling_scheme = 0;
++    ctx_create_arg.tiling_stride = 0;
++    ret = drmCommandWriteRead(fd, DRM_IPVR_CONTEXT_CREATE, &ctx_create_arg, sizeof(ctx_create_arg));
++    check_ret(ret);
++
++    /* create preload bo */
++    random_wait();
++    memset(&create_arg, 0, sizeof(create_arg));
++    create_arg.size = 1 << 12;
++    ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_CREATE, &create_arg, sizeof(create_arg));
++    check_ret(ret);
++    arg = &exec_objs[0];
++    arg->handle = create_arg.handle;
++    arg->offset = create_arg.mmu_offset;
++    arg->flags = IPVR_EXEC_OBJECT_NEED_FENCE;
++    arg->relocation_count = 0;
++    arg->relocs_ptr = (uintptr_t)NULL;
++    reloc_entries[0].delta = 0;
++    reloc_entries[0].offset = 8;
++    reloc_entries[0].presumed_offset = create_arg.mmu_offset;
++    reloc_entries[0].target_handle = create_arg.handle;
++    /* preload bo end */
++
++    /* create colocated bo */
++    random_wait();
++    memset(&create_arg, 0, sizeof(create_arg));
++    create_arg.size = 5 << 12;
++    ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_CREATE, &create_arg, sizeof(create_arg));
++    check_ret(ret);
++    arg = &exec_objs[1];
++    arg->handle = create_arg.handle;
++    arg->offset = create_arg.mmu_offset;
++    arg->flags = IPVR_EXEC_OBJECT_NEED_FENCE;
++    arg->relocation_count = 0;
++    arg->relocs_ptr = (uintptr_t)NULL;
++    reloc_entries[1].delta = 0;
++    reloc_entries[1].offset = 57 * 4;
++    reloc_entries[1].presumed_offset = create_arg.mmu_offset;
++    reloc_entries[1].target_handle = create_arg.handle;
++    /* colocated bo end */
++
++    /* create reference cache bo */
++    random_wait();
++    memset(&create_arg, 0, sizeof(create_arg));
++    create_arg.size = reference_cache_size;
++    ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_CREATE, &create_arg, sizeof(create_arg));
++    check_ret(ret);
++    arg = &exec_objs[2];
++    arg->flags = 0;
++    arg->handle = create_arg.handle;
++    arg->offset = create_arg.mmu_offset;
++    arg->relocation_count = 0;
++    arg->relocs_ptr = (uintptr_t)NULL;
++    reloc_entries[2].delta = 0;
++    reloc_entries[2].offset = 123 * 4;
++    reloc_entries[2].presumed_offset = create_arg.mmu_offset;
++    reloc_entries[2].target_handle = create_arg.handle;
++    /* reference cache bo end */
++
++    /* create surface bo */
++    random_wait();
++    i915_bo = dri_bo_alloc(i915_bufmgr, "to-be-exported", 512 * 32 * 3 / 2, 0x1000);
++    check_addr(i915_bo);
++    ret = drm_intel_bo_gem_export_to_prime(i915_bo, &i915_export_fd);
++    check_ret(ret);
++    check_fd(i915_export_fd);
++    random_wait();
++    ret = drmPrimeFDToHandle(fd, i915_export_fd, &import_handle);
++    check_ret(ret);
++    arg = &exec_objs[3];
++    arg->handle = import_handle;
++    arg->offset = 0; /* we don't know the mmu offset */
++    arg->flags = IPVR_EXEC_OBJECT_NEED_FENCE;
++    arg->relocation_count = 0;
++    arg->relocs_ptr = (uintptr_t)NULL;
++    reloc_entries[3].delta = 0;
++    reloc_entries[3].offset = 120 * 4;
++    reloc_entries[3].presumed_offset = 0; // let kernel fix it
++    reloc_entries[3].target_handle = import_handle;
++    /* create surface bo */
++
++    /* create slice data bo */
++    random_wait();
++    memset(&create_arg, 0, sizeof(create_arg));
++    create_arg.size = 4096;
++    create_arg.cache_level = IPVR_CACHE_WRITECOMBINE;
++    ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_CREATE, &create_arg, sizeof(create_arg));
++    check_ret(ret);
++    vaddr = drm_mmap(NULL, create_arg.rounded_size, PROT_READ | PROT_WRITE,
++               MAP_SHARED, fd, create_arg.map_offset);
++    check_addr (vaddr);
++    memcpy((void *)vaddr, video_slice_data, sizeof(video_slice_data));
++    random_wait();
++    drm_munmap(vaddr, create_arg.rounded_size);
++    arg = &exec_objs[4];
++    arg->flags = 0;
++    arg->handle = create_arg.handle;
++    arg->offset = create_arg.mmu_offset;
++    arg->relocation_count = 0;
++    arg->relocs_ptr = (uintptr_t)NULL;
++    reloc_entries[4].delta = 0;
++    reloc_entries[4].offset = 38 * 4;
++    reloc_entries[4].presumed_offset = create_arg.mmu_offset;
++    reloc_entries[4].target_handle = create_arg.handle;
++    /* slice data end */
++
++    /* create cmd bo */
++    random_wait();
++    memset(&create_arg, 0, sizeof(create_arg));
++    create_arg.size = 4096;
++    ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_CREATE, &create_arg, sizeof(create_arg));
++    check_ret(ret);
++    vaddr = drm_mmap(NULL, create_arg.rounded_size, PROT_READ | PROT_WRITE,
++               MAP_SHARED, fd, create_arg.map_offset);
++    check_addr (vaddr);
++    memcpy((void *)vaddr, video_cmd_data, sizeof(video_cmd_data));
++    vaddr[2] = exec_objs[0].offset;
++    vaddr[38] = exec_objs[4].offset;
++    vaddr[57] = exec_objs[1].offset;
++    vaddr[120] = exec_objs[3].offset;
++    vaddr[123] = exec_objs[2].offset;
++    random_wait();
++    drm_munmap(vaddr, create_arg.rounded_size);
++    arg = &exec_objs[5];
++    arg->flags = IPVR_EXEC_OBJECT_NEED_FENCE;
++    arg->handle = create_arg.handle;
++    arg->offset = create_arg.mmu_offset;
++    arg->relocation_count = 5;
++    arg->relocs_ptr = (uintptr_t)&reloc_entries[0];
++    reloc_entries[5].delta = 0;
++    reloc_entries[5].offset = 8;
++    reloc_entries[5].presumed_offset = create_arg.mmu_offset;
++    reloc_entries[5].target_handle = create_arg.handle;
++    /* cmd buf end */
++
++    /* create msg bo */
++    random_wait();
++    memset(&create_arg, 0, sizeof(create_arg));
++    create_arg.size = 4096;
++    ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_CREATE, &create_arg, sizeof(create_arg));
++    check_ret(ret);
++    vaddr = drm_mmap(NULL, create_arg.rounded_size, PROT_READ | PROT_WRITE,
++               MAP_SHARED, fd, create_arg.map_offset);
++    check_addr (vaddr);
++    memcpy((void *)vaddr, video_msg_data, sizeof(video_msg_data));
++    vaddr[2] = exec_objs[5].offset;
++    random_wait();
++    drm_munmap(vaddr, create_arg.rounded_size);
++    arg = &exec_objs[6];
++    arg->flags = IPVR_EXEC_OBJECT_NEED_FENCE | IPVR_EXEC_OBJECT_SUBMIT;
++    arg->handle = create_arg.handle;
++    arg->offset = create_arg.mmu_offset;
++    arg->relocation_count = 1;
++    arg->relocs_ptr = (uintptr_t)&reloc_entries[5];
++    /* msg bo end */
++
++    /* run execbuffer ioctl */
++    random_wait();
++    memset(&exec_arg, 0, sizeof(exec_arg));
++    exec_arg.buffer_count = 7;
++    exec_arg.buffers_ptr = (uintptr_t)exec_objs;
++    exec_arg.exec_start_offset = 0;
++    exec_arg.exec_len = 20;
++    exec_arg.ctx_id = ctx_create_arg.ctx_id;
++    random_wait();
++    ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_EXECBUFFER, &exec_arg, sizeof(exec_arg));
++    check_ret(ret);
++
++    /*check busy ioctl*/
++    random_wait();
++    memset(&busy_arg, 0, sizeof(busy_arg));
++    busy_arg.handle = create_arg.handle;
++    ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_BUSY, &busy_arg, sizeof(busy_arg));
++    check_condition ((ret == 0) || (ret == -EBUSY));
++
++    /*wait for finish*/
++    random_wait();
++    memset(&wait_arg, 0, sizeof(wait_arg));
++    wait_arg.handle = create_arg.handle;
++    ret = drmCommandWriteRead(fd, DRM_IPVR_GEM_WAIT, &wait_arg, sizeof(wait_arg));
++    /* the random command causes PANIC */
++    check_condition((ret == 0) || (ret == -EDEADLK));
++
++    /* close val bo and cmd bo */
++    random_wait();
++    memset(&close_arg, 0, sizeof(close_arg));
++    for (i = 0; i < 7; i++) {
++        close_arg.handle = exec_objs[i].handle;
++        ret = drmIoctl(fd, DRM_IOCTL_GEM_CLOSE, &close_arg);
++        check_ret (ret);
++    }
++
++    /* clean up i915 */
++    close(i915_export_fd);
++    dri_bo_unreference(i915_bo);
++    dri_bufmgr_destroy(i915_bufmgr);
++    close(i915_fd);
++
++    /* destroy the ctx_context */
++    random_wait();
++    memset(&ctx_destroy_arg, 0, sizeof(ctx_destroy_arg));
++    ctx_destroy_arg.ctx_id = ctx_create_arg.ctx_id;
++    ret = drmCommandWriteRead(fd, DRM_IPVR_CONTEXT_DESTROY, &ctx_destroy_arg, sizeof(ctx_destroy_arg));
++    check_ret(ret);
++    if (!use_pre_opened)
++        close(fd);
++    return NULL;
++}
++
++static void* basic_libdrm_test(void *args)
++{
++    int fd, i915_fd, export_fd, i915_export_fd;
++    drm_ipvr_bo *created_bo, *flinked_bo, *imported_bo;
++    dri_bo *i915_created_bo, *i915_imported_bo;
++    drm_ipvr_bufmgr *bufmgr;
++    dri_bufmgr *i915_bufmgr;
++    int ret= 0;
++    uint32_t flink_name;
++    int use_pre_opened_fd = 1;
++    int use_pre_opened_bufmgr = 1;
++    size_t create_size = 16 * 4096;
++    size_t i915_create_size = 2 * 4096;
++
++    if(rand() % 3)
++        use_pre_opened_fd = 0;
++    if(rand() % 3)
++        use_pre_opened_bufmgr = 0;
++
++    if (use_pre_opened_fd)
++        fd = pre_opened_fd;
++    else
++        fd = open("/dev/dri/card1", O_RDWR);
++    check_fd(fd);
++
++    if (use_pre_opened_bufmgr)
++        bufmgr = pre_opened_bufmgr;
++    else
++        bufmgr = drm_ipvr_gem_bufmgr_init(fd);
++    check_addr(bufmgr);
++
++    i915_fd = open("/dev/dri/card0", O_RDWR);
++    check_fd(i915_fd);
++    i915_bufmgr = drm_intel_bufmgr_gem_init(i915_fd, 4096);
++    check_addr(i915_bufmgr);
++
++    {
++        created_bo = drm_ipvr_gem_bo_alloc(bufmgr, NULL, "created", create_size, 0, 0);
++        check_addr(created_bo);
++        check_condition(created_bo->size >= create_size);
++        ret = drm_ipvr_gem_bo_map(created_bo, 1);
++        check_ret(ret);
++        check_addr(created_bo->virt);
++        memcpy(created_bo->virt, rand_ipvr_mem, create_size);
++        ret = drm_ipvr_gem_bo_unmap(created_bo);
++        check_ret(ret);
++    }
++
++    {
++        ret = drm_ipvr_gem_bo_flink(created_bo, &flink_name);
++        check_ret(ret);
++        flinked_bo = drm_ipvr_gem_bo_create_from_name(bufmgr, NULL, "flinked", flink_name);
++        check_addr(flinked_bo);
++        check_equal(flinked_bo->size, created_bo->size);
++        ret = drm_ipvr_gem_bo_map(flinked_bo, 0);
++        check_ret(ret);
++        check_addr(flinked_bo->virt);
++        check_ret(memcmp(flinked_bo->virt, rand_ipvr_mem, flinked_bo->size));
++        ret = drm_ipvr_gem_bo_unmap(flinked_bo);
++        check_ret(ret);
++        drm_ipvr_gem_bo_unreference(flinked_bo);
++    }
++
++    {
++        i915_created_bo = dri_bo_alloc(i915_bufmgr, "i915_bo", i915_create_size, 0x1000);
++        check_addr(i915_created_bo);
++        ret = dri_bo_map(i915_created_bo, 1);
++        check_ret(ret);
++        check_addr(i915_created_bo->virtual);
++        memcpy(i915_created_bo->virtual, rand_i915_mem, i915_create_size);
++        ret = dri_bo_unmap(i915_created_bo);
++        check_ret(ret);
++        random_wait();
++        ret = drm_intel_bo_gem_export_to_prime(i915_created_bo, &i915_export_fd);
++        check_ret(ret);
++        check_fd(i915_export_fd);
++        imported_bo = drm_ipvr_gem_bo_create_from_prime(bufmgr, NULL, "imported", i915_export_fd, i915_create_size);
++        check_addr(imported_bo);
++        check_equal(i915_created_bo->size, imported_bo->size);
++        ret = drm_ipvr_gem_bo_map(imported_bo, 0);
++        check_ret(ret);
++        check_addr(imported_bo->virt);
++        check_ret(memcmp(imported_bo->virt, rand_i915_mem, i915_create_size));
++        ret = drm_ipvr_gem_bo_unmap(imported_bo);
++        check_ret(ret);
++        drm_ipvr_gem_bo_unreference(imported_bo);
++        close(i915_export_fd);
++        dri_bo_unreference(i915_created_bo);
++    }
++
++    {
++        ret = drm_ipvr_gem_bo_export_to_prime(created_bo, &export_fd);
++        check_ret(ret);
++        check_fd(export_fd);
++        i915_imported_bo = drm_intel_bo_gem_create_from_prime(i915_bufmgr, export_fd, created_bo->size);
++        check_addr(i915_imported_bo);
++        check_equal(i915_imported_bo->size, created_bo->size);
++        ret = drm_intel_gem_bo_map_gtt(i915_imported_bo);
++        check_ret(ret);
++        check_addr(i915_imported_bo->virtual);
++        //check_ret(memcmp(i915_imported_bo->virtual, rand_ipvr_mem, create_size));
++        ret = dri_bo_unmap(i915_imported_bo);
++        check_ret(ret);
++        dri_bo_unreference(i915_imported_bo);
++        close(export_fd);
++    }
++
++    drm_ipvr_gem_bo_unreference(created_bo);
++
++    dri_bufmgr_destroy(i915_bufmgr);
++    close(i915_fd);
++    if (!use_pre_opened_bufmgr)
++        drm_ipvr_gem_bufmgr_destroy(bufmgr);
++    if (!use_pre_opened_fd)
++        close(fd);
++
++    return NULL;
++}
++
++static void* decode_libdrm_test(void *args)
++{
++    int fd, i915_fd, i915_export_fd;
++    dri_bufmgr *i915_bufmgr;
++    drm_ipvr_bufmgr *bufmgr;
++    drm_ipvr_bo *pre_bo, *col_bo, *slc_bo, *surf_bo, *ref_bo, *cmd_bo, *msg_bo;
++    dri_bo *i915_bo;
++    drm_ipvr_context *ctx;
++    int ret = 0;
++    int use_pre_opened_fd = 1;
++    int use_pre_opened_bufmgr = 1;
++
++    if(rand() % 3)
++        use_pre_opened_fd = 0;
++    if(rand() % 3)
++        use_pre_opened_bufmgr = 0;
++
++    if (use_pre_opened_fd)
++        fd = pre_opened_fd;
++    else
++        fd = open("/dev/dri/card1", O_RDWR);
++    check_fd(fd);
++
++    if (use_pre_opened_bufmgr)
++        bufmgr = pre_opened_bufmgr;
++    else
++        bufmgr = drm_ipvr_gem_bufmgr_init(fd);
++    check_addr(bufmgr);
++
++    i915_fd = open("/dev/dri/card0", O_RDWR);
++    check_fd(i915_fd);
++    i915_bufmgr = drm_intel_bufmgr_gem_init(i915_fd, 4096);
++    check_addr(i915_bufmgr);
++
++    /* create a ctx_context, which is needed for exec ioctl */
++    random_wait();
++    ctx = drm_ipvr_gem_context_create(bufmgr, IPVR_CONTEXT_TYPE_VED, 0, 0);
++    check_addr(ctx);
++
++    /* preload */
++    random_wait();
++    pre_bo = drm_ipvr_gem_bo_alloc(bufmgr, NULL, "preload", 4096, 0, 0);
++    check_addr(pre_bo);
++    /* colocated */
++    random_wait();
++    col_bo = drm_ipvr_gem_bo_alloc(bufmgr, NULL, "colocated", 5 << 12, 0, 0);
++    check_addr(col_bo);
++    /* reference */
++    random_wait();
++    ref_bo = drm_ipvr_gem_bo_alloc(bufmgr, NULL, "reference", reference_cache_size, 0, 0);
++    check_addr(ref_bo);
++    /* surface */
++    random_wait();
++    i915_bo = dri_bo_alloc(i915_bufmgr, "surface", 512 * 32 * 3 / 2, 0x1000);
++    check_addr(i915_bo);
++    ret = drm_intel_bo_gem_export_to_prime(i915_bo, &i915_export_fd);
++    check_ret(ret);
++    check_fd(i915_export_fd);
++    random_wait();
++    surf_bo = drm_ipvr_gem_bo_create_from_prime(bufmgr, ctx, "imported", i915_export_fd, 512 * 32 * 3 / 2);
++    check_addr(surf_bo);
++    /* slice */
++    random_wait();
++    slc_bo = drm_ipvr_gem_bo_alloc(bufmgr, NULL, "slice", sizeof(video_slice_data), 0, 0);
++    check_addr(slc_bo);
++    /* cmd bo */
++    random_wait();
++    cmd_bo = drm_ipvr_gem_bo_alloc(bufmgr, NULL, "cmd", sizeof(video_cmd_data), 0, 0);
++    check_addr(cmd_bo);
++    /* cmd bo */
++    random_wait();
++    msg_bo = drm_ipvr_gem_bo_alloc(bufmgr, ctx, "msg", sizeof(video_msg_data), 0, 0);
++    check_addr(msg_bo);
++
++    /* setup relocs */
++    ret = drm_ipvr_gem_bo_emit_reloc(msg_bo, 8, cmd_bo, 0, 0);
++    check_ret(ret);
++    ret = drm_ipvr_gem_bo_emit_reloc(cmd_bo, 8, pre_bo, 0, 0);
++    check_ret(ret);
++    ret = drm_ipvr_gem_bo_emit_reloc(cmd_bo, 57 * 4, col_bo, 0, 0);
++    check_ret(ret);
++    ret = drm_ipvr_gem_bo_emit_reloc(cmd_bo, 123 * 4, ref_bo, 0, 1);
++    check_ret(ret);
++    ret = drm_ipvr_gem_bo_emit_reloc(cmd_bo, 120 * 4, surf_bo, 0, 0);
++    check_ret(ret);
++    ret = drm_ipvr_gem_bo_emit_reloc(cmd_bo, 38 * 4, slc_bo, 0, 0);
++    check_ret(ret);
++
++    /* set data */
++    random_wait();
++    ret = drm_ipvr_gem_bo_map(slc_bo, 1);
++    check_ret(ret);
++    check_addr(slc_bo->virt);
++    memcpy(slc_bo->virt, video_slice_data, sizeof(video_slice_data));
++    ret = drm_ipvr_gem_bo_unmap(slc_bo);
++    check_ret(ret);
++    ret = drm_ipvr_gem_bo_map(cmd_bo, 1);
++    check_ret(ret);
++    check_addr(cmd_bo->virt);
++    memcpy(cmd_bo->virt, video_cmd_data, sizeof(video_cmd_data));
++    ret = drm_ipvr_gem_bo_unmap(cmd_bo);
++    check_ret(ret);
++    ret = drm_ipvr_gem_bo_map(msg_bo, 1);
++    check_ret(ret);
++    check_addr(msg_bo->virt);
++    memcpy(msg_bo->virt, video_msg_data, sizeof(video_msg_data));
++    ret = drm_ipvr_gem_bo_unmap(msg_bo);
++    check_ret(ret);
++
++    /* execute */
++    random_wait();
++    ret = drm_ipvr_gem_bo_exec(msg_bo, 0, sizeof(video_msg_data), -1, NULL);
++    check_ret(ret);
++
++    /*check busy ioctl*/
++    random_wait();
++    drm_ipvr_gem_bo_busy(col_bo);
++
++    /*wait for finish*/
++    random_wait();
++    drm_ipvr_gem_bo_wait(surf_bo);
++
++    /* destroy all bos */
++    drm_ipvr_gem_bo_unreference(msg_bo);
++    drm_ipvr_gem_bo_unreference(cmd_bo);
++    drm_ipvr_gem_bo_unreference(surf_bo);
++    drm_ipvr_gem_bo_unreference(slc_bo);
++    drm_ipvr_gem_bo_unreference(pre_bo);
++    drm_ipvr_gem_bo_unreference(col_bo);
++    drm_ipvr_gem_bo_unreference(ref_bo);
++
++    /* clean up i915 */
++    close(i915_export_fd);
++    dri_bo_unreference(i915_bo);
++    dri_bufmgr_destroy(i915_bufmgr);
++    close(i915_fd);
++
++    /* destroy the ctx_context */
++    random_wait();
++    drm_ipvr_gem_context_destroy(ctx);
++    check_ret(ret);
++
++    /* house-cleaning */
++    if (!use_pre_opened_bufmgr)
++        drm_ipvr_gem_bufmgr_destroy(bufmgr);
++    if (!use_pre_opened_fd)
++        close(fd);
++    return NULL;
++}
++
++int main(int argc, char **argv)
++{
++    int err, opt;
++    int loop_count = 1;
++    int thread_count = 1;
++    int i;
++    int ret = 0;
++    pthread_t *threads;
++    pre_opened_fd = open("/dev/dri/card1", O_RDWR);
++    check_fd(pre_opened_fd);
++    pre_opened_bufmgr = drm_ipvr_gem_bufmgr_init(pre_opened_fd);
++    check_addr(pre_opened_bufmgr);
++
++    while ((opt = getopt(argc, argv, "l:t:")) != -1) {
++       switch (opt) {
++       case 'l':
++           loop_count = atoi(optarg);
++           break;
++       case 't':
++           thread_count = atoi(optarg);
++           break;
++       default: /* '?' */
++           fprintf(stderr, "Usage: %s [-t nsecs] [-n] name\n",
++                   argv[0]);
++           exit(-1);
++       }
++    }
++
++    random_mem_init(rand_ipvr_mem, sizeof(rand_ipvr_mem));
++    random_mem_init(rand_i915_mem, sizeof(rand_i915_mem));
++
++    threads = (pthread_t*)calloc(4 * thread_count, sizeof(pthread_t));
++    check_addr(threads);
++    fprintf(stderr, "Starting stress test with %d loops and %d threads for each loop\n\n",
++        loop_count, thread_count);
++    /* test bo create, mmap, close */
++    while (loop_count--) {
++        for (i = 0; i < thread_count; ++i) {
++            err = pthread_create(&threads[i], NULL, basic_ioctl_test, NULL);
++            check_ret(err);
++            err = pthread_create(&threads[thread_count * 1 + i], NULL, decode_ioctl_test, NULL);
++            check_ret(err);
++            err = pthread_create(&threads[thread_count * 2 + i], NULL, basic_libdrm_test, NULL);
++            check_ret(err);
++            err = pthread_create(&threads[thread_count * 3 + i], NULL, decode_libdrm_test, NULL);
++            check_ret(err);
++        }
++        for (i = 0; i < thread_count * 4; ++i) {
++            err = pthread_join(threads[i], NULL);
++            check_ret(err);
++        }
++        fprintf(stderr, ".");
++    }
++    free(threads);
++    drm_ipvr_gem_bufmgr_destroy(pre_opened_bufmgr);
++    close(pre_opened_fd);
++    fprintf(stderr, "\n\nAll tests finished successfully!\n");
++    return 0;
++}
+-- 
+2.1.0

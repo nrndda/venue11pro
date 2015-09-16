@@ -1,0 +1,41 @@
+Feb 28 16:22:43 venue11pro systemd[1]: Reached target Sleep.
+Feb 28 16:22:43 venue11pro systemd[1]: Starting Sleep.
+Feb 28 16:22:43 venue11pro systemd[1]: Starting Suspend...
+Feb 28 16:22:43 venue11pro systemd-sleep[6481]: Suspending system...
+Feb 28 16:22:48 venue11pro kernel: PM: Syncing filesystems ... done.
+Feb 28 16:22:48 venue11pro kernel: Freezing user space processes ... (elapsed 0.003 seconds) done.
+Feb 28 16:22:48 venue11pro kernel: Freezing remaining freezable tasks ... (elapsed 0.003 seconds) done.
+Feb 28 16:22:48 venue11pro kernel: Suspending console(s) (use no_console_suspend to debug)
+Feb 28 16:22:48 venue11pro kernel: ath6kl: timeout, didn't get host sleep cmd processed event
+Feb 28 16:22:48 venue11pro kernel: ath6kl: deepsleep suspend failed: -110
+Feb 28 16:22:48 venue11pro kernel: Removing pn544
+Feb 28 16:22:48 venue11pro kernel: PM: suspend of devices complete after 2655.802 msecs
+Feb 28 16:22:48 venue11pro kernel: dpm_run_callback(): acpi_subsys_suspend_late+0x0/0x16 returns -5
+Feb 28 16:22:48 venue11pro kernel: PM: Device mmc1:0001:1 failed to suspend late: error -5
+Feb 28 16:22:48 venue11pro kernel: PM: early resume of devices complete after 27.667 msecs
+Feb 28 16:22:48 venue11pro kernel: PM: late suspend of devices failed
+Feb 28 16:22:48 venue11pro kernel: i2c_hid i2c-SMO91D0:00: failed to change power setting.
+Feb 28 16:22:48 venue11pro kernel: dpm_run_callback(): i2c_hid_resume+0x0/0x60 returns -121
+Feb 28 16:22:48 venue11pro kernel: PM: Device i2c-SMO91D0:00 failed to resume: error -121
+Feb 28 16:22:48 venue11pro kernel: rtc_cmos 00:00: System wakeup disabled by ACPI
+Feb 28 16:22:48 venue11pro kernel: mei_txe 0000:00:1a.0: NFC MEI VERSION: IVN 0x1 Vendor ID 0x1 Type 0x1
+Feb 28 16:22:48 venue11pro kernel: Probing NFC pn544
+Feb 28 16:22:48 venue11pro kernel: sdio_read_cis: 1 callbacks suppressed
+Feb 28 16:22:48 venue11pro kernel: mmc1: queuing unknown CIS tuple 0x01 (3 bytes)
+Feb 28 16:22:48 venue11pro kernel: mmc1: queuing unknown CIS tuple 0x1a (5 bytes)
+Feb 28 16:22:48 venue11pro kernel: mmc1: queuing unknown CIS tuple 0x1b (8 bytes)
+Feb 28 16:22:48 venue11pro kernel: mmc1: queuing unknown CIS tuple 0x14 (0 bytes)
+Feb 28 16:22:48 venue11pro kernel: PM: resume of devices complete after 2284.451 msecs
+Feb 28 16:22:48 venue11pro kernel: Restarting tasks ... 
+Feb 28 16:22:48 venue11pro kernel: i2c_hid i2c-SMO91D0:00: failed to change power setting.
+Feb 28 16:22:48 venue11pro kernel: done.
+Feb 28 16:22:48 venue11pro systemd[1]: systemd-suspend.service: main process exited, code=exited, status=1/FAILURE
+Feb 28 16:22:48 venue11pro systemd[1]: Failed to start Suspend.
+Feb 28 16:22:48 venue11pro systemd[1]: Dependency failed for Suspend.
+Feb 28 16:22:48 venue11pro systemd-logind[216]: Operation finished.
+Feb 28 16:22:48 venue11pro systemd[1]: Job suspend.target/start failed with result 'dependency'.
+Feb 28 16:22:48 venue11pro systemd[1]: Unit sleep.target is not needed anymore. Stopping.
+Feb 28 16:22:48 venue11pro systemd[1]: Unit systemd-suspend.service entered failed state.
+Feb 28 16:22:48 venue11pro systemd[1]: systemd-suspend.service failed.
+Feb 28 16:22:48 venue11pro systemd[1]: Stopped target Sleep.
+Feb 28 16:22:48 venue11pro systemd[1]: Stopping Sleep.

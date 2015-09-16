@@ -1,0 +1,40 @@
+Feb 27 23:01:23 venue11pro kernel: ------------[ cut here ]------------
+Feb 27 23:01:23 venue11pro kernel: WARNING: CPU: 0 PID: 0 at drivers/mmc/host/sdhci.c:1013 sdhci_send_command+0x57f/0xb50()
+Feb 27 23:01:23 venue11pro kernel: Modules linked in: uas usb_storage
+Feb 27 23:01:23 venue11pro kernel: CPU: 0 PID: 0 Comm: swapper/0 Tainted: G        W      3.19.0+ #37
+Feb 27 23:01:23 venue11pro kernel: Hardware name: Dell Inc. Venue 11 Pro 5130/05FF9P, BIOS A10 12/03/2014
+Feb 27 23:01:23 venue11pro kernel:  00000000 c19360d4 00000000 c107ce38 c1d230d8 00000000 00000000 c1dad231
+Feb 27 23:01:23 venue11pro kernel:  000003f5 c160ea9f c160ea9f 000003f5 f5a61b40 c24ad1a8 00000000 c24ad1dc
+Feb 27 23:01:23 venue11pro kernel:  c107cf0b 00000009 00000000 c160ea9f c2413f3a 00200082 00000064 00000004
+Feb 27 23:01:23 venue11pro kernel: Call Trace:
+Feb 27 23:01:23 venue11pro kernel:  [<c19360d4>] ? dump_stack+0x3e/0x4e
+Feb 27 23:01:23 venue11pro kernel:  [<c107ce38>] ? warn_slowpath_common+0x88/0xc0
+Feb 27 23:01:23 venue11pro kernel:  [<c160ea9f>] ? sdhci_send_command+0x57f/0xb50
+Feb 27 23:01:23 venue11pro kernel:  [<c160ea9f>] ? sdhci_send_command+0x57f/0xb50
+Feb 27 23:01:23 venue11pro kernel:  [<c107cf0b>] ? warn_slowpath_null+0x1b/0x20
+Feb 27 23:01:23 venue11pro kernel:  [<c160ea9f>] ? sdhci_send_command+0x57f/0xb50
+Feb 27 23:01:23 venue11pro kernel:  [<c133ee78>] ? __const_udelay+0x18/0x20
+Feb 27 23:01:23 venue11pro kernel:  [<c160dd1f>] ? sdhci_reset+0x4f/0xc0
+Feb 27 23:01:23 venue11pro kernel:  [<c10ac4f5>] ? autoremove_wake_function+0x15/0x40
+Feb 27 23:01:23 venue11pro kernel:  [<c160f150>] ? sdhci_finish_data+0xe0/0x2c0
+Feb 27 23:01:23 venue11pro kernel:  [<c10ac180>] ? __wake_up+0x30/0x50
+Feb 27 23:01:23 venue11pro kernel:  [<c16116de>] ? sdhci_irq+0x37e/0x740
+Feb 27 23:01:23 venue11pro kernel:  [<c10bbff7>] ? handle_irq_event_percpu+0x57/0x110
+Feb 27 23:01:23 venue11pro kernel:  [<c10bc02f>] ? handle_irq_event_percpu+0x8f/0x110
+Feb 27 23:01:23 venue11pro kernel:  [<c10bc0d2>] ? handle_irq_event+0x22/0x40
+Feb 27 23:01:23 venue11pro kernel:  [<c10be470>] ? handle_simple_irq+0x60/0x60
+Feb 27 23:01:23 venue11pro kernel:  [<c10be4d1>] ? handle_fasteoi_irq+0x61/0x100
+Feb 27 23:01:23 venue11pro kernel:  [<c103d965>] ? handle_irq+0x65/0x80
+Feb 27 23:01:23 venue11pro kernel:  <IRQ>  [<c103d2f1>] ? do_IRQ+0x31/0xc0
+Feb 27 23:01:23 venue11pro kernel:  [<c193e9f3>] ? common_interrupt+0x33/0x38
+Feb 27 23:01:23 venue11pro kernel:  [<c15f7e33>] ? cpuidle_enter_state+0x33/0xb0
+Feb 27 23:01:23 venue11pro kernel:  [<c10aca15>] ? cpu_startup_entry+0x235/0x2d0
+Feb 27 23:01:23 venue11pro kernel:  [<c1eb2a0f>] ? start_kernel+0x344/0x34a
+Feb 27 23:01:23 venue11pro kernel: ---[ end trace b5df88be6f27c46d ]---
+Feb 27 23:01:23 venue11pro kernel: mmcblk0: error -110 sending stop command, original cmd response 0x0, card status 0x400900
+Feb 27 23:01:23 venue11pro kernel: mmcblk0: error -84 transferring data, sector 39475336, nr 8, cmd response 0x0, card status 0x0
+Feb 27 23:01:23 venue11pro kernel: blk_update_request: 1 callbacks suppressed
+Feb 27 23:01:23 venue11pro kernel: blk_update_request: I/O error, dev mmcblk0, sector 39475336
+Feb 27 23:01:23 venue11pro kernel: EXT4-fs warning (device mmcblk0p2): ext4_end_bio:317: I/O error -5 writing to inode 1181666 (offset 0 size 0 starting block 4934418)
+Feb 27 23:01:23 venue11pro kernel: Buffer I/O error on device mmcblk0p2, logical block 4806161
+

@@ -1,0 +1,409 @@
+diff --git a/Documentation/DocBook/drm.tmpl b/Documentation/DocBook/drm.tmpl
+index 56e2a9b..9db989c 100644
+--- a/Documentation/DocBook/drm.tmpl
++++ b/Documentation/DocBook/drm.tmpl
+@@ -3867,6 +3867,11 @@ int num_ioctls;</synopsis>
+ !Fdrivers/gpu/drm/i915/i915_irq.c intel_runtime_pm_disable_interrupts
+ !Fdrivers/gpu/drm/i915/i915_irq.c intel_runtime_pm_enable_interrupts
+       </sect2>
++      <sect2>
++        <title>VED video core integration</title>
++!Pdrivers/gpu/drm/i915/i915_ved.c VED video core integration
++!Idrivers/gpu/drm/i915/i915_ved.c
++      </sect2>
+     </sect1>
+     <sect1>
+       <title>Display Hardware Handling</title>
+diff --git a/drivers/gpu/drm/i915/Makefile b/drivers/gpu/drm/i915/Makefile
+index e4083e4..7d0bbfa 100644
+--- a/drivers/gpu/drm/i915/Makefile
++++ b/drivers/gpu/drm/i915/Makefile
+@@ -84,6 +84,9 @@ i915-y += dvo_ch7017.o \
+ i915-y += i915_dma.o \
+ 	  i915_ums.o
+ 
++# VED for VLV
++i915-y += i915_ved.o
++
+ obj-$(CONFIG_DRM_I915)  += i915.o
+ 
+ CFLAGS_i915_trace_points.o := -I$(src)
+diff --git a/drivers/gpu/drm/i915/i915_dma.c b/drivers/gpu/drm/i915/i915_dma.c
+index 887d88f..cd96618 100644
+--- a/drivers/gpu/drm/i915/i915_dma.c
++++ b/drivers/gpu/drm/i915/i915_dma.c
+@@ -828,6 +828,13 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
+ 	if (IS_GEN5(dev))
+ 		intel_gpu_ips_init(dev_priv);
+ 
++	if (HAS_VED(dev)) {
++		ret = vlv_setup_ved(dev);
++		if (ret < 0) {
++			DRM_ERROR("failed to setup VED bridge: %d\n", ret);
++		}
++	}
++
+ 	intel_runtime_pm_enable(dev_priv);
+ 
+ 	return 0;
+@@ -870,6 +877,10 @@ int i915_driver_unload(struct drm_device *dev)
+ 	struct drm_i915_private *dev_priv = dev->dev_private;
+ 	int ret;
+ 
++	if (HAS_VED(dev)) {
++		vlv_teardown_ved(dev);
++	}
++
+ 	ret = i915_gem_suspend(dev);
+ 	if (ret) {
+ 		DRM_ERROR("failed to idle hardware: %d\n", ret);
+diff --git a/drivers/gpu/drm/i915/i915_drv.h b/drivers/gpu/drm/i915/i915_drv.h
+index 502a01b..aa39d47 100644
+--- a/drivers/gpu/drm/i915/i915_drv.h
++++ b/drivers/gpu/drm/i915/i915_drv.h
+@@ -1773,6 +1773,12 @@ struct drm_i915_private {
+ 
+ 	uint32_t bios_vgacntr;
+ 
++	/* necessary resource sharing with ved driver. */
++	struct {
++		struct platform_device *platdev;
++		int	irq;
++	} ved;
++
+ 	/* Abstract the submission mechanism (legacy ringbuffer or execlists) away */
+ 	struct {
+ 		int (*do_execbuf)(struct drm_device *dev, struct drm_file *file,
+@@ -2305,6 +2311,7 @@ struct drm_i915_cmd_table {
+ 				 IS_BROADWELL(dev) || IS_VALLEYVIEW(dev))
+ #define HAS_RC6(dev)		(INTEL_INFO(dev)->gen >= 6)
+ #define HAS_RC6p(dev)		(INTEL_INFO(dev)->gen == 6 || IS_IVYBRIDGE(dev))
++#define HAS_VED(dev)		(INTEL_INFO(dev)->is_valleyview && IS_GEN7(dev))
+ 
+ #define INTEL_PCH_DEVICE_ID_MASK		0xff00
+ #define INTEL_PCH_IBX_DEVICE_ID_TYPE		0x3b00
+@@ -2894,6 +2901,11 @@ void i915_restore_display_reg(struct drm_device *dev);
+ void i915_setup_sysfs(struct drm_device *dev_priv);
+ void i915_teardown_sysfs(struct drm_device *dev_priv);
+ 
++/* i915_ved.c */
++int vlv_setup_ved(struct drm_device *dev);
++void vlv_teardown_ved(struct drm_device *dev);
++void vlv_ved_irq_handler(struct drm_device *dev);
++
+ /* intel_i2c.c */
+ extern int intel_setup_gmbus(struct drm_device *dev);
+ extern void intel_teardown_gmbus(struct drm_device *dev);
+diff --git a/drivers/gpu/drm/i915/i915_irq.c b/drivers/gpu/drm/i915/i915_irq.c
+index 7913a72..9837a71 100644
+--- a/drivers/gpu/drm/i915/i915_irq.c
++++ b/drivers/gpu/drm/i915/i915_irq.c
+@@ -1892,6 +1892,8 @@ static irqreturn_t valleyview_irq_handler(int irq, void *arg)
+ 			snb_gt_irq_handler(dev, dev_priv, gt_iir);
+ 		if (pm_iir)
+ 			gen6_rps_irq_handler(dev_priv, pm_iir);
++		if (iir & VLV_VED_BLOCK_INTERRUPT)
++			vlv_ved_irq_handler(dev);
+ 		/* Call regardless, as some status bits might not be
+ 		 * signalled in iir */
+ 		valleyview_pipestat_irq_handler(dev, iir);
+diff --git a/drivers/gpu/drm/i915/i915_reg.h b/drivers/gpu/drm/i915/i915_reg.h
+index 869e5ae..79d8764 100644
+--- a/drivers/gpu/drm/i915/i915_reg.h
++++ b/drivers/gpu/drm/i915/i915_reg.h
+@@ -1301,6 +1301,9 @@ enum punit_power_well {
+ #define VLV_DISPLAY_BASE 0x180000
+ #define VLV_MIPI_BASE VLV_DISPLAY_BASE
+ 
++#define VLV_VED_BASE 0x170000
++#define VLV_VED_SIZE 0x010000
++
+ #define VLV_GU_CTL0	(VLV_DISPLAY_BASE + 0x2030)
+ #define VLV_GU_CTL1	(VLV_DISPLAY_BASE + 0x2034)
+ #define SCPD0		0x0209c /* 915+ only */
+@@ -1494,6 +1497,7 @@ enum punit_power_well {
+ #define ILK_BSD_USER_INTERRUPT				(1<<5)
+ 
+ #define I915_PM_INTERRUPT				(1<<31)
++#define VLV_VED_BLOCK_INTERRUPT			(1<<23)
+ #define I915_ISP_INTERRUPT				(1<<22)
+ #define I915_LPE_PIPE_B_INTERRUPT			(1<<21)
+ #define I915_LPE_PIPE_A_INTERRUPT			(1<<20)
+diff --git a/drivers/gpu/drm/i915/i915_ved.c b/drivers/gpu/drm/i915/i915_ved.c
+new file mode 100644
+index 0000000..f8ea7be
+--- /dev/null
++++ b/drivers/gpu/drm/i915/i915_ved.c
+@@ -0,0 +1,270 @@
++/*
++ * Copyright © 2014 Intel Corporation
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a
++ * copy of this software and associated documentation files (the "Software"),
++ * to deal in the Software without restriction, including without limitation
++ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
++ * and/or sell copies of the Software, and to permit persons to whom the
++ * Software is furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice (including the next
++ * paragraph) shall be included in all copies or substantial portions of the
++ * Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
++ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
++ * IN THE SOFTWARE.
++ *
++ * Authors:
++ *    Yao Cheng <yao.cheng at intel.com>
++ *
++ */
++
++#include "i915_drv.h"
++
++/**
++ * DOC: VED video core integration
++ *
++ * Motivation:
++ * Some platforms (e.g. valleyview) integrates a VED inside GPU to extend the
++ * video decoding capability.
++ * The VED is driven by the standalone drm driver "ipvr" which covers PowerVR
++ * VPUs. Since the PowerVR VPUs are also integrated by non-i915 platforms such
++ * as GMA500, we'd like to keep ipvr driver and i915 driver separated and
++ * independent to each other. To achieve this we do the minimum work in i915
++ * to setup a bridge between ipvr and i915:
++ * 1. Create a platform device to share MMIO/IRQ resources
++ * 2. Make the platform device child of i915 device for runtime PM.
++ * 3. Create IRQ chip to forward the VED irqs.
++ * ipvr driver probes the VED device and creates a new dri card on install.
++ *
++ * Threats:
++ * Due to the restriction in Linux platform device model, user need manually
++ * uninstall ipvr driver before uninstalling i915 module, otherwise we might
++ * run into use-after-free issues after i915 removes the platform device: even
++ * though ipvr driver is released, the modules is still in "installed" status.
++ *
++ * Implementation:
++ * The MMIO/REG platform resources are created according to the registers
++ * specification.
++ * When forwarding VED irqs, the flow control handler selection depends on the
++ * platform, for example on valleyview handle_simple_irq is enough.
++ *
++ */
++
++static struct platform_device* vlv_ved_platdev_create(struct drm_device *dev)
++{
++	int ret;
++	struct resource rsc[2] = { {0}, {0} };
++	struct platform_device *platdev;
++	u64 *dma_mask = NULL;
++	struct drm_i915_private *dev_priv = dev->dev_private;
++
++	if (dev_priv->ved.irq < 0)
++		return ERR_PTR(-EINVAL);
++
++	platdev = platform_device_alloc("ipvr-ved-vlv", -1);
++	if (!platdev) {
++		ret = -ENOMEM;
++		DRM_ERROR("Failed to allocate VED platform device\n");
++		goto err;
++	}
++
++	/* to work-around check_addr in nommu_map_sg() */
++	dma_mask = kmalloc(sizeof(*platdev->dev.dma_mask), GFP_KERNEL);
++	if (!dma_mask) {
++		ret = -ENOMEM;
++		DRM_ERROR("Failed to allocate dma_mask\n");
++		goto err_put_dev;
++	}
++	*dma_mask = DMA_BIT_MASK(31);
++	platdev->dev.dma_mask = dma_mask;
++	platdev->dev.coherent_dma_mask = *dma_mask;
++
++	rsc[0].start    = rsc[0].end = dev_priv->ved.irq;
++	rsc[0].flags    = IORESOURCE_IRQ;
++	rsc[0].name     = "ipvr-ved-vlv-irq";
++
++	rsc[1].start    = pci_resource_start(dev->pdev, 0) + VLV_VED_BASE;
++	rsc[1].end      = pci_resource_start(dev->pdev, 0) + VLV_VED_BASE + VLV_VED_SIZE;
++	rsc[1].flags    = IORESOURCE_MEM;
++	rsc[1].name     = "ipvr-ved-vlv-mmio";
++
++	ret = platform_device_add_resources(platdev, rsc, 2);
++	if (ret) {
++		DRM_ERROR("Failed to add resource for VED platform device: %d\n", ret);
++		goto err_put_dev;
++	}
++
++	platdev->dev.parent = dev->dev; /* for VED driver's runtime-PM */
++	ret = platform_device_add(platdev);
++	if (ret) {
++		DRM_ERROR("Failed to add VED platform device: %d\n", ret);
++		goto err_put_dev;
++	}
++
++	return platdev;
++err_put_dev:
++	platform_device_put(platdev);
++err:
++	if (dma_mask)
++		kfree(dma_mask);
++	return ERR_PTR(ret);
++}
++
++static void vlv_ved_platdev_destroy(struct drm_device *dev)
++{
++	struct drm_i915_private *dev_priv = dev->dev_private;
++	if (dev_priv->ved.platdev) {
++		kfree(dev_priv->ved.platdev->dev.dma_mask);
++		platform_device_unregister(dev_priv->ved.platdev);
++	}
++}
++
++static void vlv_ved_irq_unmask(struct irq_data *d)
++{
++	struct drm_device *dev = d->chip_data;
++	struct drm_i915_private *dev_priv = (struct drm_i915_private *) dev->dev_private;
++	unsigned long irqflags;
++	spin_lock_irqsave(&dev_priv->irq_lock, irqflags);
++
++	dev_priv->irq_mask &= ~VLV_VED_BLOCK_INTERRUPT;
++	I915_WRITE(VLV_IIR, VLV_VED_BLOCK_INTERRUPT);
++	I915_WRITE(VLV_IIR, VLV_VED_BLOCK_INTERRUPT);
++	I915_WRITE(VLV_IMR, dev_priv->irq_mask);
++	I915_WRITE(VLV_IER, ~dev_priv->irq_mask);
++	POSTING_READ(VLV_IER);
++
++	spin_unlock_irqrestore(&dev_priv->irq_lock, irqflags);
++}
++
++static void vlv_ved_irq_mask(struct irq_data *d)
++{
++	struct drm_device *dev = d->chip_data;
++	struct drm_i915_private *dev_priv = (struct drm_i915_private *) dev->dev_private;
++	unsigned long irqflags;
++	spin_lock_irqsave(&dev_priv->irq_lock, irqflags);
++
++	dev_priv->irq_mask |= VLV_VED_BLOCK_INTERRUPT;
++	I915_WRITE(VLV_IER, ~dev_priv->irq_mask);
++	I915_WRITE(VLV_IMR, dev_priv->irq_mask);
++	I915_WRITE(VLV_IIR, VLV_VED_BLOCK_INTERRUPT);
++	I915_WRITE(VLV_IIR, VLV_VED_BLOCK_INTERRUPT);
++	POSTING_READ(VLV_IIR);
++
++	spin_unlock_irqrestore(&dev_priv->irq_lock, irqflags);
++}
++
++static struct irq_chip vlv_ved_irqchip = {
++	.name = "ipvr_ved_irqchip",
++	.irq_mask = vlv_ved_irq_mask,
++	.irq_unmask = vlv_ved_irq_unmask,
++};
++
++static int vlv_ved_irq_init(struct drm_device *dev, int irq)
++{
++	struct drm_i915_private *dev_priv = (struct drm_i915_private *) dev->dev_private;
++	WARN_ON(!intel_irqs_enabled(dev_priv));
++	irq_set_chip_and_handler_name(irq,
++		&vlv_ved_irqchip,
++		handle_simple_irq,
++		"ipvr_ved_vlv_irq_handler");
++	return irq_set_chip_data(irq, dev);
++}
++
++/**
++ * vlv_ved_irq_handler() - forwards the VED irq
++ * @dev: the i915 drm device
++ *
++ * the VED irq is forwarded to the irq handler registered by VED driver.
++ */
++void vlv_ved_irq_handler(struct drm_device *dev)
++{
++	int ret;
++	struct drm_i915_private *dev_priv = dev->dev_private;
++	if (dev_priv->ved.irq < 0 && printk_ratelimit()) {
++		DRM_ERROR("invalid ved irq number: %d\n", dev_priv->ved.irq);
++		return;
++	}
++	ret = generic_handle_irq(dev_priv->ved.irq);
++	if (ret && printk_ratelimit()) {
++		DRM_ERROR("error handling vlv ved irq: %d\n", ret);
++	}
++}
++
++/**
++ * vlv_setup_ved() - setup the bridge between VED driver and i915
++ * @dev: the i915 drm device
++ *
++ * set up the minimum required resources for the bridge: irq chip, platform
++ * resource and platform device. i915 device is set as parent of the new
++ * platform device.
++ *
++ * Return: 0 if successful. non-zero if allocation/initialization fails
++ */
++int vlv_setup_ved(struct drm_device *dev)
++{
++	int ret;
++	struct drm_i915_private *dev_priv = dev->dev_private;
++
++	dev_priv->ved.irq = irq_alloc_descs(-1, 0, 1, 0);
++	if (dev_priv->ved.irq < 0) {
++		DRM_ERROR("Failed to allocate IRQ desc: %d\n", dev_priv->ved.irq);
++		ret = dev_priv->ved.irq;
++		goto err;
++	}
++
++	ret = vlv_ved_irq_init(dev, dev_priv->ved.irq);
++	if (ret) {
++		DRM_ERROR("Failed to initialize irqchip for vlv-ved: %d\n", ret);
++		goto err_free_irq;
++	}
++
++	dev_priv->ved.platdev = vlv_ved_platdev_create(dev);
++	if (IS_ERR(dev_priv->ved.platdev)) {
++		ret = PTR_ERR(dev_priv->ved.platdev);
++		DRM_ERROR("Failed to create platform device for vlv-ved: %d\n", ret);
++		goto err_free_irq;
++	}
++
++	return 0;
++err_free_irq:
++	irq_free_desc(dev_priv->ved.irq);
++err:
++	dev_priv->ved.irq = -1;
++	dev_priv->ved.platdev = NULL;
++	return ret;
++}
++
++/**
++ * vlv_teardown_ved() - destroy the bridge between VED driver and i915
++ * @dev: the i915 drm device
++ *
++ * release all the resources for VED <-> i915 bridge.
++ */
++void vlv_teardown_ved(struct drm_device *dev)
++{
++	struct drm_i915_private *dev_priv = dev->dev_private;
++	unsigned long irqflags;
++
++	/**
++	 * mask VED irq before destroying
++	 */
++	spin_lock_irqsave(&dev_priv->irq_lock, irqflags);
++	dev_priv->irq_mask |= VLV_VED_BLOCK_INTERRUPT;
++	I915_WRITE(VLV_IER, ~dev_priv->irq_mask);
++	I915_WRITE(VLV_IMR, dev_priv->irq_mask);
++	I915_WRITE(VLV_IIR, VLV_VED_BLOCK_INTERRUPT);
++	I915_WRITE(VLV_IIR, VLV_VED_BLOCK_INTERRUPT);
++	POSTING_READ(VLV_IIR);
++	spin_unlock_irqrestore(&dev_priv->irq_lock, irqflags);
++
++	vlv_ved_platdev_destroy(dev);
++	if (dev_priv->ved.irq >= 0)
++		irq_free_desc(dev_priv->ved.irq);
++}
+-- 
+2.1.0

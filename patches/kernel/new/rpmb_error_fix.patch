@@ -1,0 +1,25 @@
+From 0f5081c323c52ac842b01fd79df3b3c251f7aca9 Mon Sep 17 00:00:00 2001
+From: Nell Hardcastle <nell@dev-nell.com>
+Date: Thu, 29 May 2014 22:06:50 -0700
+Subject: [PATCH] eMMC: Don't initialize partitions on RPMB flagged areas.
+
+Prevents a lot of pointless hanging at boot on some devices.
+---
+ drivers/mmc/card/block.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 452782b..dd85dcf 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2255,7 +2255,7 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
+       return 0;
+
+    for (idx = 0; idx < card->nr_parts; idx++) {
+-       if (card->part[idx].size) {
++       if (card->part[idx].size && !(card->part[idx].area_type & MMC_BLK_DATA_AREA_RPMB)) {
+                    ret = mmc_blk_alloc_part(card, md,
+                                       card->part[idx].part_cfg,
+                                            card->part[idx].size >> 9,
+-- 
+1.9.1
