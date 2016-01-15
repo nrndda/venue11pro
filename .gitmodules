@@ -10,3 +10,6 @@
 [submodule "linux-asus-t100ta"]
 	path = linux-asus-t100ta
 	url = https://github.com/jfwells/linux-asus-t100ta.git
+[submodule "bluetooth/rtl8723bs_bt"]
+	path = bluetooth/rtl8723bs_bt
+	url = https://github.com/lwfinger/rtl8723bs_bt.git
