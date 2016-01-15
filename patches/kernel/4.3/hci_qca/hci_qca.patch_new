@@ -1,0 +1,214 @@
+diff --git a/drivers/bluetooth/hci_qca.c b/drivers/bluetooth/hci_qca.c
+index 6b9b912..dc6f1e6 100644
+--- a/drivers/bluetooth/hci_qca.c
++++ b/drivers/bluetooth/hci_qca.c
+@@ -30,6 +30,13 @@
+ 
+ #include <linux/kernel.h>
+ #include <linux/debugfs.h>
++#include <linux/module.h>
++#include <linux/wait.h>
++#include <linux/tty.h>
++#include <linux/platform_device.h>
++#include <linux/clk.h>
++#include <linux/gpio/consumer.h>
++#include <linux/acpi.h>
+ 
+ #include <net/bluetooth/bluetooth.h>
+ #include <net/bluetooth/hci_core.h>
+@@ -72,6 +79,24 @@ enum hci_ibs_clock_state_vote {
+ 	HCI_IBS_RX_VOTE_CLOCK_OFF,
+ };
+ 
++struct qca_device {
++	struct list_head list;
++
++	struct platform_device *pdev;
++
++	const char		*name;
++	struct gpio_desc	*device_wakeup;
++	struct gpio_desc	*shutdown;
++
++	struct clk		*clk;
++	bool			clk_enabled;
++
++	u32			init_speed;
++};
++
++static LIST_HEAD(qca_device_list);
++static DEFINE_SPINLOCK(qca_device_list_lock);
++
+ struct qca_data {
+ 	struct hci_uart *hu;
+ 	struct sk_buff *rx_skb;
+@@ -958,12 +983,170 @@ static struct hci_uart_proto qca_proto = {
+ 	.dequeue	= qca_dequeue,
+ };
+ 
++static const struct acpi_gpio_params device_wakeup_gpios = { 0, 0, false };
++static const struct acpi_gpio_params shutdown_gpios = { 1, 0, false };
++
++static const struct acpi_gpio_mapping acpi_qca_default_gpios[] = {
++	{ "device-wakeup-gpios", &device_wakeup_gpios, 1 },
++	{ "shutdown-gpios", &shutdown_gpios, 1 },
++	{ },
++};
++
++#ifdef CONFIG_ACPI
++static const struct acpi_device_id qca_acpi_match[] = {
++	{ "DLAC3002", 0 },
++	{ },
++};
++MODULE_DEVICE_TABLE(acpi, qca_acpi_match);
++
++static int qca_resource(struct acpi_resource *ares, void *data)
++{
++	struct qca_device *dev = data;
++
++	if (ares->type == ACPI_RESOURCE_TYPE_SERIAL_BUS) {
++		struct acpi_resource_uart_serialbus *sb;
++
++		sb = &ares->data.uart_serial_bus;
++		if (sb->type == ACPI_RESOURCE_SERIAL_TYPE_UART)
++			dev->init_speed = sb->default_baud_rate;
++	}
++
++	/* Always tell the ACPI core to skip this resource */
++	return 1;
++}
++
++static int qca_acpi_probe(struct qca_device *dev)
++{
++	struct platform_device *pdev = dev->pdev;
++	const struct acpi_device_id *id;
++	struct acpi_device *adev;
++	LIST_HEAD(resources);
++	int err;
++
++	id = acpi_match_device(qca_acpi_match, &dev->pdev->dev);
++	if (!id)
++		return -ENODEV;
++
++        /* Retrieve GPIO data */
++	dev->name = dev_name(&pdev->dev);
++	err = acpi_dev_add_driver_gpios(ACPI_COMPANION(&pdev->dev),
++					acpi_qca_default_gpios);
++	if (err)
++		return err;
++
++        dev->clk = devm_clk_get(&pdev->dev, NULL);
++
++        dev->device_wakeup = devm_gpiod_get_optional(&pdev->dev,
++						     "device-wakeup",
++						     GPIOD_OUT_LOW);
++	if (IS_ERR(dev->device_wakeup))
++		return PTR_ERR(dev->device_wakeup);
++
++	dev->shutdown = devm_gpiod_get_optional(&pdev->dev, "shutdown",
++						GPIOD_OUT_LOW);
++	if (IS_ERR(dev->shutdown))
++		return PTR_ERR(dev->shutdown);
++
++	/* Make sure at-least one of the GPIO is defined and that
++	 * a name is specified for this instance
++	 */
++	if ((!dev->device_wakeup && !dev->shutdown) || !dev->name) {
++		dev_err(&pdev->dev, "invalid platform data\n");
++		return -EINVAL;
++	}
++
++	/* Retrieve UART ACPI info */
++	adev = ACPI_COMPANION(&dev->pdev->dev);
++	if (!adev)
++		return 0;
++
++	acpi_dev_get_resources(adev, &resources, qca_resource, dev);
++
++        dev_info(dev->name,&pdev->dev,dev->clk,dev->init_speed,dev->device_wakeup,dev->shutdown);
++
++	return 0;
++}
++#else
++static int qca_acpi_probe(struct qca_device *dev)
++{
++	return -ENODEV;
++}
++#endif
++
++static int qca_probe(struct platform_device *pdev)
++{
++	struct qca_device *dev;
++        struct acpi_device_id *pdata = pdev->dev.platform_data;
++        int err;
++
++	dev = devm_kzalloc(&pdev->dev, sizeof(*dev), GFP_KERNEL);
++	if (!dev)
++		return -ENOMEM;
++
++	dev->pdev = pdev;
++
++	if (ACPI_HANDLE(&pdev->dev)) {
++		err = qca_acpi_probe(dev);
++		if (err)
++			return err;
++	} else if (pdata) {
++		dev->name = pdata->id;
++	} else {
++		return -ENODEV;
++	}
++
++	platform_set_drvdata(pdev, dev);
++
++	dev_info("%s device registered.\n", dev->name);
++
++	/* Place this instance on the device list */
++	spin_lock(&qca_device_list_lock);
++	list_add_tail(&dev->list, &qca_device_list);
++	spin_unlock(&qca_device_list_lock);
++
++	gpiod_set_value(dev->shutdown, true);
++	gpiod_set_value(dev->device_wakeup, true);
++
++	return 0;
++}
++
++static int qca_remove(struct platform_device *pdev)
++{
++	struct qca_device *dev = platform_get_drvdata(pdev);
++
++	spin_lock(&qca_device_list_lock);
++	list_del(&dev->list);
++	spin_unlock(&qca_device_list_lock);
++
++	gpiod_set_value(dev->shutdown, false);
++	gpiod_set_value(dev->device_wakeup, false);
++
++        acpi_dev_remove_driver_gpios(ACPI_COMPANION(&pdev->dev));
++
++	dev_info(&pdev->dev, "unregistered.\n");
++
++	return 0;
++}
++
++static struct platform_driver qca_driver = {
++	.probe = qca_probe,
++	.remove = qca_remove,
++	.driver = {
++		.name = "hci_qca",
++		.acpi_match_table = ACPI_PTR(qca_acpi_match),
++	},
++};
++
+ int __init qca_init(void)
+ {
++	platform_driver_register(&qca_driver);
++
+ 	return hci_uart_register_proto(&qca_proto);
+ }
+ 
+ int __exit qca_deinit(void)
+ {
++	platform_driver_unregister(&qca_driver);
++
+ 	return hci_uart_unregister_proto(&qca_proto);
+ }
