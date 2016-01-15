@@ -1,0 +1,12 @@
+[submodule "baytrail-m"]
+	path = baytrail-m
+	url = https://github.com/AdamWill/baytrail-m
+[submodule "kernel_gcc_patch"]
+	path = kernel_gcc_patch
+	url = https://github.com/graysky2/kernel_gcc_patch.git
+[submodule "patches/kernel/kernel_gcc_patch"]
+	path = patches/kernel/kernel_gcc_patch
+	url = https://github.com/graysky2/kernel_gcc_patch.git
+[submodule "linux-asus-t100ta"]
+	path = linux-asus-t100ta
+	url = https://github.com/jfwells/linux-asus-t100ta.git
