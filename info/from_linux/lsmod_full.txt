@@ -1,0 +1,133 @@
+Module                  Size  Used by
+hid_generic              849  0
+sd_mod                 26183  0
+input_leds              2318  0
+hid_logitech_hidpp      9453  0
+hid_logitech_dj         9437  0
+uas                    11611  0
+usb_storage            40024  1 uas
+usbhid                 33087  0
+scsi_mod               86575  3 uas,usb_storage,sd_mod
+cdc_ether               3781  0
+r8152                  33937  0
+tun                    16142  2
+cdc_mbim                4401  0
+cdc_ncm                13617  1 cdc_mbim
+cdc_wdm                 8119  1 cdc_mbim
+usbnet                 17068  3 cdc_mbim,cdc_ncm,cdc_ether
+mii                     3507  2 r8152,usbnet
+qcserial                4452  0
+usb_wwan                5243  1 qcserial
+usbserial              18785  2 qcserial,usb_wwan
+af_packet              27569  6
+bnep                    8587  2
+bluetooth             300927  5 bnep
+joydev                  7695  0
+hid_sensor_magn_3d      3699  0
+hid_sensor_gyro_3d      2995  0
+hid_sensor_als          2647  0
+hid_sensor_incl_3d      3059  0
+mousedev                8588  0
+hid_sensor_rotation     2419  0
+hid_sensor_accel_3d     3002  0
+hid_sensor_trigger      2030  12 hid_sensor_gyro_3d,hid_sensor_incl_3d,hid_sensor_accel_3d,hid_sensor_rotation,hid_sensor_als,hid_sensor_magn_3d
+industrialio_triggered_buffer      937  6 hid_sensor_gyro_3d,hid_sensor_incl_3d,hid_sensor_accel_3d,hid_sensor_rotation,hid_sensor_als,hid_sensor_magn_3d
+kfifo_buf               1991  1 industrialio_triggered_buffer
+industrialio           34090  9 hid_sensor_trigger,hid_sensor_gyro_3d,industrialio_triggered_buffer,hid_sensor_incl_3d,hid_sensor_accel_3d,hid_sensor_rotation,hid_sensor_als,kfifo_buf,hid_sensor_magn_3d
+hid_sensor_iio_common     4025  7 hid_sensor_trigger,hid_sensor_gyro_3d,hid_sensor_incl_3d,hid_sensor_accel_3d,hid_sensor_rotation,hid_sensor_als,hid_sensor_magn_3d
+hid_sensor_custom       8029  0
+pn544_mei               1355  0
+mei_phy                 2910  1 pn544_mei
+pn544                   6527  1 pn544_mei
+hci                    18886  2 pn544,mei_phy
+nfc                    50911  2 hci,pn544
+hid_multitouch          8465  0
+zram                   17645  4
+snd_soc_sst_baytrail_pcm    11293  2
+hid_sensor_hub          6684  9 hid_sensor_trigger,hid_sensor_gyro_3d,hid_sensor_incl_3d,hid_sensor_accel_3d,hid_sensor_rotation,hid_sensor_custom,hid_sensor_als,hid_sensor_magn_3d,hid_sensor_iio_common
+dell_wmi                1994  0
+iTCO_wdt                4808  0
+lz4_decompress          2081  1 zram
+snd_soc_sst_ipc         3278  1 snd_soc_sst_baytrail_pcm
+iTCO_vendor_support     1517  1 iTCO_wdt
+sparse_keymap           2682  1 dell_wmi
+gpio_keys               6917  0
+lz4_compress            2798  1 zram
+snd_soc_sst_dsp        15993  1 snd_soc_sst_baytrail_pcm
+snd_soc_sst_byt_rt5640_mach     4256  3
+intel_rapl              9073  0
+intel_soc_dts_thermal      833  0
+intel_powerclamp        6309  0
+coretemp                4712  0
+kvm_intel             140905  0
+kvm                   280370  1 kvm_intel
+ath6kl_sdio             9664  0
+ath6kl_core           137288  1 ath6kl_sdio
+serio                   8192  0
+led_class               3325  1 input_leds
+cfg80211              185760  1 ath6kl_core
+8250_dw                 5243  0
+dcdbas                  4483  0
+crc32c_intel            1552  0
+aesni_intel             9327  0
+xts                     2407  1 aesni_intel
+aes_i586                7047  1 aesni_intel
+lrw                     3045  1 aesni_intel
+gf128mul                5474  2 lrw,xts
+rfkill                 12246  6 nfc,cfg80211,bluetooth
+ablk_helper             1500  1 aesni_intel
+cryptd                  6638  1 ablk_helper
+pcspkr                  1459  0
+xhci_pci                3538  0
+xhci_hcd               93637  1 xhci_pci
+usbcore               141475  14 uas,r8152,qcserial,usb_storage,usbserial,usbhid,usbnet,cdc_mbim,usb_wwan,cdc_ncm,cdc_wdm,xhci_hcd,xhci_pci,cdc_ether
+mei_txe                 8985  0
+mei                    45992  4 pn544_mei,mei_phy,mei_txe
+lpc_ich                12520  0
+usb_common              2428  1 usbcore
+snd_intel_sst_acpi      3704  0
+snd_intel_sst_core     42530  1 snd_intel_sst_acpi
+snd_soc_sst_mfld_platform    45748  1 snd_intel_sst_core
+snd_soc_rt5640         60041  2 snd_soc_sst_byt_rt5640_mach
+wmi                     6630  1 dell_wmi
+snd_soc_rl6231          1693  1 snd_soc_rt5640
+snd_soc_core          105947  4 snd_soc_rt5640,snd_soc_sst_baytrail_pcm,snd_soc_sst_byt_rt5640_mach,snd_soc_sst_mfld_platform
+evdev                   8474  15
+i2c_hid                10999  0
+hid                    81039  7 i2c_hid,hid_multitouch,hid_generic,hid_sensor_hub,usbhid,hid_logitech_dj,hid_logitech_hidpp
+tpm_crb                 3204  0
+dw_dmac                 3034  0
+tpm                    22952  1 tpm_crb
+dw_dmac_core           12521  2 dw_dmac,snd_soc_sst_dsp
+soc_button_array        1690  0
+snd_compress            5971  1 snd_soc_core
+ac97_bus                1070  1 snd_soc_core
+snd_pcm_dmaengine       2630  1 snd_soc_core
+int3403_thermal         1952  0
+int3402_thermal         1160  0
+snd_pcm                61113  6 snd_soc_rt5640,snd_soc_core,snd_soc_sst_baytrail_pcm,snd_soc_sst_mfld_platform,snd_pcm_dmaengine
+snd_timer              15008  1 snd_pcm
+processor_thermal_device     4483  0
+int340x_thermal_zone     2812  3 int3402_thermal,processor_thermal_device,int3403_thermal
+intel_soc_dts_iosf      3558  2 intel_soc_dts_thermal,processor_thermal_device
+int3400_thermal         2702  0
+acpi_thermal_rel        3674  1 int3400_thermal
+snd                    44750  10 snd_soc_core,snd_timer,snd_pcm,snd_soc_sst_mfld_platform,snd_compress
+8250                   14952  1 8250_dw
+soundcore               4255  1 snd
+8250_base              19002  2 8250,8250_dw
+spi_pxa2xx_platform    13497  0
+serial_core            18299  2 8250,8250_base
+i2c_designware_platform     4847  0
+snd_soc_sst_acpi        2391  0
+pwm_lpss_platform       1007  0
+i2c_designware_core     5405  1 i2c_designware_platform
+pwm_lpss                1329  1 pwm_lpss_platform
+sch_fq_codel            7203  3
+vboxnetadp             18726  0
+vboxnetflt             17252  0
+vboxdrv               275064  2 vboxnetadp,vboxnetflt
+kdbus                  70211  155
+unix                   24330  960
+ipv6                  304104  96
+autofs4                19255  8
