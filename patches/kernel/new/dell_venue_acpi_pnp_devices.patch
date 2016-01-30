@@ -1,0 +1,25 @@
+diff --git a/drivers/acpi/acpi_pnp.c b/drivers/acpi/acpi_pnp.c
+index fb76552..53f9370 100644
+--- a/drivers/acpi/acpi_pnp.c
++++ b/drivers/acpi/acpi_pnp.c
+@@ -315,6 +315,20 @@ static const struct acpi_device_id acpi_pnp_device_ids[] = {
+ 	/* snd-opl3sa2-pnpbios */
+ 	{"YMH0021"},
+ 	{"NMX2210"},		/* Gateway Solo 2500 */
++	/* dell venue 11 pro*/
++	{"INT0800"}, /* Intel 82802 Firmware Hub Device */
++	{"INTCFD9"}, /* Intel Baytrail SOC GPIO Controller */
++	{"INT33BD"}, /* Intel Baytrail Mailbox Device */
++	{"PNP0D80"}, /* Windows-compatible System Power Management Controller */
++	{"SYNA7500"}, /* HID */
++	{"DELL1000"}, /* HID POGO Indicator */
++	{"PNP0C60"}, /* POGO Indicator */
++	{"DLAC3002"}, /* Qualcomm Atheros Bluetooth */
++	{"AUTH2750"}, /* AuthenTec AES2750 */
++	{"NXP5442"}, /* NXP 5442 Near Field Communications Controller */
++	{"80860F38"}, /* VLV2 ISP */
++	{"INTCF1A"}, /* Sony IMX175 Camera Sensor */
++	{"INT33FB"}, /* MIPI-CSI Camera Sensor OV2722 */
+ 	{""},
+ };
+ 

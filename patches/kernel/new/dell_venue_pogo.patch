@@ -1,0 +1,13 @@
+diff --git a/drivers/hid/i2c-hid/i2c-hid.c b/drivers/hid/i2c-hid/i2c-hid.c
+index 92d6cdf..ee68b44 100644
+--- a/drivers/hid/i2c-hid/i2c-hid.c
++++ b/drivers/hid/i2c-hid/i2c-hid.c
+@@ -886,6 +886,8 @@ static int i2c_hid_acpi_pdata(struct i2c_client *client,
+ static const struct acpi_device_id i2c_hid_acpi_match[] = {
+ 	{"ACPI0C50", 0 },
+ 	{"PNP0C50", 0 },
++	{"ACPI0C60", 0 },
++	{"PNP0C60", 0 },
+ 	{ },
+ };
+ MODULE_DEVICE_TABLE(acpi, i2c_hid_acpi_match);

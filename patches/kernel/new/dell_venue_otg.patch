@@ -1,0 +1,20 @@
+diff --git a/drivers/usb/dwc3/dwc3-pci.c b/drivers/usb/dwc3/dwc3-pci.c
+index 009d830..a1931ec 100644
+--- a/drivers/usb/dwc3/dwc3-pci.c
++++ b/drivers/usb/dwc3/dwc3-pci.c
+@@ -30,6 +30,7 @@
+ #define PCI_DEVICE_ID_SYNOPSYS_HAPSUSB3_AXI	0xabce
+ #define PCI_DEVICE_ID_SYNOPSYS_HAPSUSB31	0xabcf
+ #define PCI_DEVICE_ID_INTEL_BYT			0x0f37
++#define PCI_DEVICE_ID_INTEL_BYT1		0x0f35
+ #define PCI_DEVICE_ID_INTEL_MRFLD		0x119e
+ #define PCI_DEVICE_ID_INTEL_BSW			0x22b7
+ #define PCI_DEVICE_ID_INTEL_SPTLP		0x9d30
+@@ -209,6 +210,7 @@ static const struct pci_device_id dwc3_pci_id_table[] = {
+ 	},
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_BSW), },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_BYT), },
++	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_BYT1), },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_MRFLD), },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_SPTLP), },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_SPTH), },
