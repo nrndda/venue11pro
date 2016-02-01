@@ -1,9 +1,8 @@
 diff --git a/drivers/net/wireless/ath/ath6kl/sdio.c b/drivers/net/wireless/ath/ath6kl/sdio.c
-index 339d89f..5384f14 100644
+index eab0ab9..2bf14e1 100644
 --- a/drivers/net/wireless/ath/ath6kl/sdio.c
 +++ b/drivers/net/wireless/ath/ath6kl/sdio.c
-@@ -1400,6 +1400,7 @@ static const struct sdio_device_id ath6kl_sdio_devices[] = {
- 	{SDIO_DEVICE(MANUFACTURER_CODE, (MANUFACTURER_ID_AR6003_BASE | 0x1))},
+@@ -1401,6 +1401,7 @@ static const struct sdio_device_id ath6kl_sdio_devices[] = {
  	{SDIO_DEVICE(MANUFACTURER_CODE, (MANUFACTURER_ID_AR6004_BASE | 0x0))},
  	{SDIO_DEVICE(MANUFACTURER_CODE, (MANUFACTURER_ID_AR6004_BASE | 0x1))},
  	{SDIO_DEVICE(MANUFACTURER_CODE, (MANUFACTURER_ID_AR6004_BASE | 0x2))},
@@ -11,3 +10,10 @@ index 339d89f..5384f14 100644
  	{},
  };
  
+@@ -1459,3 +1460,6 @@ MODULE_FIRMWARE(AR6004_HW_1_2_DEFAULT_BOARD_DATA_FILE);
+ MODULE_FIRMWARE(AR6004_HW_1_3_FW_DIR "/" AR6004_HW_1_3_FIRMWARE_FILE);
+ MODULE_FIRMWARE(AR6004_HW_1_3_BOARD_DATA_FILE);
+ MODULE_FIRMWARE(AR6004_HW_1_3_DEFAULT_BOARD_DATA_FILE);
++MODULE_FIRMWARE(AR6004_HW_3_0_FW_DIR "/" AR6004_HW_3_0_FIRMWARE_FILE);
++MODULE_FIRMWARE(AR6004_HW_3_0_BOARD_DATA_FILE);
++MODULE_FIRMWARE(AR6004_HW_3_0_DEFAULT_BOARD_DATA_FILE);
