@@ -16,3 +16,6 @@
 [submodule "rtl8723bs"]
 	path = rtl8723bs
 	url = https://github.com/hadess/rtl8723bs.git
+[submodule "sound/usr/share/ucm"]
+	path = sound/usr/share/ucm
+	url = https://github.com/plbossart/UCM.git
