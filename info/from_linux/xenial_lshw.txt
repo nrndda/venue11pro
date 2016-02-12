@@ -1,0 +1,204 @@
+ubuntu-gnome
+    description: Computer
+    width: 64 bits
+    capabilities: smbios-2.7 vsyscall32
+  *-core
+       description: Motherboard
+       physical id: 0
+     *-memory
+          description: System memory
+          physical id: 0
+          size: 1900MiB
+     *-cpu
+          product: Intel(R) Atom(TM) CPU  Z3770  @ 1.46GHz
+          vendor: Intel Corp.
+          physical id: 1
+          bus info: cpu@0
+          size: 2238MHz
+          capacity: 2399MHz
+          width: 64 bits
+          capabilities: fpu fpu_exception wp vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp x86-64 constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm sse4_1 sse4_2 movbe popcnt tsc_deadline_timer aes rdrand lahf_lm 3dnowprefetch ida arat epb dtherm tpr_shadow vnmi flexpriority ept vpid tsc_adjust smep erms cpufreq
+     *-pci
+          description: Host bridge
+          product: Atom Processor Z36xxx/Z37xxx Series SoC Transaction Register [8086:F00]
+          vendor: Intel Corporation [8086]
+          physical id: 100
+          bus info: pci@0000:00:00.0
+          version: 09
+          width: 32 bits
+          clock: 33MHz
+          configuration: driver=iosf_mbi_pci
+          resources: irq:0
+        *-display
+             description: VGA compatible controller
+             product: Atom Processor Z36xxx/Z37xxx Series Graphics & Display [8086:F31]
+             vendor: Intel Corporation [8086]
+             physical id: 2
+             bus info: pci@0000:00:02.0
+             version: 09
+             width: 32 bits
+             clock: 33MHz
+             capabilities: pm msi vga_controller bus_master cap_list rom
+             configuration: driver=i915 latency=0
+             resources: irq:204 memory:90000000-903fffff memory:80000000-8fffffff ioport:1000(size=8)
+        *-usb
+             description: USB controller
+             product: Atom Processor Z36xxx/Z37xxx, Celeron N2000 Series USB xHCI [8086:F35]
+             vendor: Intel Corporation [8086]
+             physical id: 14
+             bus info: pci@0000:00:14.0
+             version: 09
+             width: 64 bits
+             clock: 33MHz
+             capabilities: pm msi xhci bus_master cap_list
+             configuration: driver=xhci_hcd latency=0
+             resources: irq:203 memory:90800000-9080ffff
+           *-usbhost:0
+                product: xHCI Host Controller [1D6B:3]
+                vendor: Linux 4.4.0-2-generic xhci-hcd [1D6B]
+                physical id: 0
+                bus info: usb@2
+                logical name: usb2
+                version: 4.04
+                capabilities: usb-3.00
+                configuration: driver=hub slots=1 speed=5000Mbit/s
+              *-usb
+                   description: Mass storage device
+                   product: My Passport 0812 [1058:812]
+                   vendor: Western Digital [1058]
+                   physical id: 1
+                   bus info: usb@2:1
+                   logical name: scsi0
+                   version: 10.49
+                   serial: 575852314537345457343432
+                   capabilities: usb-3.00 scsi emulated scsi-host
+                   configuration: driver=usb-storage maxpower=896mA speed=5000Mbit/s
+                 *-disk
+                      description: SCSI Disk
+                      product: My Passport 0812
+                      vendor: WD
+                      physical id: 0.0.0
+                      bus info: scsi@0:0.0.0
+                      logical name: /dev/sda
+                      version: 1049
+                      serial: WXR1E74TW442
+                      size: 931GiB (1TB)
+                      capabilities: gpt-1.00 partitioned partitioned:gpt
+                      configuration: ansiversion=6 guid=af764fa3-fd81-4aed-bfb4-5c249df0e64d logicalsectorsize=512 sectorsize=512
+                    *-volume:0
+                         description: Windows FAT volume
+                         vendor: mkfs.fat
+                         physical id: 1
+                         bus info: scsi@0:0.0.0,1
+                         logical name: /dev/sda1
+                         version: FAT32
+                         serial: 3833-c629
+                         size: 1022MiB
+                         capacity: 1023MiB
+                         capabilities: boot fat initialized
+                         configuration: FATs=2 filesystem=fat
+                    *-volume:1
+                         description: Windows NTFS volume
+                         vendor: Windows
+                         physical id: 2
+                         bus info: scsi@0:0.0.0,2
+                         logical name: /dev/sda2
+                         logical name: /media/ubuntu-gnome/nrndda
+                         version: 3.1
+                         serial: 6341-a0cd
+                         size: 719GiB
+                         capacity: 719GiB
+                         capabilities: ntfs initialized
+                         configuration: clustersize=4096 created=2015-12-25 10:00:10 filesystem=ntfs label=nrndda mount.fstype=fuseblk mount.options=rw,nosuid,nodev,relatime,user_id=0,group_id=0,default_permissions,allow_other,blksize=4096 state=mounted
+                    *-volume:2
+                         description: EXT4 volume
+                         vendor: Linux
+                         physical id: 3
+                         bus info: scsi@0:0.0.0,3
+                         logical name: /dev/sda3
+                         logical name: /isodevice
+                         version: 1.0
+                         serial: dfa94944-f32b-4a71-ab8f-4bb42c44a839
+                         size: 200GiB
+                         capabilities: journaled extended_attributes large_files huge_files dir_nlink recover extents ext4 ext2 initialized
+                         configuration: created=2015-12-25 10:02:58 filesystem=ext4 label=kubuntu lastmountpoint=/isodevice modified=2016-02-05 13:37:09 mount.fstype=ext4 mount.options=rw,relatime,data=ordered mounted=2016-02-05 13:37:09 state=mounted
+                    *-volume:3
+                         description: Linux swap volume
+                         vendor: Linux
+                         physical id: 4
+                         bus info: scsi@0:0.0.0,4
+                         logical name: /dev/sda4
+                         version: 1
+                         serial: 8c038a89-2678-4389-9724-07a61474a235
+                         size: 10GiB
+                         capacity: 10GiB
+                         capabilities: nofs swap initialized
+                         configuration: filesystem=swap pagesize=4096
+                 *-enclosure UNCLAIMED
+                      description: SCSI Enclosure
+                      product: SES Device
+                      vendor: WD
+                      physical id: 0.0.1
+                      bus info: scsi@0:0.0.1
+                      version: 1049
+                      serial: WXR1E74TW442
+                      configuration: ansiversion=6
+           *-usbhost:1
+                product: xHCI Host Controller [1D6B:2]
+                vendor: Linux 4.4.0-2-generic xhci-hcd [1D6B]
+                physical id: 1
+                bus info: usb@1
+                logical name: usb1
+                version: 4.04
+                capabilities: usb-2.00
+                configuration: driver=hub slots=6 speed=480Mbit/s
+              *-usb:0
+                   description: Communication device
+                   product: Dell Wireless 5570e HSPA+ (42Mbps) Mobile Broadband Card [413C:81A4]
+                   vendor: Sierra Wireless, Incorporated [413C]
+                   physical id: 3
+                   bus info: usb@1:3
+                   version: 0.06
+                   capabilities: usb-2.00
+                   configuration: driver=cdc_mbim maxpower=500mA speed=480Mbit/s
+              *-usb:1
+                   description: Mouse
+                   product: Synaptics T Pad V 01.30 [6CB:2819]
+                   vendor: Synaptics, Inc. [6CB]
+                   physical id: 4
+                   bus info: usb@1:4
+                   version: 0.20
+                   serial: 0670FF545053894987202608
+                   capabilities: usb-2.00
+                   configuration: driver=usbhid maxpower=500mA speed=12Mbit/s
+        *-generic
+             description: Encryption controller
+             product: Atom Processor Z36xxx/Z37xxx Series Trusted Execution Engine [8086:F18]
+             vendor: Intel Corporation [8086]
+             physical id: 1a
+             bus info: pci@0000:00:1a.0
+             version: 09
+             width: 32 bits
+             clock: 33MHz
+             capabilities: pm msi bus_master cap_list
+             configuration: driver=mei_txe latency=0
+             resources: irq:205 memory:90700000-907fffff memory:90600000-906fffff
+        *-isa
+             description: ISA bridge
+             product: Atom Processor Z36xxx/Z37xxx Series Power Control Unit [8086:F1C]
+             vendor: Intel Corporation [8086]
+             physical id: 1f
+             bus info: pci@0000:00:1f.0
+             version: 09
+             width: 32 bits
+             clock: 33MHz
+             capabilities: isa bus_master cap_list
+             configuration: driver=lpc_ich latency=0
+             resources: irq:0
+  *-network DISABLED
+       description: Ethernet interface
+       physical id: 1
+       logical name: wwan0
+       serial: f2:2d:2d:cb:a5:06
+       capabilities: ethernet physical
+       configuration: broadcast=yes driver=cdc_mbim driverversion=22-Aug-2005 firmware=CDC MBIM link=no multicast=yes
