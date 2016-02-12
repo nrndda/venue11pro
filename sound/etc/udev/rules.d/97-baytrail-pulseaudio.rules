@@ -1,3 +1,4 @@
 SUBSYSTEM=="sound", ATTR{id}=="bytrt5640", ACTION=="change", ENV{PULSE_PROFILE_SET}="pulseaudio-byt-rt5640.conf"
+SUBSYSTEM=="sound", ATTR{id}=="bytcrrt5640", ACTION=="change", ENV{PULSE_PROFILE_SET}="pulseaudio-bytcr-rt5640.conf"
 #SUBSYSTEM=="sound", ATTR{id}=="bytrt5640", ACTION=="change", ENV{PULSE_PROFILE_SET}="pulseaudio-byt-rt5640_complicated.conf"
 #SUBSYSTEM=="sound", SUBSYSTEMS=="platform", DRIVERS=="sst-acpi", ATTR{id}=="bytrt5640", ACTION=="change", ENV{PULSE_PROFILE_SET}="pulseaudio-byt-rt5640.conf"
