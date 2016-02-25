@@ -6,7 +6,7 @@ index db9a675..2fad3a7 100644
  static void __init force_disable_hpet(int num, int slot, int func)
  {
  #ifdef CONFIG_HPET_TIMER
--	boot_hpet_disable = true;
+-	boot_hpet_disable = 1;
 -	pr_info("x86/hpet: Will disable the HPET for this platform because it's not reliable\n");
 +	pr_info("x86/hpet: WARNING Enable HPET forcedly on disabled platform because it's not reliable\n");
  #endif
