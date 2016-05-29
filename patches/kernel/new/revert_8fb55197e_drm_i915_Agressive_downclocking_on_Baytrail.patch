@@ -1,0 +1,95 @@
+--- drivers/gpu/drm/i915/i915_debugfs.c	
++++ drivers/gpu/drm/i915/i915_debugfs.c	
+@@ -1269,8 +1269,8 @@ 
+                           GEN6_CURBSYTAVG_MASK);
+                seq_printf(m, "RP PREV UP: %dus\n", rpprevup &
+                           GEN6_CURBSYTAVG_MASK);
+-               seq_printf(m, "Up threshold: %d%%\n",
+-                          dev_priv->rps.up_threshold);
++//             seq_printf(m, "Up threshold: %d%%\n",
++//                        dev_priv->rps.up_threshold);
+ 
+                seq_printf(m, "RP CUR DOWN EI: %dus\n", rpdownei &
+                           GEN6_CURIAVG_MASK);
+@@ -1278,8 +1278,8 @@ 
+                           GEN6_CURBSYTAVG_MASK);
+                seq_printf(m, "RP PREV DOWN: %dus\n", rpprevdown &
+                           GEN6_CURBSYTAVG_MASK);
+-               seq_printf(m, "Down threshold: %d%%\n",
+-                          dev_priv->rps.down_threshold);
++//             seq_printf(m, "Down threshold: %d%%\n",
++//                        dev_priv->rps.down_threshold);
+ 
+                max_freq = (IS_BROXTON(dev) ? rp_state_cap >> 0 :
+                            rp_state_cap >> 16) & 0xff;
+--- drivers/gpu/drm/i915/i915_drv.h	
++++ drivers/gpu/drm/i915/i915_drv.h	
+@@ -1125,8 +1125,8 @@ 
+        u8 rp1_freq;            /* "less than" RP0 power/freqency */
+        u8 rp0_freq;            /* Non-overclocked max frequency. */
+ 
+-       u8 up_threshold; /* Current %busy required to uplock */
+-       u8 down_threshold; /* Current %busy required to downclock */
++//     u8 up_threshold; /* Current %busy required to uplock */
++//     u8 down_threshold; /* Current %busy required to downclock */
+ 
+        int last_adj;
+        enum { LOW_POWER, BETWEEN, HIGH_POWER } power;
+--- drivers/gpu/drm/i915/i915_irq.c	
++++ drivers/gpu/drm/i915/i915_irq.c	
+@@ -1061,7 +1061,8 @@ 
+        if (pm_iir & GEN6_PM_RP_DOWN_EI_EXPIRED) {
+                if (!vlv_c0_above(dev_priv,
+                                  &dev_priv->rps.down_ei, &now,
+-                                 dev_priv->rps.down_threshold))
++                                  VLV_RP_DOWN_EI_THRESHOLD))
++//                               dev_priv->rps.down_threshold))
+                        events |= GEN6_PM_RP_DOWN_THRESHOLD;
+                dev_priv->rps.down_ei = now;
+        }
+@@ -1069,7 +1070,8 @@ 
+        if (pm_iir & GEN6_PM_RP_UP_EI_EXPIRED) {
+                if (vlv_c0_above(dev_priv,
+                                 &dev_priv->rps.up_ei, &now,
+-                                dev_priv->rps.up_threshold))
++                                  VLV_RP_UP_EI_THRESHOLD))
++//                              dev_priv->rps.up_threshold))
+                        events |= GEN6_PM_RP_UP_THRESHOLD;
+                dev_priv->rps.up_ei = now;
+        }
+--- drivers/gpu/drm/i915/i915_reg.h	
++++ drivers/gpu/drm/i915/i915_reg.h	
+@@ -749,6 +749,9 @@ 
+ #define        CHV_BIAS_CPU_50_SOC_50 (3 << 2)
+ 
+ #define VLV_CZ_CLOCK_TO_MILLI_SEC              100000
++#define VLV_RP_UP_EI_THRESHOLD                 90
++#define VLV_RP_DOWN_EI_THRESHOLD               70
++
+ 
+ /* vlv2 north clock has */
+ #define CCK_FUSE_REG                           0x8
+--- drivers/gpu/drm/i915/intel_pm.c	
++++ drivers/gpu/drm/i915/intel_pm.c	
+@@ -4285,8 +4285,8 @@ 
+                    GEN6_RP_DOWN_IDLE_AVG);
+ 
+        dev_priv->rps.power = new_power;
+-       dev_priv->rps.up_threshold = threshold_up;
+-       dev_priv->rps.down_threshold = threshold_down;
++//     dev_priv->rps.up_threshold = threshold_up;
++//     dev_priv->rps.down_threshold = threshold_down;
+        dev_priv->rps.last_adj = 0;
+ }
+ 
+@@ -4366,8 +4366,8 @@ 
+ 
+        if (val != dev_priv->rps.cur_freq) {
+                vlv_punit_write(dev_priv, PUNIT_REG_GPU_FREQ_REQ, val);
+-               if (!IS_CHERRYVIEW(dev_priv))
+-                       gen6_set_rps_thresholds(dev_priv, val);
++//             if (!IS_CHERRYVIEW(dev_priv))
++//                     gen6_set_rps_thresholds(dev_priv, val);
+        }
+ 
+        dev_priv->rps.cur_freq = val;
