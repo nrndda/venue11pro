@@ -1,0 +1,35 @@
+From patchwork Mon Jan  4 11:21:24 2016
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Subject: [v5, 3/3] drm/i915: DP channel EQ check for use of DP link training
+ optimization
+From: Mika Kahola <mika.kahola@intel.com>
+X-Patchwork-Id: 69396
+Message-Id: <1451906484-4659-4-git-send-email-mika.kahola@intel.com>
+To: intel-gfx@lists.freedesktop.org
+Date: Mon,  4 Jan 2016 13:21:24 +0200
+
+Don't use DP link training optimization if channel EQ is not ok. It has
+been reported that in case of failure in channel EQ check the link training
+optimization can be enabled and therefore may not be able to reuse the
+previously computed drive current and pre-emphasis levels.
+
+Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=91393
+Signed-off-by: Mika Kahola <mika.kahola@intel.com>
+---
+ drivers/gpu/drm/i915/intel_dp.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/gpu/drm/i915/intel_dp.c b/drivers/gpu/drm/i915/intel_dp.c
+index 3137187..0cd1ccb 100644
+--- a/drivers/gpu/drm/i915/intel_dp.c
++++ b/drivers/gpu/drm/i915/intel_dp.c
+@@ -4354,6 +4354,7 @@ intel_dp_check_link_status(struct intel_dp *intel_dp)
+ 		(!drm_dp_channel_eq_ok(link_status, intel_dp->lane_count))) {
+ 		DRM_DEBUG_KMS("%s: channel EQ not ok, retraining\n",
+ 			      intel_encoder->base.name);
++		intel_dp->train_set_valid = false;
+ 		intel_dp_start_link_train(intel_dp);
+ 		intel_dp_stop_link_train(intel_dp);
+ 	}

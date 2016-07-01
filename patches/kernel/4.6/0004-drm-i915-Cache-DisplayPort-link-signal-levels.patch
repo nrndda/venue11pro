@@ -1,0 +1,79 @@
+From e08ba9e2e217963d6054fa1beb78d78dd3cc8502 Mon Sep 17 00:00:00 2001
+From: Mika Kahola <mika.kahola@intel.com>
+Date: Wed, 23 Mar 2016 15:32:00 +0200
+Subject: [PATCH 4/4] drm/i915: Cache DisplayPort link signal levels
+
+Cache DisplayPort signal levels including voltage swing and
+pre-emphasis. After resume, the DP link is re-trained by trying
+previusly computed voltage swing and pre-emphasis. In case, we
+are not able to train the link by using these settings, the link
+training is restarted. Now, the link is trained until the signal
+levels of previus link training is achieved and clock recovery
+is achieved.
+
+Signed-off-by: Mika Kahola <mika.kahola@intel.com>
+---
+ drivers/gpu/drm/i915/intel_dp.c               | 1 +
+ drivers/gpu/drm/i915/intel_dp_link_training.c | 7 ++++++-
+ drivers/gpu/drm/i915/intel_drv.h              | 1 +
+ 3 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/i915/intel_dp.c b/drivers/gpu/drm/i915/intel_dp.c
+index dec5f7c..2b53b91 100644
+--- a/drivers/gpu/drm/i915/intel_dp.c
++++ b/drivers/gpu/drm/i915/intel_dp.c
+@@ -3656,6 +3656,7 @@ intel_dp_set_signal_levels(struct intel_dp *intel_dp)
+ 			DP_TRAIN_PRE_EMPHASIS_SHIFT);
+ 
+ 	intel_dp->DP = (intel_dp->DP & ~mask) | signal_levels;
++	intel_dp->signal_levels = signal_levels;
+ 
+ 	I915_WRITE(intel_dp->output_reg, intel_dp->DP);
+ 	POSTING_READ(intel_dp->output_reg);
+diff --git a/drivers/gpu/drm/i915/intel_dp_link_training.c b/drivers/gpu/drm/i915/intel_dp_link_training.c
+index 6b4cbde..55d2c2a 100644
+--- a/drivers/gpu/drm/i915/intel_dp_link_training.c
++++ b/drivers/gpu/drm/i915/intel_dp_link_training.c
+@@ -171,6 +171,8 @@ intel_dp_link_training_clock_recovery(struct intel_dp *intel_dp)
+ 	loop_tries = 0;
+ 	for (;;) {
+ 		uint8_t link_status[DP_LINK_STATUS_SIZE];
++		DRM_DEBUG_KMS("signal levels (target/current): %.8x/%.8x\n",
++			      intel_dp->target_signal_levels, intel_dp->signal_levels);
+ 
+ 		drm_dp_link_train_clock_recovery_delay(intel_dp->dpcd);
+ 		if (!intel_dp_get_link_status(intel_dp, link_status)) {
+@@ -178,7 +180,8 @@ intel_dp_link_training_clock_recovery(struct intel_dp *intel_dp)
+ 			break;
+ 		}
+ 
+-		if (drm_dp_clock_recovery_ok(link_status, intel_dp->lane_count)) {
++		if (drm_dp_clock_recovery_ok(link_status, intel_dp->lane_count) &&
++			intel_dp->signal_levels >= intel_dp->target_signal_levels) {
+ 			DRM_DEBUG_KMS("clock recovery OK\n");
+ 			break;
+ 		}
+@@ -346,6 +349,8 @@ intel_dp_link_training_channel_equalization(struct intel_dp *intel_dp)
+ 
+ 	if (channel_eq) {
+ 		intel_dp->train_set_valid = true;
++		intel_dp->target_signal_levels = max(intel_dp->signal_levels,
++						     intel_dp->target_signal_levels);
+ 		DRM_DEBUG_KMS("Channel EQ done. DP Training successful\n");
+ 	}
+ }
+diff --git a/drivers/gpu/drm/i915/intel_drv.h b/drivers/gpu/drm/i915/intel_drv.h
+index 0802a3f..8289d3b 100644
+--- a/drivers/gpu/drm/i915/intel_drv.h
++++ b/drivers/gpu/drm/i915/intel_drv.h
+@@ -852,6 +852,7 @@ struct intel_dp {
+ 	void (*prepare_link_retrain)(struct intel_dp *intel_dp);
+ 
+ 	bool train_set_valid;
++	uint32_t signal_levels, target_signal_levels;
+ 
+ 	/* Displayport compliance testing */
+ 	unsigned long compliance_test_type;
+-- 
+1.9.1
+
