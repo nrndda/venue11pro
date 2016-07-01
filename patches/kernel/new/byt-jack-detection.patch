@@ -1,0 +1,5664 @@
+From da2b384d2d385cedcbc049cd3c61438787818de6 Mon Sep 17 00:00:00 2001
+From: Oder Chiou <oder_chiou@realtek.com>
+Date: Wed, 21 Oct 2015 09:46:05 +0800
+Subject: [PATCH 01/38] ASoC: rt5640: Revise the input pin name of IN1 and IN2
+ in document of the devicetree
+
+Signed-off-by: Oder Chiou <oder_chiou@realtek.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+---
+ Documentation/devicetree/bindings/sound/rt5640.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/sound/rt5640.txt b/Documentation/devicetree/bindings/sound/rt5640.txt
+index bac4d9a..5d062a5 100644
+--- a/Documentation/devicetree/bindings/sound/rt5640.txt
++++ b/Documentation/devicetree/bindings/sound/rt5640.txt
+@@ -24,9 +24,9 @@ Pins on the device (for linking into audio routes) for RT5639/RT5640:
+   * DMIC2
+   * MICBIAS1
+   * IN1P
+-  * IN1R
++  * IN1N
+   * IN2P
+-  * IN2R
++  * IN2N
+   * HPOL
+   * HPOR
+   * LOUTL
+
+From ada627eafc7f5192aa9fa35f447d8bc630bc9a2f Mon Sep 17 00:00:00 2001
+From: Oder Chiou <oder_chiou@realtek.com>
+Date: Wed, 21 Oct 2015 09:46:05 +0800
+Subject: [PATCH 02/38] ASoC: rt5640: Fill up the IN3's support
+
+Signed-off-by: Oder Chiou <oder_chiou@realtek.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+---
+ Documentation/devicetree/bindings/sound/rt5640.txt |  5 ++++-
+ include/sound/rt5640.h                             |  3 ++-
+ sound/soc/codecs/rt5640.c                          | 22 +++++++++++++++++++++-
+ 3 files changed, 27 insertions(+), 3 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/sound/rt5640.txt b/Documentation/devicetree/bindings/sound/rt5640.txt
+index 5d062a5..9e62f6e 100644
+--- a/Documentation/devicetree/bindings/sound/rt5640.txt
++++ b/Documentation/devicetree/bindings/sound/rt5640.txt
+@@ -14,7 +14,8 @@ Optional properties:
+ 
+ - realtek,in1-differential
+ - realtek,in2-differential
+-  Boolean. Indicate MIC1/2 input are differential, rather than single-ended.
++- realtek,in3-differential
++  Boolean. Indicate MIC1/2/3 input are differential, rather than single-ended.
+ 
+ - realtek,ldo1-en-gpios : The GPIO that controls the CODEC's LDO1_EN pin.
+ 
+@@ -27,6 +28,8 @@ Pins on the device (for linking into audio routes) for RT5639/RT5640:
+   * IN1N
+   * IN2P
+   * IN2N
++  * IN3P
++  * IN3N
+   * HPOL
+   * HPOR
+   * LOUTL
+diff --git a/include/sound/rt5640.h b/include/sound/rt5640.h
+index 59d26dd..e3c84b9 100644
+--- a/include/sound/rt5640.h
++++ b/include/sound/rt5640.h
+@@ -12,9 +12,10 @@
+ #define __LINUX_SND_RT5640_H
+ 
+ struct rt5640_platform_data {
+-	/* IN1 & IN2 can optionally be differential */
++	/* IN1 & IN2 & IN3 can optionally be differential */
+ 	bool in1_diff;
+ 	bool in2_diff;
++	bool in3_diff;
+ 
+ 	bool dmic_en;
+ 	bool dmic1_data_pin; /* 0 = IN1P; 1 = GPIO3 */
+diff --git a/sound/soc/codecs/rt5640.c b/sound/soc/codecs/rt5640.c
+index e1ceeb8..f2beb1a 100644
+--- a/sound/soc/codecs/rt5640.c
++++ b/sound/soc/codecs/rt5640.c
+@@ -405,11 +405,14 @@ static const struct snd_kcontrol_new rt5640_snd_controls[] = {
+ 	SOC_DOUBLE_TLV("DAC1 Playback Volume", RT5640_DAC1_DIG_VOL,
+ 			RT5640_L_VOL_SFT, RT5640_R_VOL_SFT,
+ 			175, 0, dac_vol_tlv),
+-	/* IN1/IN2 Control */
++	/* IN1/IN2/IN3 Control */
+ 	SOC_SINGLE_TLV("IN1 Boost", RT5640_IN1_IN2,
+ 		RT5640_BST_SFT1, 8, 0, bst_tlv),
+ 	SOC_SINGLE_TLV("IN2 Boost", RT5640_IN3_IN4,
+ 		RT5640_BST_SFT2, 8, 0, bst_tlv),
++	SOC_SINGLE_TLV("IN3 Boost", RT5640_IN1_IN2,
++		RT5640_BST_SFT2, 8, 0, bst_tlv),
++
+ 	/* INL/INR Volume Control */
+ 	SOC_DOUBLE_TLV("IN Capture Volume", RT5640_INL_INR_VOL,
+ 			RT5640_INL_VOL_SFT, RT5640_INR_VOL_SFT,
+@@ -598,6 +601,8 @@ static const struct snd_kcontrol_new rt5640_rec_l_mix[] = {
+ 			RT5640_M_HP_L_RM_L_SFT, 1, 1),
+ 	SOC_DAPM_SINGLE("INL Switch", RT5640_REC_L2_MIXER,
+ 			RT5640_M_IN_L_RM_L_SFT, 1, 1),
++	SOC_DAPM_SINGLE("BST3 Switch", RT5640_REC_L2_MIXER,
++			RT5640_M_BST2_RM_L_SFT, 1, 1),
+ 	SOC_DAPM_SINGLE("BST2 Switch", RT5640_REC_L2_MIXER,
+ 			RT5640_M_BST4_RM_L_SFT, 1, 1),
+ 	SOC_DAPM_SINGLE("BST1 Switch", RT5640_REC_L2_MIXER,
+@@ -611,6 +616,8 @@ static const struct snd_kcontrol_new rt5640_rec_r_mix[] = {
+ 			RT5640_M_HP_R_RM_R_SFT, 1, 1),
+ 	SOC_DAPM_SINGLE("INR Switch", RT5640_REC_R2_MIXER,
+ 			RT5640_M_IN_R_RM_R_SFT, 1, 1),
++	SOC_DAPM_SINGLE("BST3 Switch", RT5640_REC_R2_MIXER,
++			RT5640_M_BST2_RM_R_SFT, 1, 1),
+ 	SOC_DAPM_SINGLE("BST2 Switch", RT5640_REC_R2_MIXER,
+ 			RT5640_M_BST4_RM_R_SFT, 1, 1),
+ 	SOC_DAPM_SINGLE("BST1 Switch", RT5640_REC_R2_MIXER,
+@@ -1065,6 +1072,8 @@ static const struct snd_soc_dapm_widget rt5640_dapm_widgets[] = {
+ 	SND_SOC_DAPM_INPUT("IN1N"),
+ 	SND_SOC_DAPM_INPUT("IN2P"),
+ 	SND_SOC_DAPM_INPUT("IN2N"),
++	SND_SOC_DAPM_INPUT("IN3P"),
++	SND_SOC_DAPM_INPUT("IN3N"),
+ 	SND_SOC_DAPM_PGA("DMIC L1", SND_SOC_NOPM, 0, 0, NULL, 0),
+ 	SND_SOC_DAPM_PGA("DMIC R1", SND_SOC_NOPM, 0, 0, NULL, 0),
+ 	SND_SOC_DAPM_PGA("DMIC L2", SND_SOC_NOPM, 0, 0, NULL, 0),
+@@ -1081,6 +1090,8 @@ static const struct snd_soc_dapm_widget rt5640_dapm_widgets[] = {
+ 		RT5640_PWR_BST1_BIT, 0, NULL, 0),
+ 	SND_SOC_DAPM_PGA("BST2", RT5640_PWR_ANLG2,
+ 		RT5640_PWR_BST4_BIT, 0, NULL, 0),
++	SND_SOC_DAPM_PGA("BST3", RT5640_PWR_ANLG2,
++		RT5640_PWR_BST2_BIT, 0, NULL, 0),
+ 	/* Input Volume */
+ 	SND_SOC_DAPM_PGA("INL VOL", RT5640_PWR_VOL,
+ 		RT5640_PWR_IN_L_BIT, 0, NULL, 0),
+@@ -1310,6 +1321,7 @@ static const struct snd_soc_dapm_widget rt5639_specific_dapm_widgets[] = {
+ static const struct snd_soc_dapm_route rt5640_dapm_routes[] = {
+ 	{"IN1P", NULL, "LDO2"},
+ 	{"IN2P", NULL, "LDO2"},
++	{"IN3P", NULL, "LDO2"},
+ 
+ 	{"DMIC L1", NULL, "DMIC1"},
+ 	{"DMIC R1", NULL, "DMIC1"},
+@@ -1320,18 +1332,22 @@ static const struct snd_soc_dapm_route rt5640_dapm_routes[] = {
+ 	{"BST1", NULL, "IN1N"},
+ 	{"BST2", NULL, "IN2P"},
+ 	{"BST2", NULL, "IN2N"},
++	{"BST3", NULL, "IN3P"},
++	{"BST3", NULL, "IN3N"},
+ 
+ 	{"INL VOL", NULL, "IN2P"},
+ 	{"INR VOL", NULL, "IN2N"},
+ 
+ 	{"RECMIXL", "HPOL Switch", "HPOL"},
+ 	{"RECMIXL", "INL Switch", "INL VOL"},
++	{"RECMIXL", "BST3 Switch", "BST3"},
+ 	{"RECMIXL", "BST2 Switch", "BST2"},
+ 	{"RECMIXL", "BST1 Switch", "BST1"},
+ 	{"RECMIXL", "OUT MIXL Switch", "OUT MIXL"},
+ 
+ 	{"RECMIXR", "HPOR Switch", "HPOR"},
+ 	{"RECMIXR", "INR Switch", "INR VOL"},
++	{"RECMIXR", "BST3 Switch", "BST3"},
+ 	{"RECMIXR", "BST2 Switch", "BST2"},
+ 	{"RECMIXR", "BST1 Switch", "BST1"},
+ 	{"RECMIXR", "OUT MIXR Switch", "OUT MIXR"},
+@@ -2260,6 +2276,10 @@ static int rt5640_i2c_probe(struct i2c_client *i2c,
+ 		regmap_update_bits(rt5640->regmap, RT5640_IN3_IN4,
+ 					RT5640_IN_DF2, RT5640_IN_DF2);
+ 
++	if (rt5640->pdata.in3_diff)
++		regmap_update_bits(rt5640->regmap, RT5640_IN1_IN2,
++					RT5640_IN_DF2, RT5640_IN_DF2);
++
+ 	rt5640->hp_mute = 1;
+ 
+ 	return snd_soc_register_codec(&i2c->dev, &soc_codec_dev_rt5640,
+
+From 8da536799807ceb83179952e252f0c7ae8275c99 Mon Sep 17 00:00:00 2001
+From: Jie Yang <yang.jie@intel.com>
+Date: Thu, 22 Oct 2015 13:55:07 +0800
+Subject: [PATCH 03/38] ASoC: Intel: sst: only use sst-firmware when DW DMAC is
+ available
+
+Currentlly, we use Synopsys DesignWare DMA Controller for
+baytrail/haswell/broadwell ADSP firmware loading, but for
+skylake, we don't use it, compiling sst-firmware.c may
+introduce error when CONFIG_DW_DMAC_CORE is not enabled:
+
+    sound/built-in.o: In function `sst_dma_new':
+    (.text+0xd7b38): undefined reference to `dw_dma_probe'
+    sound/built-in.o: In function `sst_dma_free':
+    (.text+0xd7c0a): undefined reference to `dw_dma_remove'
+
+Here we only compile sst-firmware when CONFIG_DW_DMAC_CORE
+is selected, to fix the linking error issue.
+
+Reported-by: Randy Dunlap <rdunlap@infradead.org>
+Signed-off-by: Jie Yang <yang.jie@intel.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+---
+ sound/soc/intel/common/Makefile  | 6 +++++-
+ sound/soc/intel/common/sst-dsp.c | 2 ++
+ sound/soc/intel/common/sst-dsp.h | 2 ++
+ 3 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/sound/soc/intel/common/Makefile b/sound/soc/intel/common/Makefile
+index f24154c..d910558 100644
+--- a/sound/soc/intel/common/Makefile
++++ b/sound/soc/intel/common/Makefile
+@@ -1,7 +1,11 @@
+-snd-soc-sst-dsp-objs := sst-dsp.o sst-firmware.o
++snd-soc-sst-dsp-objs := sst-dsp.o
+ snd-soc-sst-acpi-objs := sst-acpi.o
+ snd-soc-sst-ipc-objs := sst-ipc.o
+ 
++ifneq ($(CONFIG_DW_DMAC_CORE),)
++snd-soc-sst-dsp-objs += sst-firmware.o
++endif
++
+ obj-$(CONFIG_SND_SOC_INTEL_SST) += snd-soc-sst-dsp.o snd-soc-sst-ipc.o
+ obj-$(CONFIG_SND_SOC_INTEL_SST_ACPI) += snd-soc-sst-acpi.o
+ 
+diff --git a/sound/soc/intel/common/sst-dsp.c b/sound/soc/intel/common/sst-dsp.c
+index a627236d..c9452e0 100644
+--- a/sound/soc/intel/common/sst-dsp.c
++++ b/sound/soc/intel/common/sst-dsp.c
+@@ -420,6 +420,7 @@ void sst_dsp_inbox_read(struct sst_dsp *sst, void *message, size_t bytes)
+ }
+ EXPORT_SYMBOL_GPL(sst_dsp_inbox_read);
+ 
++#if IS_ENABLED(CONFIG_DW_DMAC_CORE)
+ struct sst_dsp *sst_dsp_new(struct device *dev,
+ 	struct sst_dsp_device *sst_dev, struct sst_pdata *pdata)
+ {
+@@ -484,6 +485,7 @@ void sst_dsp_free(struct sst_dsp *sst)
+ 	sst_dma_free(sst->dma);
+ }
+ EXPORT_SYMBOL_GPL(sst_dsp_free);
++#endif
+ 
+ /* Module information */
+ MODULE_AUTHOR("Liam Girdwood");
+diff --git a/sound/soc/intel/common/sst-dsp.h b/sound/soc/intel/common/sst-dsp.h
+index 1f45f18..859f0de 100644
+--- a/sound/soc/intel/common/sst-dsp.h
++++ b/sound/soc/intel/common/sst-dsp.h
+@@ -216,10 +216,12 @@ struct sst_pdata {
+ 	void *dsp;
+ };
+ 
++#if IS_ENABLED(CONFIG_DW_DMAC_CORE)
+ /* Initialization */
+ struct sst_dsp *sst_dsp_new(struct device *dev,
+ 	struct sst_dsp_device *sst_dev, struct sst_pdata *pdata);
+ void sst_dsp_free(struct sst_dsp *sst);
++#endif
+ 
+ /* SHIM Read / Write */
+ void sst_dsp_shim_write(struct sst_dsp *sst, u32 offset, u32 value);
+
+From e660ba6a27993ad3a5fbb2d13b7c60d062e45f68 Mon Sep 17 00:00:00 2001
+From: Vinod Koul <vinod.koul@intel.com>
+Date: Thu, 5 Nov 2015 21:34:11 +0530
+Subject: [PATCH 04/38] ASoC: Intel: Move apci find machine routines
+
+This code to find the machine is common for all drivers so move
+it to a separate file and header for use in other drivers
+
+Signed-off-by: Vinod Koul <vinod.koul@intel.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+---
+ sound/soc/intel/common/Makefile         |  3 +--
+ sound/soc/intel/common/sst-acpi.c       | 33 +------------------------
+ sound/soc/intel/common/sst-acpi.h       | 28 +++++++++++++++++++++
+ sound/soc/intel/common/sst-match-acpi.c | 43 +++++++++++++++++++++++++++++++++
+ 4 files changed, 73 insertions(+), 34 deletions(-)
+ create mode 100644 sound/soc/intel/common/sst-acpi.h
+ create mode 100644 sound/soc/intel/common/sst-match-acpi.c
+
+diff --git a/sound/soc/intel/common/Makefile b/sound/soc/intel/common/Makefile
+index d910558..658edce 100644
+--- a/sound/soc/intel/common/Makefile
++++ b/sound/soc/intel/common/Makefile
+@@ -1,5 +1,5 @@
+ snd-soc-sst-dsp-objs := sst-dsp.o
+-snd-soc-sst-acpi-objs := sst-acpi.o
++snd-soc-sst-acpi-objs := sst-acpi.o sst-match-acpi.o
+ snd-soc-sst-ipc-objs := sst-ipc.o
+ 
+ ifneq ($(CONFIG_DW_DMAC_CORE),)
+@@ -8,4 +8,3 @@ endif
+ 
+ obj-$(CONFIG_SND_SOC_INTEL_SST) += snd-soc-sst-dsp.o snd-soc-sst-ipc.o
+ obj-$(CONFIG_SND_SOC_INTEL_SST_ACPI) += snd-soc-sst-acpi.o
+-
+diff --git a/sound/soc/intel/common/sst-acpi.c b/sound/soc/intel/common/sst-acpi.c
+index 67b6d3d..94a43e6 100644
+--- a/sound/soc/intel/common/sst-acpi.c
++++ b/sound/soc/intel/common/sst-acpi.c
+@@ -21,21 +21,12 @@
+ #include <linux/platform_device.h>
+ 
+ #include "sst-dsp.h"
++#include "sst-acpi.h"
+ 
+ #define SST_LPT_DSP_DMA_ADDR_OFFSET	0x0F0000
+ #define SST_WPT_DSP_DMA_ADDR_OFFSET	0x0FE000
+ #define SST_LPT_DSP_DMA_SIZE		(1024 - 1)
+ 
+-/* Descriptor for SST ASoC machine driver */
+-struct sst_acpi_mach {
+-	/* ACPI ID for the matching machine driver. Audio codec for instance */
+-	const u8 id[ACPI_ID_LEN];
+-	/* machine driver name */
+-	const char *drv_name;
+-	/* firmware file name */
+-	const char *fw_filename;
+-};
+-
+ /* Descriptor for setting up SST platform data */
+ struct sst_acpi_desc {
+ 	const char *drv_name;
+@@ -88,28 +79,6 @@ static void sst_acpi_fw_cb(const struct firmware *fw, void *context)
+ 	return;
+ }
+ 
+-static acpi_status sst_acpi_mach_match(acpi_handle handle, u32 level,
+-				       void *context, void **ret)
+-{
+-	*(bool *)context = true;
+-	return AE_OK;
+-}
+-
+-static struct sst_acpi_mach *sst_acpi_find_machine(
+-	struct sst_acpi_mach *machines)
+-{
+-	struct sst_acpi_mach *mach;
+-	bool found = false;
+-
+-	for (mach = machines; mach->id[0]; mach++)
+-		if (ACPI_SUCCESS(acpi_get_devices(mach->id,
+-						  sst_acpi_mach_match,
+-						  &found, NULL)) && found)
+-			return mach;
+-
+-	return NULL;
+-}
+-
+ static int sst_acpi_probe(struct platform_device *pdev)
+ {
+ 	const struct acpi_device_id *id;
+diff --git a/sound/soc/intel/common/sst-acpi.h b/sound/soc/intel/common/sst-acpi.h
+new file mode 100644
+index 0000000..1dc0595
+--- /dev/null
++++ b/sound/soc/intel/common/sst-acpi.h
+@@ -0,0 +1,28 @@
++/*
++ * Copyright (C) 2013-15, Intel Corporation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <linux/acpi.h>
++
++/* acpi match */
++struct sst_acpi_mach *sst_acpi_find_machine(struct sst_acpi_mach *machines);
++
++/* Descriptor for SST ASoC machine driver */
++struct sst_acpi_mach {
++	/* ACPI ID for the matching machine driver. Audio codec for instance */
++	const u8 id[ACPI_ID_LEN];
++	/* machine driver name */
++	const char *drv_name;
++	/* firmware file name */
++	const char *fw_filename;
++};
+diff --git a/sound/soc/intel/common/sst-match-acpi.c b/sound/soc/intel/common/sst-match-acpi.c
+new file mode 100644
+index 0000000..dd077e1
+--- /dev/null
++++ b/sound/soc/intel/common/sst-match-acpi.c
+@@ -0,0 +1,43 @@
++/*
++ * sst_match_apci.c - SST (LPE) match for ACPI enumeration.
++ *
++ * Copyright (c) 2013-15, Intel Corporation.
++ *
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms and conditions of the GNU General Public License,
++ * version 2, as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
++ * more details.
++ */
++#include <linux/acpi.h>
++#include <linux/device.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++
++#include "sst-acpi.h"
++
++static acpi_status sst_acpi_mach_match(acpi_handle handle, u32 level,
++				       void *context, void **ret)
++{
++	*(bool *)context = true;
++	return AE_OK;
++}
++
++struct sst_acpi_mach *sst_acpi_find_machine(struct sst_acpi_mach *machines)
++{
++	struct sst_acpi_mach *mach;
++	bool found = false;
++
++	for (mach = machines; mach->id[0]; mach++)
++		if (ACPI_SUCCESS(acpi_get_devices(mach->id,
++						  sst_acpi_mach_match,
++						  &found, NULL)) && found)
++			return mach;
++
++	return NULL;
++}
++EXPORT_SYMBOL_GPL(sst_acpi_find_machine);
+
+From 09a25f80c3fe99484cc1925ab4660a911f9e89af Mon Sep 17 00:00:00 2001
+From: Vinod Koul <vinod.koul@intel.com>
+Date: Thu, 5 Nov 2015 21:34:12 +0530
+Subject: [PATCH 05/38] ASoC: Intel: Atom: move atom driver to common acpi
+ match
+
+This patch moves the atom driver to use the common acpi match
+functions.  Since atom driver has few more information in machine
+table, these are appended to table and set to NULL for common
+driver
+
+Signed-off-by: Vinod Koul <vinod.koul@intel.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+---
+ sound/soc/intel/Kconfig             |  1 +
+ sound/soc/intel/atom/sst/sst_acpi.c | 67 +++++++++++--------------------------
+ sound/soc/intel/common/sst-acpi.c   |  8 ++---
+ sound/soc/intel/common/sst-acpi.h   |  5 +++
+ 4 files changed, 29 insertions(+), 52 deletions(-)
+
+diff --git a/sound/soc/intel/Kconfig b/sound/soc/intel/Kconfig
+index 05fde5e6e..cb67273 100644
+--- a/sound/soc/intel/Kconfig
++++ b/sound/soc/intel/Kconfig
+@@ -23,6 +23,7 @@ config SND_SST_IPC_PCI
+ config SND_SST_IPC_ACPI
+ 	tristate
+ 	select SND_SST_IPC
++	select SND_SOC_INTEL_SST
+ 	depends on ACPI
+ 
+ config SND_SOC_INTEL_SST
+diff --git a/sound/soc/intel/atom/sst/sst_acpi.c b/sound/soc/intel/atom/sst/sst_acpi.c
+index bb19b58..f3d109e 100644
+--- a/sound/soc/intel/atom/sst/sst_acpi.c
++++ b/sound/soc/intel/atom/sst/sst_acpi.c
+@@ -40,18 +40,9 @@
+ #include <acpi/acpi_bus.h>
+ #include "../sst-mfld-platform.h"
+ #include "../../common/sst-dsp.h"
++#include "../../common/sst-acpi.h"
+ #include "sst.h"
+ 
+-struct sst_machines {
+-	char *codec_id;
+-	char board[32];
+-	char machine[32];
+-	void (*machine_quirk)(void);
+-	char firmware[FW_NAME_SIZE];
+-	struct sst_platform_info *pdata;
+-
+-};
+-
+ /* LPE viewpoint addresses */
+ #define SST_BYT_IRAM_PHY_START	0xff2c0000
+ #define SST_BYT_IRAM_PHY_END	0xff2d4000
+@@ -223,37 +214,16 @@ static int sst_platform_get_resources(struct intel_sst_drv *ctx)
+ 	return 0;
+ }
+ 
+-static acpi_status sst_acpi_mach_match(acpi_handle handle, u32 level,
+-				       void *context, void **ret)
+-{
+-	*(bool *)context = true;
+-	return AE_OK;
+-}
+-
+-static struct sst_machines *sst_acpi_find_machine(
+-	struct sst_machines *machines)
+-{
+-	struct sst_machines *mach;
+-	bool found = false;
+-
+-	for (mach = machines; mach->codec_id; mach++)
+-		if (ACPI_SUCCESS(acpi_get_devices(mach->codec_id,
+-						  sst_acpi_mach_match,
+-						  &found, NULL)) && found)
+-			return mach;
+-
+-	return NULL;
+-}
+-
+ static int sst_acpi_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev = &pdev->dev;
+ 	int ret = 0;
+ 	struct intel_sst_drv *ctx;
+ 	const struct acpi_device_id *id;
+-	struct sst_machines *mach;
++	struct sst_acpi_mach *mach;
+ 	struct platform_device *mdev;
+ 	struct platform_device *plat_dev;
++	struct sst_platform_info *pdata;
+ 	unsigned int dev_id;
+ 
+ 	id = acpi_match_device(dev->driver->acpi_match_table, dev);
+@@ -261,12 +231,13 @@ static int sst_acpi_probe(struct platform_device *pdev)
+ 		return -ENODEV;
+ 	dev_dbg(dev, "for %s", id->id);
+ 
+-	mach = (struct sst_machines *)id->driver_data;
++	mach = (struct sst_acpi_mach *)id->driver_data;
+ 	mach = sst_acpi_find_machine(mach);
+ 	if (mach == NULL) {
+ 		dev_err(dev, "No matching machine driver found\n");
+ 		return -ENODEV;
+ 	}
++	pdata = mach->pdata;
+ 
+ 	ret = kstrtouint(id->id, 16, &dev_id);
+ 	if (ret < 0) {
+@@ -276,16 +247,16 @@ static int sst_acpi_probe(struct platform_device *pdev)
+ 
+ 	dev_dbg(dev, "ACPI device id: %x\n", dev_id);
+ 
+-	plat_dev = platform_device_register_data(dev, mach->pdata->platform, -1, NULL, 0);
++	plat_dev = platform_device_register_data(dev, pdata->platform, -1, NULL, 0);
+ 	if (IS_ERR(plat_dev)) {
+-		dev_err(dev, "Failed to create machine device: %s\n", mach->pdata->platform);
++		dev_err(dev, "Failed to create machine device: %s\n", pdata->platform);
+ 		return PTR_ERR(plat_dev);
+ 	}
+ 
+ 	/* Create platform device for sst machine driver */
+-	mdev = platform_device_register_data(dev, mach->machine, -1, NULL, 0);
++	mdev = platform_device_register_data(dev, mach->drv_name, -1, NULL, 0);
+ 	if (IS_ERR(mdev)) {
+-		dev_err(dev, "Failed to create machine device: %s\n", mach->machine);
++		dev_err(dev, "Failed to create machine device: %s\n", mach->drv_name);
+ 		return PTR_ERR(mdev);
+ 	}
+ 
+@@ -294,8 +265,8 @@ static int sst_acpi_probe(struct platform_device *pdev)
+ 		return ret;
+ 
+ 	/* Fill sst platform data */
+-	ctx->pdata = mach->pdata;
+-	strcpy(ctx->firmware_name, mach->firmware);
++	ctx->pdata = pdata;
++	strcpy(ctx->firmware_name, mach->fw_filename);
+ 
+ 	ret = sst_platform_get_resources(ctx);
+ 	if (ret)
+@@ -342,22 +313,22 @@ static int sst_acpi_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
+-static struct sst_machines sst_acpi_bytcr[] = {
+-	{"10EC5640", "T100", "bytt100_rt5640", NULL, "intel/fw_sst_0f28.bin",
++static struct sst_acpi_mach sst_acpi_bytcr[] = {
++	{"10EC5640", "bytt100_rt5640", "intel/fw_sst_0f28.bin", "T100", NULL,
+ 						&byt_rvp_platform_data },
+ 	{},
+ };
+ 
+ /* Cherryview-based platforms: CherryTrail and Braswell */
+-static struct sst_machines sst_acpi_chv[] = {
+-	{"10EC5670", "cht-bsw", "cht-bsw-rt5672", NULL, "intel/fw_sst_22a8.bin",
++static struct sst_acpi_mach sst_acpi_chv[] = {
++	{"10EC5670", "cht-bsw-rt5672", "intel/fw_sst_22a8.bin", "cht-bsw", NULL,
++						&chv_platform_data },
++	{"10EC5645", "cht-bsw-rt5645", "intel/fw_sst_22a8.bin", "cht-bsw", NULL,
+ 						&chv_platform_data },
+-	{"10EC5645", "cht-bsw", "cht-bsw-rt5645", NULL, "intel/fw_sst_22a8.bin",
++	{"10EC5650", "cht-bsw-rt5645", "intel/fw_sst_22a8.bin", "cht-bsw", NULL,
+ 						&chv_platform_data },
+-	{"10EC5650", "cht-bsw", "cht-bsw-rt5645", NULL, "intel/fw_sst_22a8.bin",
++	{"193C9890", "cht-bsw-max98090", "intel/fw_sst_22a8.bin", "cht-bsw", NULL,
+ 						&chv_platform_data },
+-	{"193C9890", "cht-bsw", "cht-bsw-max98090", NULL,
+-	"intel/fw_sst_22a8.bin", &chv_platform_data },
+ 	{},
+ };
+ 
+diff --git a/sound/soc/intel/common/sst-acpi.c b/sound/soc/intel/common/sst-acpi.c
+index 94a43e6..7a85c57 100644
+--- a/sound/soc/intel/common/sst-acpi.c
++++ b/sound/soc/intel/common/sst-acpi.c
+@@ -180,7 +180,7 @@ static int sst_acpi_remove(struct platform_device *pdev)
+ }
+ 
+ static struct sst_acpi_mach haswell_machines[] = {
+-	{ "INT33CA", "haswell-audio", "intel/IntcSST1.bin" },
++	{ "INT33CA", "haswell-audio", "intel/IntcSST1.bin", NULL, NULL, NULL },
+ 	{}
+ };
+ 
+@@ -198,7 +198,7 @@ static struct sst_acpi_desc sst_acpi_haswell_desc = {
+ };
+ 
+ static struct sst_acpi_mach broadwell_machines[] = {
+-	{ "INT343A", "broadwell-audio", "intel/IntcSST2.bin" },
++	{ "INT343A", "broadwell-audio", "intel/IntcSST2.bin", NULL, NULL, NULL },
+ 	{}
+ };
+ 
+@@ -216,8 +216,8 @@ static struct sst_acpi_desc sst_acpi_broadwell_desc = {
+ };
+ 
+ static struct sst_acpi_mach baytrail_machines[] = {
+-	{ "10EC5640", "byt-rt5640", "intel/fw_sst_0f28.bin-48kHz_i2s_master" },
+-	{ "193C9890", "byt-max98090", "intel/fw_sst_0f28.bin-48kHz_i2s_master" },
++	{ "10EC5640", "byt-rt5640", "intel/fw_sst_0f28.bin-48kHz_i2s_master", NULL, NULL, NULL },
++	{ "193C9890", "byt-max98090", "intel/fw_sst_0f28.bin-48kHz_i2s_master", NULL, NULL, NULL },
+ 	{}
+ };
+ 
+diff --git a/sound/soc/intel/common/sst-acpi.h b/sound/soc/intel/common/sst-acpi.h
+index 1dc0595..3ee3b7a 100644
+--- a/sound/soc/intel/common/sst-acpi.h
++++ b/sound/soc/intel/common/sst-acpi.h
+@@ -25,4 +25,9 @@ struct sst_acpi_mach {
+ 	const char *drv_name;
+ 	/* firmware file name */
+ 	const char *fw_filename;
++
++	/* board name */
++	const char *board;
++	void (*machine_quirk)(void);
++	void *pdata;
+ };
+
+From 64eeec251df8b5adadd3f0b8394ff5ebbb9bf44b Mon Sep 17 00:00:00 2001
+From: Jie Yang <yang.jie@intel.com>
+Date: Tue, 24 Nov 2015 22:01:21 +0800
+Subject: [PATCH 06/38] ASoC: Intel: sst: only select sst-firmware when DW DMAC
+ is built-in
+
+The previous commit ef3e199a49c8 ("ASoC: Intel: sst: only use
+sst-firmware when DW DMAC is available") does not fix the 0day
+building errors thoroughly:
+
+   sound/built-in.o: In function 'dw_dma_remove'
+   sound/built-in.o: In function 'dw_dma_probe'
+
+Here we fallback to select sst-firmware only when DW DMAC
+is built-in selected. We may need to refactor sst common
+driver and split DW related codes to platform driver, but
+ATM, this fallback may be the smallest fix.
+
+Please be noticed that after applying this patch, we may
+need select DW DMAC manually in DMA driver menu, before
+we can prompt and select HSW/BDW and old BYT machines.
+
+Signed-off-by: Jie Yang <yang.jie@intel.com>
+Cc: Vinod Koul <vinod.koul@intel.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+---
+ sound/soc/intel/Kconfig          | 8 ++++----
+ sound/soc/intel/common/Makefile  | 4 +---
+ sound/soc/intel/common/sst-dsp.c | 2 +-
+ sound/soc/intel/common/sst-dsp.h | 2 +-
+ 4 files changed, 7 insertions(+), 9 deletions(-)
+
+diff --git a/sound/soc/intel/Kconfig b/sound/soc/intel/Kconfig
+index cb67273..06d6f61 100644
+--- a/sound/soc/intel/Kconfig
++++ b/sound/soc/intel/Kconfig
+@@ -43,7 +43,7 @@ config SND_SOC_INTEL_BAYTRAIL
+ config SND_SOC_INTEL_HASWELL_MACH
+ 	tristate "ASoC Audio DSP support for Intel Haswell Lynxpoint"
+ 	depends on X86_INTEL_LPSS && I2C && I2C_DESIGNWARE_PLATFORM
+-	depends on DW_DMAC_CORE
++	depends on DW_DMAC_CORE=y
+ 	select SND_SOC_INTEL_SST
+ 	select SND_SOC_INTEL_HASWELL
+ 	select SND_SOC_RT5640
+@@ -56,7 +56,7 @@ config SND_SOC_INTEL_HASWELL_MACH
+ config SND_SOC_INTEL_BYT_RT5640_MACH
+ 	tristate "ASoC Audio driver for Intel Baytrail with RT5640 codec"
+ 	depends on X86_INTEL_LPSS && I2C
+-	depends on DW_DMAC_CORE
++	depends on DW_DMAC_CORE=y
+ 	select SND_SOC_INTEL_SST
+ 	select SND_SOC_INTEL_BAYTRAIL
+ 	select SND_SOC_RT5640
+@@ -67,7 +67,7 @@ config SND_SOC_INTEL_BYT_RT5640_MACH
+ config SND_SOC_INTEL_BYT_MAX98090_MACH
+ 	tristate "ASoC Audio driver for Intel Baytrail with MAX98090 codec"
+ 	depends on X86_INTEL_LPSS && I2C
+-	depends on DW_DMAC_CORE
++	depends on DW_DMAC_CORE=y
+ 	select SND_SOC_INTEL_SST
+ 	select SND_SOC_INTEL_BAYTRAIL
+ 	select SND_SOC_MAX98090
+@@ -79,7 +79,7 @@ config SND_SOC_INTEL_BROADWELL_MACH
+ 	tristate "ASoC Audio DSP support for Intel Broadwell Wildcatpoint"
+ 	depends on X86_INTEL_LPSS && I2C && DW_DMAC && \
+ 		   I2C_DESIGNWARE_PLATFORM
+-	depends on DW_DMAC_CORE
++	depends on DW_DMAC_CORE=y
+ 	select SND_SOC_INTEL_SST
+ 	select SND_SOC_INTEL_HASWELL
+ 	select SND_SOC_RT286
+diff --git a/sound/soc/intel/common/Makefile b/sound/soc/intel/common/Makefile
+index 658edce..3b9332e7 100644
+--- a/sound/soc/intel/common/Makefile
++++ b/sound/soc/intel/common/Makefile
+@@ -2,9 +2,7 @@ snd-soc-sst-dsp-objs := sst-dsp.o
+ snd-soc-sst-acpi-objs := sst-acpi.o sst-match-acpi.o
+ snd-soc-sst-ipc-objs := sst-ipc.o
+ 
+-ifneq ($(CONFIG_DW_DMAC_CORE),)
+-snd-soc-sst-dsp-objs += sst-firmware.o
+-endif
++snd-soc-sst-dsp-$(CONFIG_DW_DMAC_CORE) += sst-firmware.o
+ 
+ obj-$(CONFIG_SND_SOC_INTEL_SST) += snd-soc-sst-dsp.o snd-soc-sst-ipc.o
+ obj-$(CONFIG_SND_SOC_INTEL_SST_ACPI) += snd-soc-sst-acpi.o
+diff --git a/sound/soc/intel/common/sst-dsp.c b/sound/soc/intel/common/sst-dsp.c
+index c9452e0..b5bbdf4 100644
+--- a/sound/soc/intel/common/sst-dsp.c
++++ b/sound/soc/intel/common/sst-dsp.c
+@@ -420,7 +420,7 @@ void sst_dsp_inbox_read(struct sst_dsp *sst, void *message, size_t bytes)
+ }
+ EXPORT_SYMBOL_GPL(sst_dsp_inbox_read);
+ 
+-#if IS_ENABLED(CONFIG_DW_DMAC_CORE)
++#ifdef CONFIG_DW_DMAC_CORE
+ struct sst_dsp *sst_dsp_new(struct device *dev,
+ 	struct sst_dsp_device *sst_dev, struct sst_pdata *pdata)
+ {
+diff --git a/sound/soc/intel/common/sst-dsp.h b/sound/soc/intel/common/sst-dsp.h
+index 859f0de..0b84c71 100644
+--- a/sound/soc/intel/common/sst-dsp.h
++++ b/sound/soc/intel/common/sst-dsp.h
+@@ -216,7 +216,7 @@ struct sst_pdata {
+ 	void *dsp;
+ };
+ 
+-#if IS_ENABLED(CONFIG_DW_DMAC_CORE)
++#ifdef CONFIG_DW_DMAC_CORE
+ /* Initialization */
+ struct sst_dsp *sst_dsp_new(struct device *dev,
+ 	struct sst_dsp_device *sst_dev, struct sst_pdata *pdata);
+
+From dd55d1c97944a19276a4a54acf7b59b8ab5743e5 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Wed, 25 Nov 2015 14:15:52 -0600
+Subject: [PATCH 07/38] ASoC: Intel: fix ACPI probe regression with Atom DPCM
+ driver
+
+Commit 5f3d57ebdda4de30e00e2d7c45b5247e5410fe6b introduced a
+regression in ACPI probe of the DPCM driver.
+Fix by conditionally compiling sst-acpi when the DPCM driver
+is not selected
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/common/Makefile | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/sound/soc/intel/common/Makefile b/sound/soc/intel/common/Makefile
+index 3b9332e7..668fdee 100644
+--- a/sound/soc/intel/common/Makefile
++++ b/sound/soc/intel/common/Makefile
+@@ -1,5 +1,10 @@
+ snd-soc-sst-dsp-objs := sst-dsp.o
++ifneq ($(CONFIG_SND_SST_IPC_ACPI),)
++snd-soc-sst-acpi-objs := sst-match-acpi.o
++else
+ snd-soc-sst-acpi-objs := sst-acpi.o sst-match-acpi.o
++endif
++
+ snd-soc-sst-ipc-objs := sst-ipc.o
+ 
+ snd-soc-sst-dsp-$(CONFIG_DW_DMAC_CORE) += sst-firmware.o
+
+From 5dea5c451cfe356fd46384b55b1f867f63d35977 Mon Sep 17 00:00:00 2001
+From: Sebastien Guiriec <sebastien.guiriec@intel.com>
+Date: Tue, 24 Nov 2015 11:30:21 +0100
+Subject: [PATCH 08/38] ASoC: Intel: bytcr_rt5640: set SSP to I2S mode 2ch
+
+Using the hw_fixup function in order to overwrite the default SSP
+setting for Audio DSP port connected to the codec. Instead of
+TDM 4ch use I2S 2ch 24 bits.
+
+Signed-off-by: Sebastien Guiriec <sebastien.guiriec@intel.com>
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/boards/bytcr_rt5640.c | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index c445312..648bb8e 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -107,6 +107,7 @@ static int byt_codec_fixup(struct snd_soc_pcm_runtime *rtd,
+ 			SNDRV_PCM_HW_PARAM_RATE);
+ 	struct snd_interval *channels = hw_param_interval(params,
+ 						SNDRV_PCM_HW_PARAM_CHANNELS);
++	int ret;
+ 
+ 	/* The DSP will covert the FE rate to 48k, stereo, 24bits */
+ 	rate->min = rate->max = 48000;
+@@ -114,6 +115,28 @@ static int byt_codec_fixup(struct snd_soc_pcm_runtime *rtd,
+ 
+ 	/* set SSP2 to 24-bit */
+ 	params_set_format(params, SNDRV_PCM_FORMAT_S24_LE);
++
++	/*
++	 * Default mode for SSP configuration is TDM 4 slot, override config
++	 * with explicit setting to I2S 2ch 24-bit. The word length is set with
++	 * dai_set_tdm_slot() since there is no other API exposed
++	 */
++	ret = snd_soc_dai_set_fmt(rtd->cpu_dai,
++				  SND_SOC_DAIFMT_I2S     |
++				  SND_SOC_DAIFMT_NB_IF   |
++				  SND_SOC_DAIFMT_CBS_CFS
++				  );
++	if (ret < 0) {
++		dev_err(rtd->dev, "can't set format to I2S, err %d\n", ret);
++		return ret;
++	}
++
++	ret = snd_soc_dai_set_tdm_slot(rtd->cpu_dai, 0x3, 0x3, 2, 24);
++	if (ret < 0) {
++		dev_err(rtd->dev, "can't set I2S config, err %d\n", ret);
++		return ret;
++	}
++
+ 	return 0;
+ }
+ 
+
+From 34b8ec5e83c81d281b4a360279ed5cca83417822 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Mon, 14 Sep 2015 22:30:46 -0500
+Subject: [PATCH 09/38] ASoC: Intel: boards: align pin names between byt-rt5640
+ drivers
+
+initial cleanup to use same pins
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/boards/bytcr_rt5640.c | 23 +++++++++++------------
+ 1 file changed, 11 insertions(+), 12 deletions(-)
+
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index 648bb8e..6af0fb5 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -32,22 +32,21 @@
+ static const struct snd_soc_dapm_widget byt_dapm_widgets[] = {
+ 	SND_SOC_DAPM_HP("Headphone", NULL),
+ 	SND_SOC_DAPM_MIC("Headset Mic", NULL),
+-	SND_SOC_DAPM_MIC("Int Mic", NULL),
+-	SND_SOC_DAPM_SPK("Ext Spk", NULL),
++	SND_SOC_DAPM_MIC("Internal Mic", NULL),
++	SND_SOC_DAPM_SPK("Speaker", NULL),
+ };
+ 
+ static const struct snd_soc_dapm_route byt_audio_map[] = {
+-	{"IN2P", NULL, "Headset Mic"},
+-	{"IN2N", NULL, "Headset Mic"},
+ 	{"Headset Mic", NULL, "MICBIAS1"},
+-	{"IN1P", NULL, "MICBIAS1"},
+-	{"LDO2", NULL, "Int Mic"},
++	{"IN2P", NULL, "Headset Mic"},
+ 	{"Headphone", NULL, "HPOL"},
+ 	{"Headphone", NULL, "HPOR"},
+-	{"Ext Spk", NULL, "SPOLP"},
+-	{"Ext Spk", NULL, "SPOLN"},
+-	{"Ext Spk", NULL, "SPORP"},
+-	{"Ext Spk", NULL, "SPORN"},
++	{"Speaker", NULL, "SPOLP"},
++	{"Speaker", NULL, "SPOLN"},
++	{"Speaker", NULL, "SPORP"},
++	{"Speaker", NULL, "SPORN"},
++	{"Internal Mic", NULL, "MICBIAS1"},
++	{"IN1P", NULL, "Internal Mic"},
+ 
+ 	{"AIF1 Playback", NULL, "ssp2 Tx"},
+ 	{"ssp2 Tx", NULL, "codec_out0"},
+@@ -60,8 +59,8 @@ static const struct snd_soc_dapm_route byt_audio_map[] = {
+ static const struct snd_kcontrol_new byt_mc_controls[] = {
+ 	SOC_DAPM_PIN_SWITCH("Headphone"),
+ 	SOC_DAPM_PIN_SWITCH("Headset Mic"),
+-	SOC_DAPM_PIN_SWITCH("Int Mic"),
+-	SOC_DAPM_PIN_SWITCH("Ext Spk"),
++	SOC_DAPM_PIN_SWITCH("Internal Mic"),
++	SOC_DAPM_PIN_SWITCH("Speaker"),
+ };
+ 
+ static int byt_aif1_hw_params(struct snd_pcm_substream *substream,
+
+From 4bc5a60a81a7f6a0552cddffe73b5f9018cbf944 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Tue, 15 Dec 2015 19:20:51 -0600
+Subject: [PATCH 10/38] ASoC: Intel: boards: start merging byt-rt5640 drivers
+
+first renaming and reducing delta with byt-rt5640 code before
+dmi-based quirks are enabled
+---
+ sound/soc/intel/atom/sst/sst_acpi.c   |   2 +-
+ sound/soc/intel/boards/bytcr_rt5640.c | 128 ++++++++++++++++++++++++----------
+ 2 files changed, 93 insertions(+), 37 deletions(-)
+
+diff --git a/sound/soc/intel/atom/sst/sst_acpi.c b/sound/soc/intel/atom/sst/sst_acpi.c
+index f3d109e..f424460 100644
+--- a/sound/soc/intel/atom/sst/sst_acpi.c
++++ b/sound/soc/intel/atom/sst/sst_acpi.c
+@@ -314,7 +314,7 @@ static int sst_acpi_remove(struct platform_device *pdev)
+ }
+ 
+ static struct sst_acpi_mach sst_acpi_bytcr[] = {
+-	{"10EC5640", "bytt100_rt5640", "intel/fw_sst_0f28.bin", "T100", NULL,
++	{"10EC5640", "bytcr_rt5640", "intel/fw_sst_0f28.bin", "bytcr_rt5640", NULL,
+ 						&byt_rvp_platform_data },
+ 	{},
+ };
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index 6af0fb5..4019049 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -20,23 +20,25 @@
+ #include <linux/init.h>
+ #include <linux/module.h>
+ #include <linux/platform_device.h>
++#include <linux/acpi.h>
+ #include <linux/device.h>
++#include <linux/dmi.h>
+ #include <linux/slab.h>
+-#include <linux/input.h>
+ #include <sound/pcm.h>
+ #include <sound/pcm_params.h>
+ #include <sound/soc.h>
++#include <sound/jack.h>
+ #include "../../codecs/rt5640.h"
+ #include "../atom/sst-atom-controls.h"
+ 
+-static const struct snd_soc_dapm_widget byt_dapm_widgets[] = {
++static const struct snd_soc_dapm_widget byt_rt5640_widgets[] = {
+ 	SND_SOC_DAPM_HP("Headphone", NULL),
+ 	SND_SOC_DAPM_MIC("Headset Mic", NULL),
+ 	SND_SOC_DAPM_MIC("Internal Mic", NULL),
+ 	SND_SOC_DAPM_SPK("Speaker", NULL),
+ };
+ 
+-static const struct snd_soc_dapm_route byt_audio_map[] = {
++static const struct snd_soc_dapm_route byt_rt5640_audio_map[] = {
+ 	{"Headset Mic", NULL, "MICBIAS1"},
+ 	{"IN2P", NULL, "Headset Mic"},
+ 	{"Headphone", NULL, "HPOL"},
+@@ -56,14 +58,39 @@ static const struct snd_soc_dapm_route byt_audio_map[] = {
+ 	{"ssp2 Rx", NULL, "AIF1 Capture"},
+ };
+ 
+-static const struct snd_kcontrol_new byt_mc_controls[] = {
++static const struct snd_soc_dapm_route byt_rt5640_intmic_dmic1_map[] = {
++	{"DMIC1", NULL, "Internal Mic"},
++};
++
++static const struct snd_soc_dapm_route byt_rt5640_intmic_dmic2_map[] = {
++	{"DMIC2", NULL, "Internal Mic"},
++};
++
++static const struct snd_soc_dapm_route byt_rt5640_intmic_in1_map[] = {
++	{"Internal Mic", NULL, "MICBIAS1"},
++	{"IN1P", NULL, "Internal Mic"},
++};
++
++enum {
++	BYT_RT5640_DMIC1_MAP,
++	BYT_RT5640_DMIC2_MAP,
++	BYT_RT5640_IN1_MAP,
++};
++
++#define BYT_RT5640_MAP(quirk)	((quirk) & 0xff)
++#define BYT_RT5640_DMIC_EN	BIT(16)
++
++static unsigned long byt_rt5640_quirk = BYT_RT5640_DMIC1_MAP |
++					BYT_RT5640_DMIC_EN;
++
++static const struct snd_kcontrol_new byt_rt5640_controls[] = {
+ 	SOC_DAPM_PIN_SWITCH("Headphone"),
+ 	SOC_DAPM_PIN_SWITCH("Headset Mic"),
+ 	SOC_DAPM_PIN_SWITCH("Internal Mic"),
+ 	SOC_DAPM_PIN_SWITCH("Speaker"),
+ };
+ 
+-static int byt_aif1_hw_params(struct snd_pcm_substream *substream,
++static int byt_rt5640_aif1_hw_params(struct snd_pcm_substream *substream,
+ 					struct snd_pcm_hw_params *params)
+ {
+ 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
+@@ -91,7 +118,34 @@ static int byt_aif1_hw_params(struct snd_pcm_substream *substream,
+ 	return 0;
+ }
+ 
+-static const struct snd_soc_pcm_stream byt_dai_params = {
++static int byt_rt5640_quirk_cb(const struct dmi_system_id *id)
++{
++	byt_rt5640_quirk = (unsigned long)id->driver_data;
++	return 1;
++}
++
++static const struct dmi_system_id byt_rt5640_quirk_table[] = {
++	{
++		.callback = byt_rt5640_quirk_cb,
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
++			DMI_MATCH(DMI_PRODUCT_NAME, "T100TA"),
++		},
++		.driver_data = (unsigned long *)BYT_RT5640_IN1_MAP,
++	},
++	{
++		.callback = byt_rt5640_quirk_cb,
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "DellInc."),
++			DMI_MATCH(DMI_PRODUCT_NAME, "Venue 8 Pro 5830"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_DMIC2_MAP |
++						 BYT_RT5640_DMIC_EN),
++	},
++	{}
++};
++
++static const struct snd_soc_pcm_stream byt_rt5640_dai_params = {
+ 	.formats = SNDRV_PCM_FMTBIT_S24_LE,
+ 	.rate_min = 48000,
+ 	.rate_max = 48000,
+@@ -99,7 +153,7 @@ static const struct snd_soc_pcm_stream byt_dai_params = {
+ 	.channels_max = 2,
+ };
+ 
+-static int byt_codec_fixup(struct snd_soc_pcm_runtime *rtd,
++static int byt_rt5640_codec_fixup(struct snd_soc_pcm_runtime *rtd,
+ 			    struct snd_pcm_hw_params *params)
+ {
+ 	struct snd_interval *rate = hw_param_interval(params,
+@@ -148,22 +202,22 @@ static struct snd_pcm_hw_constraint_list constraints_48000 = {
+ 	.list  = rates_48000,
+ };
+ 
+-static int byt_aif1_startup(struct snd_pcm_substream *substream)
++static int byt_rt5640_aif1_startup(struct snd_pcm_substream *substream)
+ {
+ 	return snd_pcm_hw_constraint_list(substream->runtime, 0,
+ 			SNDRV_PCM_HW_PARAM_RATE,
+ 			&constraints_48000);
+ }
+ 
+-static struct snd_soc_ops byt_aif1_ops = {
+-	.startup = byt_aif1_startup,
++static struct snd_soc_ops byt_rt5640_aif1_ops = {
++	.startup = byt_rt5640_aif1_startup,
+ };
+ 
+-static struct snd_soc_ops byt_be_ssp2_ops = {
+-	.hw_params = byt_aif1_hw_params,
++static struct snd_soc_ops byt_rt5640_be_ssp2_ops = {
++	.hw_params = byt_rt5640_aif1_hw_params,
+ };
+ 
+-static struct snd_soc_dai_link byt_dailink[] = {
++static struct snd_soc_dai_link byt_rt5640_dais[] = {
+ 	[MERR_DPCM_AUDIO] = {
+ 		.name = "Baytrail Audio Port",
+ 		.stream_name = "Baytrail Audio",
+@@ -175,7 +229,7 @@ static struct snd_soc_dai_link byt_dailink[] = {
+ 		.dynamic = 1,
+ 		.dpcm_playback = 1,
+ 		.dpcm_capture = 1,
+-		.ops = &byt_aif1_ops,
++		.ops = &byt_rt5640_aif1_ops,
+ 	},
+ 	[MERR_DPCM_COMPR] = {
+ 		.name = "Baytrail Compressed Port",
+@@ -196,55 +250,57 @@ static struct snd_soc_dai_link byt_dailink[] = {
+ 		.codec_name = "i2c-10EC5640:00",
+ 		.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF
+ 						| SND_SOC_DAIFMT_CBS_CFS,
+-		.be_hw_params_fixup = byt_codec_fixup,
++		.be_hw_params_fixup = byt_rt5640_codec_fixup,
+ 		.ignore_suspend = 1,
+ 		.dpcm_playback = 1,
+ 		.dpcm_capture = 1,
+-		.ops = &byt_be_ssp2_ops,
++		.ops = &byt_rt5640_be_ssp2_ops,
+ 	},
+ };
+ 
+ /* SoC card */
+-static struct snd_soc_card snd_soc_card_byt = {
+-	.name = "baytrailcraudio",
++static struct snd_soc_card snd_soc_card_byt_rt5640 = {
++	.name = "bytcr-rt5640",
+ 	.owner = THIS_MODULE,
+-	.dai_link = byt_dailink,
+-	.num_links = ARRAY_SIZE(byt_dailink),
+-	.dapm_widgets = byt_dapm_widgets,
+-	.num_dapm_widgets = ARRAY_SIZE(byt_dapm_widgets),
+-	.dapm_routes = byt_audio_map,
+-	.num_dapm_routes = ARRAY_SIZE(byt_audio_map),
+-	.controls = byt_mc_controls,
+-	.num_controls = ARRAY_SIZE(byt_mc_controls),
++	.dai_link = byt_rt5640_dais,
++	.num_links = ARRAY_SIZE(byt_rt5640_dais),
++	.dapm_widgets = byt_rt5640_widgets,
++	.num_dapm_widgets = ARRAY_SIZE(byt_rt5640_widgets),
++	.dapm_routes = byt_rt5640_audio_map,
++	.num_dapm_routes = ARRAY_SIZE(byt_rt5640_audio_map),
++	.controls = byt_rt5640_controls,
++	.num_controls = ARRAY_SIZE(byt_rt5640_controls),
+ };
+ 
+-static int snd_byt_mc_probe(struct platform_device *pdev)
++static int snd_byt_rt5640_mc_probe(struct platform_device *pdev)
+ {
+ 	int ret_val = 0;
+ 
+ 	/* register the soc card */
+-	snd_soc_card_byt.dev = &pdev->dev;
++	snd_soc_card_byt_rt5640.dev = &pdev->dev;
+ 
+-	ret_val = devm_snd_soc_register_card(&pdev->dev, &snd_soc_card_byt);
++	ret_val = devm_snd_soc_register_card(&pdev->dev,
++					&snd_soc_card_byt_rt5640);
+ 	if (ret_val) {
+-		dev_err(&pdev->dev, "devm_snd_soc_register_card failed %d\n", ret_val);
++		dev_err(&pdev->dev, "devm_snd_soc_register_card failed %d\n",
++			ret_val);
+ 		return ret_val;
+ 	}
+-	platform_set_drvdata(pdev, &snd_soc_card_byt);
++	platform_set_drvdata(pdev, &snd_soc_card_byt_rt5640);
+ 	return ret_val;
+ }
+ 
+-static struct platform_driver snd_byt_mc_driver = {
++static struct platform_driver snd_byt_rt5640_mc_driver = {
+ 	.driver = {
+-		.name = "bytt100_rt5640",
++		.name = "bytcr_rt5640",
+ 		.pm = &snd_soc_pm_ops,
+ 	},
+-	.probe = snd_byt_mc_probe,
++	.probe = snd_byt_rt5640_mc_probe,
+ };
+ 
+-module_platform_driver(snd_byt_mc_driver);
++module_platform_driver(snd_byt_rt5640_mc_driver);
+ 
+ MODULE_DESCRIPTION("ASoC Intel(R) Baytrail CR Machine driver");
+ MODULE_AUTHOR("Subhransu S. Prusty <subhransu.s.prusty@intel.com>");
+ MODULE_LICENSE("GPL v2");
+-MODULE_ALIAS("platform:bytt100_rt5640");
++MODULE_ALIAS("platform:bytcr_rt5640");
+
+From 653a4b81cd98d7dccf665773a75220f998e3d77c Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Tue, 15 Sep 2015 11:09:28 -0500
+Subject: [PATCH 11/38] ASoC: Intel: boards: merge DMI-based quirks in
+ bytcr-rt5640 driver
+
+Merge DMI quirks for various machines such as Asus T100
+and clean-up code
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/boards/bytcr_rt5640.c | 78 ++++++++++++++++++++++++++++-------
+ 1 file changed, 62 insertions(+), 16 deletions(-)
+
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index 4019049..25ca024 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -39,6 +39,13 @@ static const struct snd_soc_dapm_widget byt_rt5640_widgets[] = {
+ };
+ 
+ static const struct snd_soc_dapm_route byt_rt5640_audio_map[] = {
++	{"AIF1 Playback", NULL, "ssp2 Tx"},
++	{"ssp2 Tx", NULL, "codec_out0"},
++	{"ssp2 Tx", NULL, "codec_out1"},
++	{"codec_in0", NULL, "ssp2 Rx"},
++	{"codec_in1", NULL, "ssp2 Rx"},
++	{"ssp2 Rx", NULL, "AIF1 Capture"},
++
+ 	{"Headset Mic", NULL, "MICBIAS1"},
+ 	{"IN2P", NULL, "Headset Mic"},
+ 	{"Headphone", NULL, "HPOL"},
+@@ -47,15 +54,6 @@ static const struct snd_soc_dapm_route byt_rt5640_audio_map[] = {
+ 	{"Speaker", NULL, "SPOLN"},
+ 	{"Speaker", NULL, "SPORP"},
+ 	{"Speaker", NULL, "SPORN"},
+-	{"Internal Mic", NULL, "MICBIAS1"},
+-	{"IN1P", NULL, "Internal Mic"},
+-
+-	{"AIF1 Playback", NULL, "ssp2 Tx"},
+-	{"ssp2 Tx", NULL, "codec_out0"},
+-	{"ssp2 Tx", NULL, "codec_out1"},
+-	{"codec_in0", NULL, "ssp2 Rx"},
+-	{"codec_in1", NULL, "ssp2 Rx"},
+-	{"ssp2 Rx", NULL, "AIF1 Capture"},
+ };
+ 
+ static const struct snd_soc_dapm_route byt_rt5640_intmic_dmic1_map[] = {
+@@ -145,6 +143,54 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 	{}
+ };
+ 
++static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
++{
++	int ret;
++	struct snd_soc_codec *codec = runtime->codec;
++	struct snd_soc_card *card = runtime->card;
++	const struct snd_soc_dapm_route *custom_map;
++	int num_routes;
++
++	card->dapm.idle_bias_off = true;
++
++	ret = snd_soc_add_card_controls(card, byt_rt5640_controls,
++					ARRAY_SIZE(byt_rt5640_controls));
++	if (ret) {
++		dev_err(card->dev, "unable to add card controls\n");
++		return ret;
++	}
++
++	dmi_check_system(byt_rt5640_quirk_table);
++	switch (BYT_RT5640_MAP(byt_rt5640_quirk)) {
++	case BYT_RT5640_IN1_MAP:
++		custom_map = byt_rt5640_intmic_in1_map;
++		num_routes = ARRAY_SIZE(byt_rt5640_intmic_in1_map);
++		break;
++	case BYT_RT5640_DMIC2_MAP:
++		custom_map = byt_rt5640_intmic_dmic2_map;
++		num_routes = ARRAY_SIZE(byt_rt5640_intmic_dmic2_map);
++		break;
++	default:
++		custom_map = byt_rt5640_intmic_dmic1_map;
++		num_routes = ARRAY_SIZE(byt_rt5640_intmic_dmic1_map);
++	}
++
++	ret = snd_soc_dapm_add_routes(&card->dapm, custom_map, num_routes);
++	if (ret)
++		return ret;
++
++	if (byt_rt5640_quirk & BYT_RT5640_DMIC_EN) {
++		ret = rt5640_dmic_enable(codec, 0, 0);
++		if (ret)
++			return ret;
++	}
++
++	snd_soc_dapm_ignore_suspend(&card->dapm, "Headphone");
++	snd_soc_dapm_ignore_suspend(&card->dapm, "Speaker");
++
++	return ret;
++}
++
+ static const struct snd_soc_pcm_stream byt_rt5640_dai_params = {
+ 	.formats = SNDRV_PCM_FMTBIT_S24_LE,
+ 	.rate_min = 48000,
+@@ -254,12 +300,13 @@ static struct snd_soc_dai_link byt_rt5640_dais[] = {
+ 		.ignore_suspend = 1,
+ 		.dpcm_playback = 1,
+ 		.dpcm_capture = 1,
++		.init = byt_rt5640_init,
+ 		.ops = &byt_rt5640_be_ssp2_ops,
+ 	},
+ };
+ 
+ /* SoC card */
+-static struct snd_soc_card snd_soc_card_byt_rt5640 = {
++static struct snd_soc_card byt_rt5640_card = {
+ 	.name = "bytcr-rt5640",
+ 	.owner = THIS_MODULE,
+ 	.dai_link = byt_rt5640_dais,
+@@ -268,8 +315,7 @@ static struct snd_soc_card snd_soc_card_byt_rt5640 = {
+ 	.num_dapm_widgets = ARRAY_SIZE(byt_rt5640_widgets),
+ 	.dapm_routes = byt_rt5640_audio_map,
+ 	.num_dapm_routes = ARRAY_SIZE(byt_rt5640_audio_map),
+-	.controls = byt_rt5640_controls,
+-	.num_controls = ARRAY_SIZE(byt_rt5640_controls),
++	.fully_routed = true,
+ };
+ 
+ static int snd_byt_rt5640_mc_probe(struct platform_device *pdev)
+@@ -277,16 +323,16 @@ static int snd_byt_rt5640_mc_probe(struct platform_device *pdev)
+ 	int ret_val = 0;
+ 
+ 	/* register the soc card */
+-	snd_soc_card_byt_rt5640.dev = &pdev->dev;
++	byt_rt5640_card.dev = &pdev->dev;
++
++	ret_val = devm_snd_soc_register_card(&pdev->dev, &byt_rt5640_card);
+ 
+-	ret_val = devm_snd_soc_register_card(&pdev->dev,
+-					&snd_soc_card_byt_rt5640);
+ 	if (ret_val) {
+ 		dev_err(&pdev->dev, "devm_snd_soc_register_card failed %d\n",
+ 			ret_val);
+ 		return ret_val;
+ 	}
+-	platform_set_drvdata(pdev, &snd_soc_card_byt_rt5640);
++	platform_set_drvdata(pdev, &byt_rt5640_card);
+ 	return ret_val;
+ }
+ 
+
+From 6041ea022e232353a37a6bd5f8bc72c7eb1a9656 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Tue, 15 Dec 2015 15:21:41 -0600
+Subject: [PATCH 12/38] ASoC: Intel: tag byt-rt5640 machine driver as
+ deprecated
+
+All the functionality was merged in DPCM-based driver,
+keep older driver to avoid breaking userspace but
+tag it as unsupported/deprecated
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/Kconfig | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/sound/soc/intel/Kconfig b/sound/soc/intel/Kconfig
+index 06d6f61..20e104b4 100644
+--- a/sound/soc/intel/Kconfig
++++ b/sound/soc/intel/Kconfig
+@@ -56,13 +56,14 @@ config SND_SOC_INTEL_HASWELL_MACH
+ config SND_SOC_INTEL_BYT_RT5640_MACH
+ 	tristate "ASoC Audio driver for Intel Baytrail with RT5640 codec"
+ 	depends on X86_INTEL_LPSS && I2C
+-	depends on DW_DMAC_CORE=y
++	depends on DW_DMAC_CORE=y && (SND_SOC_INTEL_BYTCR_RT5640_MACH = n)
+ 	select SND_SOC_INTEL_SST
+ 	select SND_SOC_INTEL_BAYTRAIL
+ 	select SND_SOC_RT5640
+ 	help
+ 	  This adds audio driver for Intel Baytrail platform based boards
+-	  with the RT5640 audio codec.
++	  with the RT5640 audio codec. This driver is deprecated, use
++	  SND_SOC_INTEL_BYTCR_RT5640_MACH instead for better functionality
+ 
+ config SND_SOC_INTEL_BYT_MAX98090_MACH
+ 	tristate "ASoC Audio driver for Intel Baytrail with MAX98090 codec"
+@@ -90,14 +91,14 @@ config SND_SOC_INTEL_BROADWELL_MACH
+ 	  If unsure select "N".
+ 
+ config SND_SOC_INTEL_BYTCR_RT5640_MACH
+-	tristate "ASoC Audio DSP Support for MID BYT Platform"
++        tristate "ASoC Audio driver for Intel Baytrail and Baytrail-CR with RT5640 codec"
+ 	depends on X86 && I2C
+ 	select SND_SOC_RT5640
+ 	select SND_SST_MFLD_PLATFORM
+ 	select SND_SST_IPC_ACPI
+ 	help
+-	  This adds support for ASoC machine driver for Intel(R) MID Baytrail platform
+-          used as alsa device in audio substem in Intel(R) MID devices
++          This adds support for ASoC machine driver for Intel(R) Baytrail and Baytrail-CR
++          platforms with RT5640 audio codec.
+           Say Y if you have such a device
+           If unsure select "N".
+ 
+
+From 413a1079e9b4d477ac1702967d1647e845460a62 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Tue, 15 Dec 2015 19:24:01 -0600
+Subject: [PATCH 13/38]  ASoc: Intel: Atom: add deep buffer definitions for
+ atom platforms
+
+Add definitions for MERR_DPCM_DEEP_BUFFER AND PIPE_MEDIA3_IN
+Add relevant cpu-dai and dai link names
+---
+ arch/x86/include/asm/platform_sst_audio.h    |  1 +
+ sound/soc/intel/atom/sst-atom-controls.c     |  1 +
+ sound/soc/intel/atom/sst-atom-controls.h     |  1 +
+ sound/soc/intel/atom/sst-mfld-platform-pcm.c | 12 ++++++++++++
+ 4 files changed, 15 insertions(+)
+
+diff --git a/arch/x86/include/asm/platform_sst_audio.h b/arch/x86/include/asm/platform_sst_audio.h
+index 7249e6d0..5973a2f 100644
+--- a/arch/x86/include/asm/platform_sst_audio.h
++++ b/arch/x86/include/asm/platform_sst_audio.h
+@@ -55,6 +55,7 @@ enum sst_audio_device_id_mrfld {
+ 	PIPE_MEDIA0_IN = 0x8F,
+ 	PIPE_MEDIA1_IN = 0x90,
+ 	PIPE_MEDIA2_IN = 0x91,
++	PIPE_MEDIA3_IN = 0x9C,
+ 	PIPE_RSVD = 0xFF,
+ };
+ 
+diff --git a/sound/soc/intel/atom/sst-atom-controls.c b/sound/soc/intel/atom/sst-atom-controls.c
+index d55388e..1727cc4 100644
+--- a/sound/soc/intel/atom/sst-atom-controls.c
++++ b/sound/soc/intel/atom/sst-atom-controls.c
+@@ -1109,6 +1109,7 @@ static const struct snd_soc_dapm_route intercon[] = {
+ 	{"media0_in", NULL, "Compress Playback"},
+ 	{"media1_in", NULL, "Headset Playback"},
+ 	{"media2_in", NULL, "pcm0_out"},
++	{"media3_in", NULL, "Deepbuffer Playback"},
+ 
+ 	{"media0_out mix 0", "media0_in Switch", "media0_in"},
+ 	{"media0_out mix 0", "media1_in Switch", "media1_in"},
+diff --git a/sound/soc/intel/atom/sst-atom-controls.h b/sound/soc/intel/atom/sst-atom-controls.h
+index 93de804..e011311 100644
+--- a/sound/soc/intel/atom/sst-atom-controls.h
++++ b/sound/soc/intel/atom/sst-atom-controls.h
+@@ -28,6 +28,7 @@
+ 
+ enum {
+ 	MERR_DPCM_AUDIO = 0,
++	MERR_DPCM_DEEP_BUFFER,
+ 	MERR_DPCM_COMPR,
+ };
+ 
+diff --git a/sound/soc/intel/atom/sst-mfld-platform-pcm.c b/sound/soc/intel/atom/sst-mfld-platform-pcm.c
+index 683e501..e5d4a79 100644
+--- a/sound/soc/intel/atom/sst-mfld-platform-pcm.c
++++ b/sound/soc/intel/atom/sst-mfld-platform-pcm.c
+@@ -98,6 +98,7 @@ static struct sst_dev_stream_map dpcm_strm_map[] = {
+ 	{MERR_DPCM_AUDIO, 0, SNDRV_PCM_STREAM_PLAYBACK, PIPE_MEDIA1_IN, SST_TASK_ID_MEDIA, 0},
+ 	{MERR_DPCM_COMPR, 0, SNDRV_PCM_STREAM_PLAYBACK, PIPE_MEDIA0_IN, SST_TASK_ID_MEDIA, 0},
+ 	{MERR_DPCM_AUDIO, 0, SNDRV_PCM_STREAM_CAPTURE, PIPE_PCM1_OUT, SST_TASK_ID_MEDIA, 0},
++	{MERR_DPCM_DEEP_BUFFER, 0, SNDRV_PCM_STREAM_PLAYBACK, PIPE_MEDIA3_IN, SST_TASK_ID_MEDIA, 0},
+ };
+ 
+ static int sst_media_digital_mute(struct snd_soc_dai *dai, int mute, int stream)
+@@ -528,6 +529,17 @@ static struct snd_soc_dai_driver sst_platform_dai[] = {
+ 	},
+ },
+ {
++	.name = "deepbuffer-cpu-dai",
++	.ops = &sst_media_dai_ops,
++	.playback = {
++		.stream_name = "Deepbuffer Playback",
++		.channels_min = SST_STEREO,
++		.channels_max = SST_STEREO,
++		.rates = SNDRV_PCM_RATE_44100|SNDRV_PCM_RATE_48000,
++		.formats = SNDRV_PCM_FMTBIT_S16_LE,
++	},
++},
++{
+ 	.name = "compress-cpu-dai",
+ 	.compress_dai = 1,
+ 	.ops = &sst_compr_dai_ops,
+
+From fa135c30649df6e5121acc2b1e0abc010627a350 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Thu, 17 Sep 2015 09:40:48 -0500
+Subject: [PATCH 14/38] ASoC: Intel: boards: add DEEP_BUFFER support for
+ BYT/CHT/BSW
+
+Add dai links to enable additional playback stream with deeper
+buffer for lower power consumption.
+The normal and DEEP_buffer streams are not mutually exclusive,
+content will be mixed by the DSP.
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/boards/bytcr_rt5640.c        | 13 +++++++++++++
+ sound/soc/intel/boards/cht_bsw_max98090_ti.c | 12 ++++++++++++
+ sound/soc/intel/boards/cht_bsw_rt5645.c      | 12 ++++++++++++
+ sound/soc/intel/boards/cht_bsw_rt5672.c      | 12 ++++++++++++
+ 4 files changed, 49 insertions(+)
+
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index 25ca024..48667ac 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -277,6 +277,19 @@ static struct snd_soc_dai_link byt_rt5640_dais[] = {
+ 		.dpcm_capture = 1,
+ 		.ops = &byt_rt5640_aif1_ops,
+ 	},
++	[MERR_DPCM_DEEP_BUFFER] = {
++		.name = "Deep-Buffer Audio Port",
++		.stream_name = "Deep-Buffer Audio",
++		.cpu_dai_name = "deepbuffer-cpu-dai",
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.platform_name = "sst-mfld-platform",
++		.ignore_suspend = 1,
++		.nonatomic = true,
++		.dynamic = 1,
++		.dpcm_playback = 1,
++		.ops = &byt_rt5640_aif1_ops,
++	},
+ 	[MERR_DPCM_COMPR] = {
+ 		.name = "Baytrail Compressed Port",
+ 		.stream_name = "Baytrail Compress",
+diff --git a/sound/soc/intel/boards/cht_bsw_max98090_ti.c b/sound/soc/intel/boards/cht_bsw_max98090_ti.c
+index 49f4869..bf16d6b 100644
+--- a/sound/soc/intel/boards/cht_bsw_max98090_ti.c
++++ b/sound/soc/intel/boards/cht_bsw_max98090_ti.c
+@@ -245,6 +245,18 @@ static struct snd_soc_dai_link cht_dailink[] = {
+ 		.dpcm_capture = 1,
+ 		.ops = &cht_aif1_ops,
+ 	},
++	[MERR_DPCM_DEEP_BUFFER] = {
++		.name = "Deep-Buffer Audio Port",
++		.stream_name = "Deep-Buffer Audio",
++		.cpu_dai_name = "deepbuffer-cpu-dai",
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.platform_name = "sst-mfld-platform",
++		.nonatomic = true,
++		.dynamic = 1,
++		.dpcm_playback = 1,
++		.ops = &cht_aif1_ops,
++	},
+ 	[MERR_DPCM_COMPR] = {
+ 		.name = "Compressed Port",
+ 		.stream_name = "Compress",
+diff --git a/sound/soc/intel/boards/cht_bsw_rt5645.c b/sound/soc/intel/boards/cht_bsw_rt5645.c
+index 7be8461..faac8c9 100644
+--- a/sound/soc/intel/boards/cht_bsw_rt5645.c
++++ b/sound/soc/intel/boards/cht_bsw_rt5645.c
+@@ -273,6 +273,18 @@ static struct snd_soc_dai_link cht_dailink[] = {
+ 		.dpcm_capture = 1,
+ 		.ops = &cht_aif1_ops,
+ 	},
++	[MERR_DPCM_DEEP_BUFFER] = {
++		.name = "Deep-Buffer Audio Port",
++		.stream_name = "Deep-Buffer Audio",
++		.cpu_dai_name = "deepbuffer-cpu-dai",
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.platform_name = "sst-mfld-platform",
++		.nonatomic = true,
++		.dynamic = 1,
++		.dpcm_playback = 1,
++		.ops = &cht_aif1_ops,
++	},
+ 	[MERR_DPCM_COMPR] = {
+ 		.name = "Compressed Port",
+ 		.stream_name = "Compress",
+diff --git a/sound/soc/intel/boards/cht_bsw_rt5672.c b/sound/soc/intel/boards/cht_bsw_rt5672.c
+index 23fe040..2c77d45 100644
+--- a/sound/soc/intel/boards/cht_bsw_rt5672.c
++++ b/sound/soc/intel/boards/cht_bsw_rt5672.c
+@@ -261,6 +261,18 @@ static struct snd_soc_dai_link cht_dailink[] = {
+ 		.dpcm_capture = 1,
+ 		.ops = &cht_aif1_ops,
+ 	},
++	[MERR_DPCM_DEEP_BUFFER] = {
++		.name = "Deep-Buffer Audio Port",
++		.stream_name = "Deep-Buffer Audio",
++		.cpu_dai_name = "deepbuffer-cpu-dai",
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.platform_name = "sst-mfld-platform",
++		.nonatomic = true,
++		.dynamic = 1,
++		.dpcm_playback = 1,
++		.ops = &cht_aif1_ops,
++	},
+ 	[MERR_DPCM_COMPR] = {
+ 		.name = "Compressed Port",
+ 		.stream_name = "Compress",
+
+From eaaba4dd17cf0a43558945982881db6da56e021c Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Thu, 24 Sep 2015 11:06:39 -0500
+Subject: [PATCH 15/38] ASoC: Intel: Atom: add 24-bit support for media
+ playback and capture
+
+DSP firmware supports 24-bit data, expose functionality to
+userspace/apps.
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/atom/sst-mfld-platform-pcm.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/sound/soc/intel/atom/sst-mfld-platform-pcm.c b/sound/soc/intel/atom/sst-mfld-platform-pcm.c
+index e5d4a79..e146ca2 100644
+--- a/sound/soc/intel/atom/sst-mfld-platform-pcm.c
++++ b/sound/soc/intel/atom/sst-mfld-platform-pcm.c
+@@ -518,14 +518,14 @@ static struct snd_soc_dai_driver sst_platform_dai[] = {
+ 		.channels_min = SST_STEREO,
+ 		.channels_max = SST_STEREO,
+ 		.rates = SNDRV_PCM_RATE_44100|SNDRV_PCM_RATE_48000,
+-		.formats = SNDRV_PCM_FMTBIT_S16_LE,
++		.formats = SNDRV_PCM_FMTBIT_S16_LE | SNDRV_PCM_FMTBIT_S24_LE,
+ 	},
+ 	.capture = {
+ 		.stream_name = "Headset Capture",
+ 		.channels_min = 1,
+ 		.channels_max = 2,
+ 		.rates = SNDRV_PCM_RATE_44100|SNDRV_PCM_RATE_48000,
+-		.formats = SNDRV_PCM_FMTBIT_S16_LE,
++		.formats = SNDRV_PCM_FMTBIT_S16_LE | SNDRV_PCM_FMTBIT_S24_LE,
+ 	},
+ },
+ {
+@@ -536,7 +536,7 @@ static struct snd_soc_dai_driver sst_platform_dai[] = {
+ 		.channels_min = SST_STEREO,
+ 		.channels_max = SST_STEREO,
+ 		.rates = SNDRV_PCM_RATE_44100|SNDRV_PCM_RATE_48000,
+-		.formats = SNDRV_PCM_FMTBIT_S16_LE,
++		.formats = SNDRV_PCM_FMTBIT_S16_LE | SNDRV_PCM_FMTBIT_S24_LE,
+ 	},
+ },
+ {
+
+From c75e09b4252350262cd50582882b4bff0101a459 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Thu, 24 Sep 2015 11:12:45 -0500
+Subject: [PATCH 16/38] ASoC: Intel: Atom: clean-up compressed DAI definition
+
+the fields channels_min, channels_max, rate and formats are
+irrelevant for compressed playback, they will depend on the
+content. This was probably a copy-paste mistake to have
+them in the first place
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/atom/sst-mfld-platform-pcm.c | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/sound/soc/intel/atom/sst-mfld-platform-pcm.c b/sound/soc/intel/atom/sst-mfld-platform-pcm.c
+index e146ca2..3353a58 100644
+--- a/sound/soc/intel/atom/sst-mfld-platform-pcm.c
++++ b/sound/soc/intel/atom/sst-mfld-platform-pcm.c
+@@ -545,10 +545,6 @@ static struct snd_soc_dai_driver sst_platform_dai[] = {
+ 	.ops = &sst_compr_dai_ops,
+ 	.playback = {
+ 		.stream_name = "Compress Playback",
+-		.channels_min = SST_STEREO,
+-		.channels_max = SST_STEREO,
+-		.rates = SNDRV_PCM_RATE_48000,
+-		.formats = SNDRV_PCM_FMTBIT_S16_LE,
+ 	},
+ },
+ /* BE CPU  Dais */
+
+From b1ce9601ade52048c5691f03c72ff592ac43025b Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Thu, 22 Oct 2015 15:14:10 -0500
+Subject: [PATCH 17/38] ASoC: Intel: Atom: flip logic for gain Switch
+
+The upstreamed code modified the control names from Mute to
+Switch without changing the logic. To get audio working the Switch
+needs to be off which isn't aligned with normal ALSA conventions.
+
+Inverting the logic now so that Switch Off means mute and Switch On
+means active audio using the specific volume setting.
+
+Signed-off-by: Sebastien Guiriec <sebastien.guiriec@intel.com>
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/atom/sst-atom-controls.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/sound/soc/intel/atom/sst-atom-controls.c b/sound/soc/intel/atom/sst-atom-controls.c
+index 1727cc4..b97e6ad 100644
+--- a/sound/soc/intel/atom/sst-atom-controls.c
++++ b/sound/soc/intel/atom/sst-atom-controls.c
+@@ -443,7 +443,7 @@ static int sst_gain_get(struct snd_kcontrol *kcontrol,
+ 		break;
+ 
+ 	case SST_GAIN_MUTE:
+-		ucontrol->value.integer.value[0] = gv->mute ? 1 : 0;
++		ucontrol->value.integer.value[0] = gv->mute ? 0 : 1;
+ 		break;
+ 
+ 	case SST_GAIN_RAMP_DURATION:
+@@ -479,7 +479,7 @@ static int sst_gain_put(struct snd_kcontrol *kcontrol,
+ 		break;
+ 
+ 	case SST_GAIN_MUTE:
+-		gv->mute = !!ucontrol->value.integer.value[0];
++		gv->mute = !ucontrol->value.integer.value[0];
+ 		dev_dbg(cmpnt->dev, "%s: Mute %d\n", mc->pname, gv->mute);
+ 		break;
+ 
+
+From dfb91890722f7613564ff01bf3cc0e6e7f2d17fc Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Thu, 5 Nov 2015 10:30:51 -0600
+Subject: [PATCH 18/38] ASoC: codec: rt5651: add ACPI and OF support
+
+Add required tables for ACPI and OF matching
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/codecs/rt5651.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/sound/soc/codecs/rt5651.c b/sound/soc/codecs/rt5651.c
+index 1d40318..4df7894 100644
+--- a/sound/soc/codecs/rt5651.c
++++ b/sound/soc/codecs/rt5651.c
+@@ -18,6 +18,7 @@
+ #include <linux/regmap.h>
+ #include <linux/platform_device.h>
+ #include <linux/spi/spi.h>
++#include <linux/acpi.h>
+ #include <sound/core.h>
+ #include <sound/pcm.h>
+ #include <sound/pcm_params.h>
+@@ -1741,6 +1742,22 @@ static const struct i2c_device_id rt5651_i2c_id[] = {
+ };
+ MODULE_DEVICE_TABLE(i2c, rt5651_i2c_id);
+ 
++#if defined(CONFIG_OF)
++static const struct of_device_id rt5651_of_match[] = {
++	{ .compatible = "realtek,rt5651", },
++	{},
++};
++MODULE_DEVICE_TABLE(of, rt5651_of_match);
++#endif
++
++#ifdef CONFIG_ACPI
++static const struct acpi_device_id rt5651_acpi_match[] = {
++	{ "10EC5651", 0 },
++	{ },
++};
++MODULE_DEVICE_TABLE(acpi, rt5651_acpi_match);
++#endif
++
+ static int rt5651_i2c_probe(struct i2c_client *i2c,
+ 		    const struct i2c_device_id *id)
+ {
+@@ -1806,6 +1823,8 @@ static int rt5651_i2c_remove(struct i2c_client *i2c)
+ static struct i2c_driver rt5651_i2c_driver = {
+ 	.driver = {
+ 		.name = "rt5651",
++		.acpi_match_table = ACPI_PTR(rt5651_acpi_match),
++		.of_match_table = of_match_ptr(rt5651_of_match),
+ 	},
+ 	.probe = rt5651_i2c_probe,
+ 	.remove   = rt5651_i2c_remove,
+
+From 97f81c6cc7beba673da0d61f6ffe43142740c8ac Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Thu, 5 Nov 2015 10:50:07 -0600
+Subject: [PATCH 19/38] ASoC: Intel: add bytct-rt5651 machine driver
+
+based on bytcr-rt5640 with changes only on codec side
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/Kconfig               |  12 ++
+ sound/soc/intel/atom/sst/sst_acpi.c   |   3 +
+ sound/soc/intel/boards/Makefile       |   2 +
+ sound/soc/intel/boards/bytcr_rt5651.c | 338 ++++++++++++++++++++++++++++++++++
+ 4 files changed, 355 insertions(+)
+ create mode 100644 sound/soc/intel/boards/bytcr_rt5651.c
+
+diff --git a/sound/soc/intel/Kconfig b/sound/soc/intel/Kconfig
+index 20e104b4..7f71993 100644
+--- a/sound/soc/intel/Kconfig
++++ b/sound/soc/intel/Kconfig
+@@ -102,6 +102,18 @@ config SND_SOC_INTEL_BYTCR_RT5640_MACH
+           Say Y if you have such a device
+           If unsure select "N".
+ 
++config SND_SOC_INTEL_BYTCR_RT5651_MACH
++        tristate "ASoC Audio driver for Intel Baytrail and Baytrail-CR with RT5651 codec"
++	depends on X86 && I2C
++	select SND_SOC_RT5651
++	select SND_SST_MFLD_PLATFORM
++	select SND_SST_IPC_ACPI
++	help
++          This adds support for ASoC machine driver for Intel(R) Baytrail and Baytrail-CR
++          platforms with RT5651 audio codec.
++          Say Y if you have such a device
++          If unsure select "N".
++
+ config SND_SOC_INTEL_CHT_BSW_RT5672_MACH
+         tristate "ASoC Audio driver for Intel Cherrytrail & Braswell with RT5672 codec"
+         depends on X86_INTEL_LPSS && I2C
+diff --git a/sound/soc/intel/atom/sst/sst_acpi.c b/sound/soc/intel/atom/sst/sst_acpi.c
+index f424460..b6ea0a5 100644
+--- a/sound/soc/intel/atom/sst/sst_acpi.c
++++ b/sound/soc/intel/atom/sst/sst_acpi.c
+@@ -316,6 +316,9 @@ static int sst_acpi_remove(struct platform_device *pdev)
+ static struct sst_acpi_mach sst_acpi_bytcr[] = {
+ 	{"10EC5640", "bytcr_rt5640", "intel/fw_sst_0f28.bin", "bytcr_rt5640", NULL,
+ 						&byt_rvp_platform_data },
++	{"10EC5651", "bytcr_rt5651", "intel/fw_sst_0f28.bin", "bytcr_rt5651", NULL,
++						&byt_rvp_platform_data },
++
+ 	{},
+ };
+ 
+diff --git a/sound/soc/intel/boards/Makefile b/sound/soc/intel/boards/Makefile
+index cb94895..0e9b36c 100644
+--- a/sound/soc/intel/boards/Makefile
++++ b/sound/soc/intel/boards/Makefile
+@@ -3,6 +3,7 @@ snd-soc-sst-byt-rt5640-mach-objs := byt-rt5640.o
+ snd-soc-sst-byt-max98090-mach-objs := byt-max98090.o
+ snd-soc-sst-broadwell-objs := broadwell.o
+ snd-soc-sst-bytcr-rt5640-objs := bytcr_rt5640.o
++snd-soc-sst-bytcr-rt5651-objs := bytcr_rt5651.o
+ snd-soc-sst-cht-bsw-rt5672-objs := cht_bsw_rt5672.o
+ snd-soc-sst-cht-bsw-rt5645-objs := cht_bsw_rt5645.o
+ snd-soc-sst-cht-bsw-max98090_ti-objs := cht_bsw_max98090_ti.o
+@@ -12,6 +13,7 @@ obj-$(CONFIG_SND_SOC_INTEL_BYT_RT5640_MACH) += snd-soc-sst-byt-rt5640-mach.o
+ obj-$(CONFIG_SND_SOC_INTEL_BYT_MAX98090_MACH) += snd-soc-sst-byt-max98090-mach.o
+ obj-$(CONFIG_SND_SOC_INTEL_BROADWELL_MACH) += snd-soc-sst-broadwell.o
+ obj-$(CONFIG_SND_SOC_INTEL_BYTCR_RT5640_MACH) += snd-soc-sst-bytcr-rt5640.o
++obj-$(CONFIG_SND_SOC_INTEL_BYTCR_RT5651_MACH) += snd-soc-sst-bytcr-rt5651.o
+ obj-$(CONFIG_SND_SOC_INTEL_CHT_BSW_RT5672_MACH) += snd-soc-sst-cht-bsw-rt5672.o
+ obj-$(CONFIG_SND_SOC_INTEL_CHT_BSW_RT5645_MACH) += snd-soc-sst-cht-bsw-rt5645.o
+ obj-$(CONFIG_SND_SOC_INTEL_CHT_BSW_MAX98090_TI_MACH) += snd-soc-sst-cht-bsw-max98090_ti.o
+diff --git a/sound/soc/intel/boards/bytcr_rt5651.c b/sound/soc/intel/boards/bytcr_rt5651.c
+new file mode 100644
+index 0000000..d5f77f6
+--- /dev/null
++++ b/sound/soc/intel/boards/bytcr_rt5651.c
+@@ -0,0 +1,338 @@
++/*
++ *  bytcr_rt5651.c - ASoc Machine driver for Intel Byt CR platform
++ *  (derived from bytcr_rt5640.c)
++ *
++ *  Copyright (C) 2015 Intel Corp
++ *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; version 2 of the License.
++ *
++ *  This program is distributed in the hope that it will be useful, but
++ *  WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ *  General Public License for more details.
++ *
++ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++ */
++
++#include <linux/init.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/acpi.h>
++#include <linux/device.h>
++#include <linux/dmi.h>
++#include <linux/slab.h>
++#include <sound/pcm.h>
++#include <sound/pcm_params.h>
++#include <sound/soc.h>
++#include <sound/jack.h>
++#include "../../codecs/rt5651.h"
++#include "../atom/sst-atom-controls.h"
++
++static const struct snd_soc_dapm_widget byt_rt5651_widgets[] = {
++	SND_SOC_DAPM_HP("Headphone", NULL),
++	SND_SOC_DAPM_MIC("Headset Mic", NULL),
++	SND_SOC_DAPM_MIC("Internal Mic", NULL),
++	SND_SOC_DAPM_SPK("Speaker", NULL),
++};
++
++static const struct snd_soc_dapm_route byt_rt5651_audio_map[] = {
++	{"AIF1 Playback", NULL, "ssp2 Tx"},
++	{"ssp2 Tx", NULL, "codec_out0"},
++	{"ssp2 Tx", NULL, "codec_out1"},
++	{"codec_in0", NULL, "ssp2 Rx"},
++	{"codec_in1", NULL, "ssp2 Rx"},
++	{"ssp2 Rx", NULL, "AIF1 Capture"},
++
++	{"Headset Mic", NULL, "micbias1"}, /* lowercase for rt5651 */
++	{"IN2P", NULL, "Headset Mic"},
++	{"Headphone", NULL, "HPOL"},
++	{"Headphone", NULL, "HPOR"},
++	{"Speaker", NULL, "LOUTL"},
++	{"Speaker", NULL, "LOUTR"},
++};
++
++static const struct snd_soc_dapm_route byt_rt5651_intmic_dmic1_map[] = {
++	{"DMIC1", NULL, "Internal Mic"},
++};
++
++static const struct snd_soc_dapm_route byt_rt5651_intmic_dmic2_map[] = {
++	{"DMIC2", NULL, "Internal Mic"},
++};
++
++static const struct snd_soc_dapm_route byt_rt5651_intmic_in1_map[] = {
++	{"Internal Mic", NULL, "MICBIAS1"},
++	{"IN1P", NULL, "Internal Mic"},
++};
++
++enum {
++	BYT_RT5651_DMIC1_MAP,
++	BYT_RT5651_DMIC2_MAP,
++	BYT_RT5651_IN1_MAP,
++};
++
++#define BYT_RT5651_MAP(quirk)	((quirk) & 0xff)
++#define BYT_RT5651_DMIC_EN	BIT(16)
++
++static unsigned long byt_rt5651_quirk = BYT_RT5651_DMIC1_MAP |
++					BYT_RT5651_DMIC_EN;
++
++static const struct snd_kcontrol_new byt_rt5651_controls[] = {
++	SOC_DAPM_PIN_SWITCH("Headphone"),
++	SOC_DAPM_PIN_SWITCH("Headset Mic"),
++	SOC_DAPM_PIN_SWITCH("Internal Mic"),
++	SOC_DAPM_PIN_SWITCH("Speaker"),
++};
++
++static int byt_rt5651_aif1_hw_params(struct snd_pcm_substream *substream,
++					struct snd_pcm_hw_params *params)
++{
++	struct snd_soc_pcm_runtime *rtd = substream->private_data;
++	struct snd_soc_dai *codec_dai = rtd->codec_dai;
++	int ret;
++
++	snd_soc_dai_set_bclk_ratio(codec_dai, 50);
++
++	ret = snd_soc_dai_set_sysclk(codec_dai, RT5651_SCLK_S_PLL1,
++				     params_rate(params) * 512,
++				     SND_SOC_CLOCK_IN);
++	if (ret < 0) {
++		dev_err(rtd->dev, "can't set codec clock %d\n", ret);
++		return ret;
++	}
++
++	ret = snd_soc_dai_set_pll(codec_dai, 0, RT5651_PLL1_S_BCLK1,
++				  params_rate(params) * 50,
++				  params_rate(params) * 512);
++	if (ret < 0) {
++		dev_err(rtd->dev, "can't set codec pll: %d\n", ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++static int byt_rt5651_quirk_cb(const struct dmi_system_id *id)
++{
++	byt_rt5651_quirk = (unsigned long)id->driver_data;
++	return 1;
++}
++
++static const struct dmi_system_id byt_rt5651_quirk_table[] = {
++	{
++		.callback = byt_rt5651_quirk_cb,
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
++			DMI_MATCH(DMI_PRODUCT_NAME, "T100TA"),
++		},
++		.driver_data = (unsigned long *)BYT_RT5651_IN1_MAP,
++	},
++	{
++		.callback = byt_rt5651_quirk_cb,
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "DellInc."),
++			DMI_MATCH(DMI_PRODUCT_NAME, "Venue 8 Pro 5830"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5651_DMIC2_MAP |
++						 BYT_RT5651_DMIC_EN),
++	},
++	{}
++};
++
++static int byt_rt5651_init(struct snd_soc_pcm_runtime *runtime)
++{
++	int ret;
++	struct snd_soc_card *card = runtime->card;
++
++	card->dapm.idle_bias_off = true;
++
++	ret = snd_soc_add_card_controls(card, byt_rt5651_controls,
++					ARRAY_SIZE(byt_rt5651_controls));
++	if (ret) {
++		dev_err(card->dev, "unable to add card controls\n");
++		return ret;
++	}
++	snd_soc_dapm_ignore_suspend(&card->dapm, "Headphone");
++	snd_soc_dapm_ignore_suspend(&card->dapm, "Speaker");
++
++	return ret;
++}
++
++static const struct snd_soc_pcm_stream byt_rt5651_dai_params = {
++	.formats = SNDRV_PCM_FMTBIT_S24_LE,
++	.rate_min = 48000,
++	.rate_max = 48000,
++	.channels_min = 2,
++	.channels_max = 2,
++};
++
++static int byt_rt5651_codec_fixup(struct snd_soc_pcm_runtime *rtd,
++			    struct snd_pcm_hw_params *params)
++{
++	struct snd_interval *rate = hw_param_interval(params,
++			SNDRV_PCM_HW_PARAM_RATE);
++	struct snd_interval *channels = hw_param_interval(params,
++						SNDRV_PCM_HW_PARAM_CHANNELS);
++	int ret;
++
++	/* The DSP will covert the FE rate to 48k, stereo, 24bits */
++	rate->min = rate->max = 48000;
++	channels->min = channels->max = 2;
++
++	/* set SSP2 to 24-bit */
++	params_set_format(params, SNDRV_PCM_FORMAT_S24_LE);
++
++	/*
++	 * Default mode for SSP configuration is TDM 4 slot, override config
++	 * with explicit setting to I2S 2ch 24-bit. The word length is set with
++	 * dai_set_tdm_slot() since there is no other API exposed
++	 */
++	ret = snd_soc_dai_set_fmt(rtd->cpu_dai,
++				  SND_SOC_DAIFMT_I2S     |
++				  SND_SOC_DAIFMT_NB_IF   |
++				  SND_SOC_DAIFMT_CBS_CFS
++				  );
++
++	if (ret < 0) {
++		dev_err(rtd->dev, "can't set format to I2S, err %d\n", ret);
++		return ret;
++	}
++
++	ret = snd_soc_dai_set_tdm_slot(rtd->cpu_dai, 0x3, 0x3, 2, 24);
++	if (ret < 0) {
++		dev_err(rtd->dev, "can't set I2S config, err %d\n", ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++static unsigned int rates_48000[] = {
++	48000,
++};
++
++static struct snd_pcm_hw_constraint_list constraints_48000 = {
++	.count = ARRAY_SIZE(rates_48000),
++	.list  = rates_48000,
++};
++
++static int byt_rt5651_aif1_startup(struct snd_pcm_substream *substream)
++{
++	return snd_pcm_hw_constraint_list(substream->runtime, 0,
++			SNDRV_PCM_HW_PARAM_RATE,
++			&constraints_48000);
++}
++
++static struct snd_soc_ops byt_rt5651_aif1_ops = {
++	.startup = byt_rt5651_aif1_startup,
++};
++
++static struct snd_soc_ops byt_rt5651_be_ssp2_ops = {
++	.hw_params = byt_rt5651_aif1_hw_params,
++};
++
++static struct snd_soc_dai_link byt_rt5651_dais[] = {
++	[MERR_DPCM_AUDIO] = {
++		.name = "Audio Port",
++		.stream_name = "Audio",
++		.cpu_dai_name = "media-cpu-dai",
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.platform_name = "sst-mfld-platform",
++		.ignore_suspend = 1,
++		.nonatomic = true,
++		.dynamic = 1,
++		.dpcm_playback = 1,
++		.dpcm_capture = 1,
++		.ops = &byt_rt5651_aif1_ops,
++	},
++	[MERR_DPCM_DEEP_BUFFER] = {
++		.name = "Deep-Buffer Audio Port",
++		.stream_name = "Deep-Buffer Audio",
++		.cpu_dai_name = "deepbuffer-cpu-dai",
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.platform_name = "sst-mfld-platform",
++		.ignore_suspend = 1,
++		.nonatomic = true,
++		.dynamic = 1,
++		.dpcm_playback = 1,
++		.ops = &byt_rt5651_aif1_ops,
++	},
++	[MERR_DPCM_COMPR] = {
++		.name = "Compressed Port",
++		.stream_name = "Compress",
++		.cpu_dai_name = "compress-cpu-dai",
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.platform_name = "sst-mfld-platform",
++	},
++	/* CODEC<->CODEC link */
++	/* back ends */
++	{
++		.name = "SSP2-Codec",
++		.be_id = 1,
++		.cpu_dai_name = "ssp2-port",
++		.platform_name = "sst-mfld-platform",
++		.no_pcm = 1,
++		.codec_dai_name = "rt5651-aif1",
++		.codec_name = "i2c-10EC5651:00",
++		.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF
++						| SND_SOC_DAIFMT_CBS_CFS,
++		.be_hw_params_fixup = byt_rt5651_codec_fixup,
++		.ignore_suspend = 1,
++		.nonatomic = true,
++		.dpcm_playback = 1,
++		.dpcm_capture = 1,
++		.init = byt_rt5651_init,
++		.ops = &byt_rt5651_be_ssp2_ops,
++	},
++};
++
++/* SoC card */
++static struct snd_soc_card byt_rt5651_card = {
++	.name = "bytcr-rt5651",
++	.owner = THIS_MODULE,
++	.dai_link = byt_rt5651_dais,
++	.num_links = ARRAY_SIZE(byt_rt5651_dais),
++	.dapm_widgets = byt_rt5651_widgets,
++	.num_dapm_widgets = ARRAY_SIZE(byt_rt5651_widgets),
++	.dapm_routes = byt_rt5651_audio_map,
++	.num_dapm_routes = ARRAY_SIZE(byt_rt5651_audio_map),
++	.fully_routed = true,
++};
++
++static int snd_byt_rt5651_mc_probe(struct platform_device *pdev)
++{
++	int ret_val = 0;
++
++	/* register the soc card */
++	byt_rt5651_card.dev = &pdev->dev;
++
++	ret_val = devm_snd_soc_register_card(&pdev->dev, &byt_rt5651_card);
++
++	if (ret_val) {
++		dev_err(&pdev->dev, "devm_snd_soc_register_card failed %d\n",
++			ret_val);
++		return ret_val;
++	}
++	platform_set_drvdata(pdev, &byt_rt5651_card);
++	return ret_val;
++}
++
++static struct platform_driver snd_byt_rt5651_mc_driver = {
++	.driver = {
++		.name = "bytcr_rt5651",
++		.pm = &snd_soc_pm_ops,
++	},
++	.probe = snd_byt_rt5651_mc_probe,
++};
++
++module_platform_driver(snd_byt_rt5651_mc_driver);
++
++MODULE_DESCRIPTION("ASoC Intel(R) Baytrail CR Machine driver for RT5651");
++MODULE_AUTHOR("Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>");
++MODULE_LICENSE("GPL v2");
++MODULE_ALIAS("platform:bytcr_rt5651");
+
+From df5cb01c0ccd20611256425bc57b019b4a59cffe Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Fri, 13 Nov 2015 20:24:30 -0600
+Subject: [PATCH 20/38] ASoC: intel: boards: add card for MinnowBoard I2S
+ access
+
+Add card with dummy codec and DAI to make I2S signals observable.
+Uses Mic and Speaker pins/widgets to control DAPM
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/Kconfig                |  12 ++
+ sound/soc/intel/boards/Makefile        |   2 +
+ sound/soc/intel/boards/bytcr_nocodec.c | 233 +++++++++++++++++++++++++++++++++
+ 3 files changed, 247 insertions(+)
+ create mode 100644 sound/soc/intel/boards/bytcr_nocodec.c
+
+diff --git a/sound/soc/intel/Kconfig b/sound/soc/intel/Kconfig
+index 7f71993..d589107 100644
+--- a/sound/soc/intel/Kconfig
++++ b/sound/soc/intel/Kconfig
+@@ -114,6 +114,18 @@ config SND_SOC_INTEL_BYTCR_RT5651_MACH
+           Say Y if you have such a device
+           If unsure select "N".
+ 
++config SND_SOC_INTEL_BYTCR_NOCODEC_MACH
++        tristate "ASoC Audio driver for Intel Baytrail and Baytrail-CR with no codec (MinnowBoard MAX)"
++	depends on X86 && I2C
++	select SND_SST_MFLD_PLATFORM
++	select SND_SST_IPC_ACPI
++	help
++          This adds support for ASoC machine driver for the MinnowBoard Max
++	  and provides access to I2S signals on the Low-Speed connector
++          Say Y if you have such a device
++          If unsure select "N".
++
++
+ config SND_SOC_INTEL_CHT_BSW_RT5672_MACH
+         tristate "ASoC Audio driver for Intel Cherrytrail & Braswell with RT5672 codec"
+         depends on X86_INTEL_LPSS && I2C
+diff --git a/sound/soc/intel/boards/Makefile b/sound/soc/intel/boards/Makefile
+index 0e9b36c..2130ceb 100644
+--- a/sound/soc/intel/boards/Makefile
++++ b/sound/soc/intel/boards/Makefile
+@@ -4,6 +4,7 @@ snd-soc-sst-byt-max98090-mach-objs := byt-max98090.o
+ snd-soc-sst-broadwell-objs := broadwell.o
+ snd-soc-sst-bytcr-rt5640-objs := bytcr_rt5640.o
+ snd-soc-sst-bytcr-rt5651-objs := bytcr_rt5651.o
++snd-soc-sst-bytcr-nocodec-objs := bytcr_nocodec.o
+ snd-soc-sst-cht-bsw-rt5672-objs := cht_bsw_rt5672.o
+ snd-soc-sst-cht-bsw-rt5645-objs := cht_bsw_rt5645.o
+ snd-soc-sst-cht-bsw-max98090_ti-objs := cht_bsw_max98090_ti.o
+@@ -14,6 +15,7 @@ obj-$(CONFIG_SND_SOC_INTEL_BYT_MAX98090_MACH) += snd-soc-sst-byt-max98090-mach.o
+ obj-$(CONFIG_SND_SOC_INTEL_BROADWELL_MACH) += snd-soc-sst-broadwell.o
+ obj-$(CONFIG_SND_SOC_INTEL_BYTCR_RT5640_MACH) += snd-soc-sst-bytcr-rt5640.o
+ obj-$(CONFIG_SND_SOC_INTEL_BYTCR_RT5651_MACH) += snd-soc-sst-bytcr-rt5651.o
++obj-$(CONFIG_SND_SOC_INTEL_BYTCR_NOCODEC_MACH) += snd-soc-sst-bytcr-nocodec.o
+ obj-$(CONFIG_SND_SOC_INTEL_CHT_BSW_RT5672_MACH) += snd-soc-sst-cht-bsw-rt5672.o
+ obj-$(CONFIG_SND_SOC_INTEL_CHT_BSW_RT5645_MACH) += snd-soc-sst-cht-bsw-rt5645.o
+ obj-$(CONFIG_SND_SOC_INTEL_CHT_BSW_MAX98090_TI_MACH) += snd-soc-sst-cht-bsw-max98090_ti.o
+diff --git a/sound/soc/intel/boards/bytcr_nocodec.c b/sound/soc/intel/boards/bytcr_nocodec.c
+new file mode 100644
+index 0000000..4eef28f
+--- /dev/null
++++ b/sound/soc/intel/boards/bytcr_nocodec.c
+@@ -0,0 +1,233 @@
++/*
++ *  bytcr_nocodec.c - ASoc Machine driver for MinnowBoard
++ *  to make I2S signals observable on the Low-Speed connector. Audio codec
++ *  is not managed by ASoC/DAPM
++ *
++ *  Copyright (C) 2015 Intel Corp
++ *
++ *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; version 2 of the License.
++ *
++ *  This program is distributed in the hope that it will be useful, but
++ *  WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ *  General Public License for more details.
++ *
++ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++ */
++
++#include <linux/init.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/acpi.h>
++#include <linux/device.h>
++#include <linux/dmi.h>
++#include <linux/slab.h>
++#include <sound/pcm.h>
++#include <sound/pcm_params.h>
++#include <sound/soc.h>
++#include <sound/jack.h>
++#include "../atom/sst-atom-controls.h"
++
++
++static const struct snd_soc_dapm_widget byt_nocodec_widgets[] = {
++	SND_SOC_DAPM_MIC("Mic", NULL),
++	SND_SOC_DAPM_SPK("Speaker", NULL),
++};
++
++static const struct snd_soc_dapm_route byt_nocodec_audio_map[] = {
++	{"ssp2 Tx", NULL, "codec_out0"},
++	{"ssp2 Tx", NULL, "codec_out1"},
++	{"codec_in0", NULL, "ssp2 Rx"},
++	{"codec_in1", NULL, "ssp2 Rx"},
++
++	{"ssp2 Rx", NULL, "Mic"},
++	{"Speaker", NULL, "ssp2 Tx"},
++};
++
++static const struct snd_kcontrol_new byt_nocodec_controls[] = {
++	SOC_DAPM_PIN_SWITCH("Mic"),
++	SOC_DAPM_PIN_SWITCH("Speaker"),
++};
++
++static int byt_nocodec_init(struct snd_soc_pcm_runtime *runtime)
++{
++	return 0;
++}
++
++static const struct snd_soc_pcm_stream byt_nocodec_dai_params = {
++	.formats = SNDRV_PCM_FMTBIT_S24_LE,
++	.rate_min = 48000,
++	.rate_max = 48000,
++	.channels_min = 2,
++	.channels_max = 2,
++};
++
++static int byt_nocodec_codec_fixup(struct snd_soc_pcm_runtime *rtd,
++			    struct snd_pcm_hw_params *params)
++{
++	struct snd_interval *rate = hw_param_interval(params,
++			SNDRV_PCM_HW_PARAM_RATE);
++	struct snd_interval *channels = hw_param_interval(params,
++						SNDRV_PCM_HW_PARAM_CHANNELS);
++	int ret;
++
++	/* The DSP will covert the FE rate to 48k, stereo, 24bits */
++	rate->min = rate->max = 48000;
++	channels->min = channels->max = 2;
++
++	/* set SSP2 to 24-bit */
++	params_set_format(params, SNDRV_PCM_FORMAT_S24_LE);
++
++	/*
++	 * Default mode for SSP configuration is TDM 4 slot, override config
++	 * with explicit setting to I2S 2ch 24-bit. The word length is set with
++	 * dai_set_tdm_slot() since there is no other API exposed
++	 */
++	ret = snd_soc_dai_set_fmt(rtd->cpu_dai,
++				  SND_SOC_DAIFMT_I2S     |
++				  SND_SOC_DAIFMT_NB_IF   |
++				  SND_SOC_DAIFMT_CBS_CFS
++				  );
++
++	if (ret < 0) {
++		dev_err(rtd->dev, "can't set format to I2S, err %d\n", ret);
++		return ret;
++	}
++
++	ret = snd_soc_dai_set_tdm_slot(rtd->cpu_dai, 0x3, 0x3, 2, 24);
++	if (ret < 0) {
++		dev_err(rtd->dev, "can't set I2S config, err %d\n", ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++static unsigned int rates_48000[] = {
++	48000,
++};
++
++static struct snd_pcm_hw_constraint_list constraints_48000 = {
++	.count = ARRAY_SIZE(rates_48000),
++	.list  = rates_48000,
++};
++
++static int byt_nocodec_aif1_startup(struct snd_pcm_substream *substream)
++{
++	return snd_pcm_hw_constraint_list(substream->runtime, 0,
++			SNDRV_PCM_HW_PARAM_RATE,
++			&constraints_48000);
++}
++
++static struct snd_soc_ops byt_nocodec_aif1_ops = {
++	.startup = byt_nocodec_aif1_startup,
++};
++
++static struct snd_soc_dai_link byt_nocodec_dais[] = {
++	[MERR_DPCM_AUDIO] = {
++		.name = "Audio Port",
++		.stream_name = "Audio",
++		.cpu_dai_name = "media-cpu-dai",
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.platform_name = "sst-mfld-platform",
++		.ignore_suspend = 1,
++		.nonatomic = true,
++		.dynamic = 1,
++		.dpcm_playback = 1,
++		.dpcm_capture = 1,
++		.ops = &byt_nocodec_aif1_ops,
++	},
++	[MERR_DPCM_DEEP_BUFFER] = {
++		.name = "Deep-Buffer Audio Port",
++		.stream_name = "Deep-Buffer Audio",
++		.cpu_dai_name = "deepbuffer-cpu-dai",
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.platform_name = "sst-mfld-platform",
++		.ignore_suspend = 1,
++		.nonatomic = true,
++		.dynamic = 1,
++		.dpcm_playback = 1,
++		.ops = &byt_nocodec_aif1_ops,
++	},
++	[MERR_DPCM_COMPR] = {
++		.name = "Compressed Port",
++		.stream_name = "Compress",
++		.cpu_dai_name = "compress-cpu-dai",
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.platform_name = "sst-mfld-platform",
++	},
++	/* CODEC<->CODEC link */
++	/* back ends */
++	{
++		.name = "LowSpeed Connector",
++		.be_id = 1,
++		.cpu_dai_name = "ssp2-port",
++		.platform_name = "sst-mfld-platform",
++		.no_pcm = 1,
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF
++						| SND_SOC_DAIFMT_CBS_CFS,
++		.be_hw_params_fixup = byt_nocodec_codec_fixup,
++		.ignore_suspend = 1,
++		.nonatomic = true,
++		.dpcm_playback = 1,
++		.dpcm_capture = 1,
++		.init = byt_nocodec_init,
++	},
++};
++
++/* SoC card */
++static struct snd_soc_card byt_nocodec_card = {
++	.name = "bytcr-nocodec",
++	.owner = THIS_MODULE,
++	.dai_link = byt_nocodec_dais,
++	.dapm_widgets = byt_nocodec_widgets,
++	.num_dapm_widgets = ARRAY_SIZE(byt_nocodec_widgets),
++	.num_links = ARRAY_SIZE(byt_nocodec_dais),
++	.dapm_routes = byt_nocodec_audio_map,
++	.num_dapm_routes = ARRAY_SIZE(byt_nocodec_audio_map),
++	.controls = byt_nocodec_controls,
++	.num_controls = ARRAY_SIZE(byt_nocodec_controls),
++	.fully_routed = true,
++};
++
++static int snd_byt_nocodec_mc_probe(struct platform_device *pdev)
++{
++	int ret_val = 0;
++
++	/* register the soc card */
++	byt_nocodec_card.dev = &pdev->dev;
++
++	ret_val = devm_snd_soc_register_card(&pdev->dev, &byt_nocodec_card);
++
++	if (ret_val) {
++		dev_err(&pdev->dev, "devm_snd_soc_register_card failed %d\n",
++			ret_val);
++		return ret_val;
++	}
++	platform_set_drvdata(pdev, &byt_nocodec_card);
++	return ret_val;
++}
++
++static struct platform_driver snd_byt_nocodec_mc_driver = {
++	.driver = {
++		.name = "bytcr_nocodec",
++		.pm = &snd_soc_pm_ops,
++	},
++	.probe = snd_byt_nocodec_mc_probe,
++};
++
++module_platform_driver(snd_byt_nocodec_mc_driver);
++
++MODULE_DESCRIPTION("ASoC Intel(R) Baytrail CR Nocodec Machine driver");
++MODULE_AUTHOR("Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>");
++MODULE_LICENSE("GPL v2");
++MODULE_ALIAS("platform:bytcr_nocodec");
+
+From 7a73d8357286a19c46848d3cd0cea5f69ae527a0 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Tue, 15 Dec 2015 19:29:19 -0600
+Subject: [PATCH 21/38] ASoC: rt5640: add ASRC support
+
+Signed-off-by: Jack Yu <jack.yu@realtek.com>
+---
+ sound/soc/codecs/rt5640.c | 102 ++++++++++++++++++++++++++++++++++++++++++++++
+ sound/soc/codecs/rt5640.h |  17 ++++++++
+ 2 files changed, 119 insertions(+)
+
+diff --git a/sound/soc/codecs/rt5640.c b/sound/soc/codecs/rt5640.c
+index f2beb1a..18f2d3b 100644
+--- a/sound/soc/codecs/rt5640.c
++++ b/sound/soc/codecs/rt5640.c
+@@ -488,6 +488,18 @@ static int is_sys_clk_from_pll(struct snd_soc_dapm_widget *source,
+ 		return 0;
+ }
+ 
++static int is_using_asrc(struct snd_soc_dapm_widget *source,
++			 struct snd_soc_dapm_widget *sink)
++{
++	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(source->dapm);
++	struct rt5640_priv *rt5640 = snd_soc_codec_get_drvdata(codec);
++
++	if (!rt5640->asrc_en)
++		return 0;
++
++	return 1;
++}
++
+ /* Digital Mixer */
+ static const struct snd_kcontrol_new rt5640_sto_adc_l_mix[] = {
+ 	SOC_DAPM_SINGLE("ADC1 Switch", RT5640_STO_ADC_MIXER,
+@@ -1059,6 +1071,20 @@ static int rt5640_hp_post_event(struct snd_soc_dapm_widget *w,
+ static const struct snd_soc_dapm_widget rt5640_dapm_widgets[] = {
+ 	SND_SOC_DAPM_SUPPLY("PLL1", RT5640_PWR_ANLG2,
+ 			RT5640_PWR_PLL_BIT, 0, NULL, 0),
++
++	/* ASRC */
++	SND_SOC_DAPM_SUPPLY_S("Stereo Filter ASRC", 1, RT5640_ASRC_1,
++			 15, 0, NULL, 0),
++	SND_SOC_DAPM_SUPPLY_S("I2S2 Filter ASRC", 1, RT5640_ASRC_1,
++			 12, 0, NULL, 0),
++	SND_SOC_DAPM_SUPPLY_S("I2S2 ASRC", 1, RT5640_ASRC_1,
++			 11, 0, NULL, 0),
++	SND_SOC_DAPM_SUPPLY_S("DMIC1 ASRC", 1, RT5640_ASRC_1,
++			 9, 0, NULL, 0),
++	SND_SOC_DAPM_SUPPLY_S("DMIC2 ASRC", 1, RT5640_ASRC_1,
++			 8, 0, NULL, 0),
++
++
+ 	/* Input Side */
+ 	/* micbias */
+ 	SND_SOC_DAPM_SUPPLY("LDO2", RT5640_PWR_ANLG1,
+@@ -1319,6 +1345,12 @@ static const struct snd_soc_dapm_widget rt5639_specific_dapm_widgets[] = {
+ };
+ 
+ static const struct snd_soc_dapm_route rt5640_dapm_routes[] = {
++	{ "I2S1", NULL, "Stereo Filter ASRC", is_using_asrc },
++	{ "I2S2", NULL, "I2S2 ASRC", is_using_asrc },
++	{ "I2S2", NULL, "I2S2 Filter ASRC", is_using_asrc },
++	{ "DMIC1", NULL, "DMIC1 ASRC", is_using_asrc },
++	{ "DMIC2", NULL, "DMIC2 ASRC", is_using_asrc },
++
+ 	{"IN1P", NULL, "LDO2"},
+ 	{"IN2P", NULL, "LDO2"},
+ 	{"IN3P", NULL, "LDO2"},
+@@ -1981,6 +2013,76 @@ int rt5640_dmic_enable(struct snd_soc_codec *codec,
+ }
+ EXPORT_SYMBOL_GPL(rt5640_dmic_enable);
+ 
++int rt5640_sel_asrc_clk_src(struct snd_soc_codec *codec,
++		unsigned int filter_mask, unsigned int clk_src)
++{
++	struct rt5640_priv *rt5640 = snd_soc_codec_get_drvdata(codec);
++	unsigned int asrc2_mask = 0;
++	unsigned int asrc2_value = 0;
++
++	switch (clk_src) {
++	case RT5640_CLK_SEL_SYS:
++	case RT5640_CLK_SEL_ASRC:
++		break;
++
++	default:
++		return -EINVAL;
++	}
++
++	if (!filter_mask)
++		return -EINVAL;
++
++	if (filter_mask & RT5640_DA_STEREO_FILTER) {
++		asrc2_mask |= RT5640_STO_DAC_M_MASK;
++		asrc2_value = (asrc2_value & ~RT5640_STO_DAC_M_MASK)
++			| (clk_src << RT5640_STO_DAC_M_SFT);
++	}
++
++	if (filter_mask & RT5640_DA_MONO_L_FILTER) {
++		asrc2_mask |= RT5640_MDA_L_M_MASK;
++		asrc2_value = (asrc2_value & ~RT5640_MDA_L_M_MASK)
++			| (clk_src << RT5640_MDA_L_M_SFT);
++	}
++
++	if (filter_mask & RT5640_DA_MONO_R_FILTER) {
++		asrc2_mask |= RT5640_MDA_R_M_MASK;
++		asrc2_value = (asrc2_value & ~RT5640_MDA_R_M_MASK)
++			| (clk_src << RT5640_MDA_R_M_SFT);
++	}
++
++	if (filter_mask & RT5640_AD_STEREO_FILTER) {
++		asrc2_mask |= RT5640_ADC_M_MASK;
++		asrc2_value = (asrc2_value & ~RT5640_ADC_M_MASK)
++			| (clk_src << RT5640_ADC_M_SFT);
++	}
++
++	if (filter_mask & RT5640_AD_MONO_L_FILTER) {
++		asrc2_mask |= RT5640_MAD_L_M_MASK;
++		asrc2_value = (asrc2_value & ~RT5640_MAD_L_M_MASK)
++			| (clk_src << RT5640_MAD_L_M_SFT);
++	}
++
++	if (filter_mask & RT5640_AD_MONO_R_FILTER)  {
++		asrc2_mask |= RT5640_MAD_R_M_MASK;
++		asrc2_value = (asrc2_value & ~RT5640_MAD_R_M_MASK)
++			| (clk_src << RT5640_MAD_R_M_SFT);
++	}
++
++	snd_soc_update_bits(codec, RT5640_ASRC_2,
++		asrc2_mask, asrc2_value);
++
++	if (snd_soc_read(codec, RT5640_ASRC_2)) {
++		rt5640->asrc_en = true;
++		snd_soc_update_bits(codec, RT5640_JD_CTRL, 0x3, 0x3);
++	} else {
++		rt5640->asrc_en = false;
++		snd_soc_update_bits(codec, RT5640_JD_CTRL, 0x3, 0x0);
++	}
++
++	return 0;
++}
++EXPORT_SYMBOL_GPL(rt5640_sel_asrc_clk_src);
++
+ static int rt5640_probe(struct snd_soc_codec *codec)
+ {
+ 	struct snd_soc_dapm_context *dapm = snd_soc_codec_get_dapm(codec);
+diff --git a/sound/soc/codecs/rt5640.h b/sound/soc/codecs/rt5640.h
+index 3deb8ba..83a7150d 100644
+--- a/sound/soc/codecs/rt5640.h
++++ b/sound/soc/codecs/rt5640.h
+@@ -1033,6 +1033,10 @@
+ #define RT5640_DMIC_2_M_NOR			(0x0 << 8)
+ #define RT5640_DMIC_2_M_ASYN			(0x1 << 8)
+ 
++/* ASRC clock source selection (0x84) */
++#define RT5640_CLK_SEL_SYS			(0x0)
++#define RT5640_CLK_SEL_ASRC			(0x1)
++
+ /* ASRC Control 2 (0x84) */
+ #define RT5640_MDA_L_M_MASK			(0x1 << 15)
+ #define RT5640_MDA_L_M_SFT			15
+@@ -2079,6 +2083,16 @@ enum {
+ 	RT5640_DMIC2,
+ };
+ 
++/* filter mask */
++enum {
++	RT5640_DA_STEREO_FILTER = 0x1,
++	RT5640_DA_MONO_L_FILTER = (0x1 << 1),
++	RT5640_DA_MONO_R_FILTER = (0x1 << 2),
++	RT5640_AD_STEREO_FILTER = (0x1 << 3),
++	RT5640_AD_MONO_L_FILTER = (0x1 << 4),
++	RT5640_AD_MONO_R_FILTER = (0x1 << 5),
++};
++
+ struct rt5640_priv {
+ 	struct snd_soc_codec *codec;
+ 	struct rt5640_platform_data pdata;
+@@ -2095,9 +2109,12 @@ struct rt5640_priv {
+ 	int pll_out;
+ 
+ 	bool hp_mute;
++	bool asrc_en;
+ };
+ 
+ int rt5640_dmic_enable(struct snd_soc_codec *codec,
+ 		       bool dmic1_data_pin, bool dmic2_data_pin);
++int rt5640_sel_asrc_clk_src(struct snd_soc_codec *codec,
++		unsigned int filter_mask, unsigned int clk_src);
+ 
+ #endif
+
+From bff46414955c4657c646f1ebc1010e8740393286 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Mon, 16 Nov 2015 13:42:24 -0600
+Subject: [PATCH 22/38] ASoC: Intel: bytcr-rt5640: enable ASRC
+
+Sound is noisy when using BCLK as reference, enable ASRC in rt5640
+codec
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/boards/bytcr_rt5640.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index 48667ac..1db130e7 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -153,6 +153,11 @@ static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
+ 
+ 	card->dapm.idle_bias_off = true;
+ 
++	rt5640_sel_asrc_clk_src(codec,
++				RT5640_DA_STEREO_FILTER |
++				RT5640_AD_STEREO_FILTER,
++				RT5640_CLK_SEL_ASRC);
++
+ 	ret = snd_soc_add_card_controls(card, byt_rt5640_controls,
+ 					ARRAY_SIZE(byt_rt5640_controls));
+ 	if (ret) {
+
+From 84acb3ce664fdfffe96d1093f61be00b20bbbc34 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Fri, 27 Nov 2015 12:28:59 -0600
+Subject: [PATCH 23/38] ASoC: Intel: bytcr_rt5640: fixup DAI codec_name with
+ HID
+
+Codec name is hard-coded in machine driver, pass information
+from actual ACPI HID to help support BIOS variations
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/atom/sst/sst_acpi.c   | 17 ++++++++++++-----
+ sound/soc/intel/boards/bytcr_rt5640.c | 10 ++++++++++
+ 2 files changed, 22 insertions(+), 5 deletions(-)
+
+diff --git a/sound/soc/intel/atom/sst/sst_acpi.c b/sound/soc/intel/atom/sst/sst_acpi.c
+index b6ea0a5..f61e531 100644
+--- a/sound/soc/intel/atom/sst/sst_acpi.c
++++ b/sound/soc/intel/atom/sst/sst_acpi.c
+@@ -247,16 +247,23 @@ static int sst_acpi_probe(struct platform_device *pdev)
+ 
+ 	dev_dbg(dev, "ACPI device id: %x\n", dev_id);
+ 
+-	plat_dev = platform_device_register_data(dev, pdata->platform, -1, NULL, 0);
++	plat_dev = platform_device_register_data(dev, pdata->platform, -1,
++						NULL, 0);
+ 	if (IS_ERR(plat_dev)) {
+-		dev_err(dev, "Failed to create machine device: %s\n", pdata->platform);
++		dev_err(dev, "Failed to create machine device: %s\n",
++			pdata->platform);
+ 		return PTR_ERR(plat_dev);
+ 	}
+ 
+-	/* Create platform device for sst machine driver */
+-	mdev = platform_device_register_data(dev, mach->drv_name, -1, NULL, 0);
++	/*
++	 * Create platform device for sst machine driver,
++	 * pass machine info as pdata
++	 */
++	mdev = platform_device_register_data(dev, mach->drv_name, -1,
++					(const void *)mach, sizeof(*mach));
+ 	if (IS_ERR(mdev)) {
+-		dev_err(dev, "Failed to create machine device: %s\n", mach->drv_name);
++		dev_err(dev, "Failed to create machine device: %s\n",
++			mach->drv_name);
+ 		return PTR_ERR(mdev);
+ 	}
+ 
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index 1db130e7..bba5109 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -30,6 +30,7 @@
+ #include <sound/jack.h>
+ #include "../../codecs/rt5640.h"
+ #include "../atom/sst-atom-controls.h"
++#include "../common/sst-acpi.h"
+ 
+ static const struct snd_soc_dapm_widget byt_rt5640_widgets[] = {
+ 	SND_SOC_DAPM_HP("Headphone", NULL),
+@@ -336,12 +337,21 @@ static struct snd_soc_card byt_rt5640_card = {
+ 	.fully_routed = true,
+ };
+ 
++static char byt_rt5640_codec_name[16]; /* i2c-<HID>:00 with HID being 8 chars */
++
+ static int snd_byt_rt5640_mc_probe(struct platform_device *pdev)
+ {
+ 	int ret_val = 0;
++	struct sst_acpi_mach *mach;
+ 
+ 	/* register the soc card */
+ 	byt_rt5640_card.dev = &pdev->dev;
++	mach = byt_rt5640_card.dev->platform_data;
++
++	/* fixup codec name based on HID */
++	snprintf(byt_rt5640_codec_name, sizeof(byt_rt5640_codec_name),
++		 "%s%s%s", "i2c-", mach->id, ":00");
++	byt_rt5640_dais[MERR_DPCM_COMPR+1].codec_name = byt_rt5640_codec_name;
+ 
+ 	ret_val = devm_snd_soc_register_card(&pdev->dev, &byt_rt5640_card);
+ 
+
+From e0b6697e38e2fae842381977ca4dcc75cc43d6cc Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Thu, 26 Nov 2015 11:19:26 -0600
+Subject: [PATCH 24/38] ASoC: Intel: Atom: add support for RT5642
+
+The machine driver is not loaded when the BIOS uses the 10EC5642
+_HID. Add it to the white list of known _HIDs, codec_name is
+already taken care of by previous commit
+
+Tested on Asus T100TAF.
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/atom/sst/sst_acpi.c   | 2 ++
+ sound/soc/intel/boards/bytcr_rt5640.c | 2 +-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/sound/soc/intel/atom/sst/sst_acpi.c b/sound/soc/intel/atom/sst/sst_acpi.c
+index f61e531..510826f 100644
+--- a/sound/soc/intel/atom/sst/sst_acpi.c
++++ b/sound/soc/intel/atom/sst/sst_acpi.c
+@@ -323,6 +323,8 @@ static int sst_acpi_remove(struct platform_device *pdev)
+ static struct sst_acpi_mach sst_acpi_bytcr[] = {
+ 	{"10EC5640", "bytcr_rt5640", "intel/fw_sst_0f28.bin", "bytcr_rt5640", NULL,
+ 						&byt_rvp_platform_data },
++	{"10EC5642", "bytcr_rt5640", "intel/fw_sst_0f28.bin", "bytcr_rt5640", NULL,
++						&byt_rvp_platform_data },
+ 	{"10EC5651", "bytcr_rt5651", "intel/fw_sst_0f28.bin", "bytcr_rt5651", NULL,
+ 						&byt_rvp_platform_data },
+ 
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index bba5109..71266e9 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -312,7 +312,7 @@ static struct snd_soc_dai_link byt_rt5640_dais[] = {
+ 		.platform_name = "sst-mfld-platform",
+ 		.no_pcm = 1,
+ 		.codec_dai_name = "rt5640-aif1",
+-		.codec_name = "i2c-10EC5640:00",
++		.codec_name = "i2c-10EC5640:00", /* overwritten with HID */
+ 		.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF
+ 						| SND_SOC_DAIFMT_CBS_CFS,
+ 		.be_hw_params_fixup = byt_rt5640_codec_fixup,
+
+From 40bce5f5fe28ff60279fad5472a26e366f0b3005 Mon Sep 17 00:00:00 2001
+From: Jorge Fernandez Monteagudo <jorgefm@cirsa.com>
+Date: Fri, 27 Nov 2015 12:46:50 -0600
+Subject: [PATCH 25/38] ASoC: Intel: Atom: Add support for HP ElitePad 1000 G2
+
+The BIOS for the HP ElitePad 1000 G2 uses an unexpected HID,
+(INTCCFFD), add it to the white list of knowns HIDs.
+
+Signed-off-by: Jorge Fernandez Monteagudo <jorgefm@cirsa.com>
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/codecs/rt5640.c             | 1 +
+ sound/soc/intel/atom/sst/sst_acpi.c   | 3 ++-
+ sound/soc/intel/boards/bytcr_rt5640.c | 8 ++++++++
+ 3 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/sound/soc/codecs/rt5640.c b/sound/soc/codecs/rt5640.c
+index 18f2d3b..11d032c 100644
+--- a/sound/soc/codecs/rt5640.c
++++ b/sound/soc/codecs/rt5640.c
+@@ -2277,6 +2277,7 @@ static const struct acpi_device_id rt5640_acpi_match[] = {
+ 	{ "INT33CA", 0 },
+ 	{ "10EC5640", 0 },
+ 	{ "10EC5642", 0 },
++	{ "INTCCFFD", 0 },
+ 	{ },
+ };
+ MODULE_DEVICE_TABLE(acpi, rt5640_acpi_match);
+diff --git a/sound/soc/intel/atom/sst/sst_acpi.c b/sound/soc/intel/atom/sst/sst_acpi.c
+index 510826f..4fce03f 100644
+--- a/sound/soc/intel/atom/sst/sst_acpi.c
++++ b/sound/soc/intel/atom/sst/sst_acpi.c
+@@ -325,9 +325,10 @@ static struct sst_acpi_mach sst_acpi_bytcr[] = {
+ 						&byt_rvp_platform_data },
+ 	{"10EC5642", "bytcr_rt5640", "intel/fw_sst_0f28.bin", "bytcr_rt5640", NULL,
+ 						&byt_rvp_platform_data },
++	{"INTCCFFD", "bytcr_rt5640", "intel/fw_sst_0f28.bin", "bytcr_rt5640", NULL,
++						&byt_rvp_platform_data },
+ 	{"10EC5651", "bytcr_rt5651", "intel/fw_sst_0f28.bin", "bytcr_rt5651", NULL,
+ 						&byt_rvp_platform_data },
+-
+ 	{},
+ };
+ 
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index 71266e9..30ec0a6 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -141,6 +141,14 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 		.driver_data = (unsigned long *)(BYT_RT5640_DMIC2_MAP |
+ 						 BYT_RT5640_DMIC_EN),
+ 	},
++	{
++		.callback = byt_rt5640_quirk_cb,
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "Hewlett-Packard"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "HP ElitePad 1000 G2"),
++		},
++		.driver_data = (unsigned long *)BYT_RT5640_IN1_MAP,
++	},
+ 	{}
+ };
+ 
+
+From 2609a075ec4a0514cea55b075516cf291b3aa85e Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Tue, 15 Dec 2015 15:37:10 -0600
+Subject: [PATCH 26/38] ASoC: Intel: Atom: auto-detection of Baytrail-CR
+
+BYT-CR does not have SSP2 pins available and needs to use
+SSP0 instead for codec connection. The upstream code needs to
+be patched manually on BYT-CR platforms to load a dedicated
+firmware that drives SSP0 internally.
+For some reason the IPC interrupt index is also modified from
+the Baytrail-T reference.
+
+Use PUNIT BIOS config bits to infer which SST firmware needs to
+needs to be loaded without user configuration. Assume regular
+firmware is to be used if status is incorrect or CONFIG_IOSF_MBI
+is not enabled.
+
+Tested with 4.3 on Asus T100TA and T100TAF. Detection checked
+ on BYT-CR/IRDA devices with an  earlier version of the code.
+
+TODO:
+- clean-up identifiers once Andy Shevshenko's patches are upstream
+- harden MBI code (locks, etc) if needed
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/atom/sst/sst_acpi.c | 98 +++++++++++++++++++++++++++++++++++--
+ 1 file changed, 93 insertions(+), 5 deletions(-)
+
+diff --git a/sound/soc/intel/atom/sst/sst_acpi.c b/sound/soc/intel/atom/sst/sst_acpi.c
+index 4fce03f..7c7c5ae 100644
+--- a/sound/soc/intel/atom/sst/sst_acpi.c
++++ b/sound/soc/intel/atom/sst/sst_acpi.c
+@@ -38,6 +38,8 @@
+ #include <acpi/platform/aclinux.h>
+ #include <acpi/actypes.h>
+ #include <acpi/acpi_bus.h>
++#include <asm/cpu_device_id.h>
++#include <asm/iosf_mbi.h>
+ #include "../sst-mfld-platform.h"
+ #include "../../common/sst-dsp.h"
+ #include "../../common/sst-acpi.h"
+@@ -112,6 +114,28 @@ static const struct sst_res_info byt_rvp_res_info = {
+ 	.acpi_ipc_irq_index = 5,
+ };
+ 
++/* BYTCR has different BIOS from BYT */
++static const struct sst_res_info bytcr_res_info = {
++	.shim_offset = 0x140000,
++	.shim_size = 0x000100,
++	.shim_phy_addr = SST_BYT_SHIM_PHY_ADDR,
++	.ssp0_offset = 0xa0000,
++	.ssp0_size = 0x1000,
++	.dma0_offset = 0x98000,
++	.dma0_size = 0x4000,
++	.dma1_offset = 0x9c000,
++	.dma1_size = 0x4000,
++	.iram_offset = 0x0c0000,
++	.iram_size = 0x14000,
++	.dram_offset = 0x100000,
++	.dram_size = 0x28000,
++	.mbox_offset = 0x144000,
++	.mbox_size = 0x1000,
++	.acpi_lpe_res_index = 0,
++	.acpi_ddr_index = 2,
++	.acpi_ipc_irq_index = 0
++};
++
+ static struct sst_platform_info byt_rvp_platform_data = {
+ 	.probe_data = &byt_fwparse_info,
+ 	.ipc_info = &byt_ipc_info,
+@@ -214,6 +238,51 @@ static int sst_platform_get_resources(struct intel_sst_drv *ctx)
+ 	return 0;
+ }
+ 
++
++static int is_byt_cr(struct device *dev, bool *bytcr)
++{
++	int status = 0;
++
++	if (IS_ENABLED(CONFIG_IOSF_MBI)) {
++		static const struct x86_cpu_id cpu_ids[] __initconst = {
++			{ X86_VENDOR_INTEL, 6, 55 }, /* Valleyview, Bay Trail */
++			{}
++		};
++		int status;
++		u32 bios_status;
++
++		if (!x86_match_cpu(cpu_ids) || !iosf_mbi_available()) {
++			dev_err(dev, "Wrong CPU ID or IOSF_MBI problem\n");
++			return -ENODEV;
++		}
++
++		/* FIXME:
++		 *  clean identifiers when Andy Shevchenko's patches
++		 *  are upstream
++		 */
++		status = iosf_mbi_read(0x04, /* PUNIT */
++				       BT_MBI_PMC_READ, /* 0x10 */
++				       0x006, /* BIOS_CONFIG */
++				       &bios_status);
++
++		if (status) {
++			dev_err(dev, "could not read PUNIT BIOS_CONFIG\n");
++		} else {
++			/* bits 26:27 mirror PMIC options */
++			bios_status = (bios_status >> 26) & 3;
++
++			if ((bios_status == 1) || (bios_status == 3))
++				*bytcr = true;
++			else
++				dev_info(dev, "BYT-CR not detected\n");
++		}
++	} else {
++		dev_info(dev, "IOSF_MBI not enabled, no BYT-CR detection\n");
++	}
++	return status;
++}
++
++
+ static int sst_acpi_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev = &pdev->dev;
+@@ -225,6 +294,7 @@ static int sst_acpi_probe(struct platform_device *pdev)
+ 	struct platform_device *plat_dev;
+ 	struct sst_platform_info *pdata;
+ 	unsigned int dev_id;
++	bool bytcr = false;
+ 
+ 	id = acpi_match_device(dev->driver->acpi_match_table, dev);
+ 	if (!id)
+@@ -273,7 +343,21 @@ static int sst_acpi_probe(struct platform_device *pdev)
+ 
+ 	/* Fill sst platform data */
+ 	ctx->pdata = pdata;
+-	strcpy(ctx->firmware_name, mach->fw_filename);
++
++	ret = is_byt_cr(dev, &bytcr);
++	if ((ret < 0) || (bytcr == false)) {
++		snprintf(ctx->firmware_name, sizeof(ctx->firmware_name),
++			"%s%s", mach->fw_filename, ".bin");
++	} else {
++		snprintf(ctx->firmware_name, sizeof(ctx->firmware_name),
++			"%s%s", mach->fw_filename, "_ssp0.bin");
++		dev_info(dev,
++			"Detected Baytrail-CR platform, use firmware %s\n",
++			ctx->firmware_name);
++
++		/* override resource info */
++		byt_rvp_platform_data.res_info = &bytcr_res_info;
++	}
+ 
+ 	ret = sst_platform_get_resources(ctx);
+ 	if (ret)
+@@ -320,14 +404,18 @@ static int sst_acpi_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
++/*
++ * .bin extension for firmware name will be added after auto detection
++ * of Baytrail CR platform
++ */
+ static struct sst_acpi_mach sst_acpi_bytcr[] = {
+-	{"10EC5640", "bytcr_rt5640", "intel/fw_sst_0f28.bin", "bytcr_rt5640", NULL,
++	{"10EC5640", "bytcr_rt5640", "intel/fw_sst_0f28", "bytcr_rt5640", NULL,
+ 						&byt_rvp_platform_data },
+-	{"10EC5642", "bytcr_rt5640", "intel/fw_sst_0f28.bin", "bytcr_rt5640", NULL,
++	{"10EC5642", "bytcr_rt5640", "intel/fw_sst_0f28", "bytcr_rt5640", NULL,
+ 						&byt_rvp_platform_data },
+-	{"INTCCFFD", "bytcr_rt5640", "intel/fw_sst_0f28.bin", "bytcr_rt5640", NULL,
++	{"INTCCFFD", "bytcr_rt5640", "intel/fw_sst_0f28", "bytcr_rt5640", NULL,
+ 						&byt_rvp_platform_data },
+-	{"10EC5651", "bytcr_rt5651", "intel/fw_sst_0f28.bin", "bytcr_rt5651", NULL,
++	{"10EC5651", "bytcr_rt5651", "intel/fw_sst_0f28", "bytcr_rt5651", NULL,
+ 						&byt_rvp_platform_data },
+ 	{},
+ };
+
+From a742e0db69a62d166e0ac56ab72d12c6e97529a4 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Wed, 2 Dec 2015 14:37:53 -0600
+Subject: [PATCH 27/38] ASoC: Intel: bytcr-rt5640: add Asus T100TAF quirks
+
+Add quirk based on DMI string matching
+Also fix matching to use DMI_EXACT_MATCH otherwise T100TA and T100TAF
+will be using same quirk
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/boards/bytcr_rt5640.c | 20 ++++++++++++++------
+ 1 file changed, 14 insertions(+), 6 deletions(-)
+
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index 30ec0a6..d2b9de0 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -127,16 +127,24 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 	{
+ 		.callback = byt_rt5640_quirk_cb,
+ 		.matches = {
+-			DMI_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
+-			DMI_MATCH(DMI_PRODUCT_NAME, "T100TA"),
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
++			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "T100TA"),
+ 		},
+ 		.driver_data = (unsigned long *)BYT_RT5640_IN1_MAP,
+ 	},
+ 	{
+ 		.callback = byt_rt5640_quirk_cb,
+ 		.matches = {
+-			DMI_MATCH(DMI_SYS_VENDOR, "DellInc."),
+-			DMI_MATCH(DMI_PRODUCT_NAME, "Venue 8 Pro 5830"),
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
++			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "T100TAF"),
++		},
++		.driver_data = (unsigned long *)BYT_RT5640_IN1_MAP,
++	},
++	{
++		.callback = byt_rt5640_quirk_cb,
++		.matches = {
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "DellInc."),
++			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "Venue 8 Pro 5830"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_DMIC2_MAP |
+ 						 BYT_RT5640_DMIC_EN),
+@@ -144,8 +152,8 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 	{
+ 		.callback = byt_rt5640_quirk_cb,
+ 		.matches = {
+-			DMI_MATCH(DMI_SYS_VENDOR, "Hewlett-Packard"),
+-			DMI_MATCH(DMI_PRODUCT_NAME, "HP ElitePad 1000 G2"),
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Hewlett-Packard"),
++			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "HP ElitePad 1000 G2"),
+ 		},
+ 		.driver_data = (unsigned long *)BYT_RT5640_IN1_MAP,
+ 	},
+
+From a567ab6e64f8d3f9ce71aa3c8b0d57baaa09c6db Mon Sep 17 00:00:00 2001
+From: Asutosh Pathak <asutosh.pathak@intel.com>
+Date: Mon, 14 Dec 2015 11:27:13 -0600
+Subject: [PATCH 28/38] drivers/misc: Baytrail SoC platform clock support
+
+The Baytrail SoC provides 6 platform clocks which can run either
+at 25MHz (xtal) or 19.2 MHz (PLL) and with an on/off control.
+
+These clocks are not exposed by ACPI for now and given the
+simplicity of the controls there is no real point in porting
+this code to the common clock framework.
+
+ASoC machine drivers for Baytrail are the main users of this
+driver. The CLK3 is used as an audio MCLK used by the
+audio codec as its PLL input, which results in better audio
+quality than if the I2S bitclock is used for the PLL input.
+---
+ drivers/misc/Kconfig            |   5 +
+ drivers/misc/Makefile           |   1 +
+ drivers/misc/vlv2_plat_clock.c  | 238 ++++++++++++++++++++++++++++++++++++++++
+ include/linux/vlv2_plat_clock.h |  30 +++++
+ 4 files changed, 274 insertions(+)
+ create mode 100644 drivers/misc/vlv2_plat_clock.c
+ create mode 100644 include/linux/vlv2_plat_clock.h
+
+diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
+index ccccc29..cc819e3 100644
+--- a/drivers/misc/Kconfig
++++ b/drivers/misc/Kconfig
+@@ -525,6 +525,11 @@ config VEXPRESS_SYSCFG
+ 	  bus. System Configuration interface is one of the possible means
+ 	  of generating transactions on this bus.
+ 
++config VLV2_PLAT_CLK
++        tristate "Vlv2 platform clock control driver"
++        ---help---
++         Driver to enable the platform clock control for valleyview2
++
+ source "drivers/misc/c2port/Kconfig"
+ source "drivers/misc/eeprom/Kconfig"
+ source "drivers/misc/cb710/Kconfig"
+diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
+index 537d7f3b..f47c365 100644
+--- a/drivers/misc/Makefile
++++ b/drivers/misc/Makefile
+@@ -53,6 +53,7 @@ obj-$(CONFIG_LATTICE_ECP3_CONFIG)	+= lattice-ecp3-config.o
+ obj-$(CONFIG_SRAM)		+= sram.o
+ obj-y				+= mic/
+ obj-$(CONFIG_GENWQE)		+= genwqe/
++obj-$(CONFIG_VLV2_PLAT_CLK)     += vlv2_plat_clock.o
+ obj-$(CONFIG_ECHO)		+= echo/
+ obj-$(CONFIG_VEXPRESS_SYSCFG)	+= vexpress-syscfg.o
+ obj-$(CONFIG_CXL_BASE)		+= cxl/
+diff --git a/drivers/misc/vlv2_plat_clock.c b/drivers/misc/vlv2_plat_clock.c
+new file mode 100644
+index 0000000..b3821f9
+--- /dev/null
++++ b/drivers/misc/vlv2_plat_clock.c
+@@ -0,0 +1,238 @@
++/*
++ * vlv2_plat_clock.c - VLV2 platform clock driver
++ * Copyright (C) 2013 Intel Corporation
++ *
++ * Author: Asutosh Pathak <asutosh.pathak@intel.com>
++ * Author: Chandra Sekhar Anagani <chandra.sekhar.anagani@intel.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; version 2 of the License.
++ *
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
++ */
++
++#include <linux/err.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/vlv2_plat_clock.h>
++
++/* NOTE: Most of below constants could come from platform data.
++ * To be fixed when appropriate ACPI support comes.
++ */
++#define VLV2_PMC_CLK_BASE_ADDRESS	0xfed03060
++#define PLT_CLK_CTL_OFFSET(x)		(0x04 * (x))
++
++#define CLK_CONFG_BIT_POS		0
++#define CLK_CONFG_BIT_LEN		2
++#define CLK_CONFG_D3_GATED		0
++#define CLK_CONFG_FORCE_ON		1
++#define CLK_CONFG_FORCE_OFF		2
++
++#define CLK_FREQ_TYPE_BIT_POS		2
++#define CLK_FREQ_TYPE_BIT_LEN		1
++#define CLK_FREQ_TYPE_XTAL		0	/* 25 MHz */
++#define CLK_FREQ_TYPE_PLL		1	/* 19.2 MHz */
++
++#define MAX_CLK_COUNT			5
++
++/* Helper macros to manipulate bitfields */
++#define REG_MASK(n)		(((1 << (n##_BIT_LEN)) - 1) << (n##_BIT_POS))
++#define REG_SET_FIELD(r, n, v)	(((r) & ~REG_MASK(n)) | \
++				 (((v) << (n##_BIT_POS)) & REG_MASK(n)))
++#define REG_GET_FIELD(r, n)	(((r) & REG_MASK(n)) >> n##_BIT_POS)
++/*
++ * vlv2 platform has 6 platform clocks, controlled by 4 byte registers
++ * Total size required for mapping is 6*4 = 24 bytes
++ */
++#define PMC_MAP_SIZE			24
++
++static DEFINE_MUTEX(clk_mutex);
++static void __iomem *pmc_base;
++
++/*
++ * vlv2_plat_set_clock_freq - Set clock frequency to a specified platform clock
++ * @clk_num: Platform clock number (i.e. 0, 1, 2, ...,5)
++ * @freq_type: Clock frequency (0-25 MHz(XTAL), 1-19.2 MHz(PLL) )
++ */
++int vlv2_plat_set_clock_freq(int clk_num, int freq_type)
++{
++	void __iomem *addr;
++
++	if (clk_num < 0 && clk_num > MAX_CLK_COUNT) {
++		pr_err("Clock number out of range (%d)\n", clk_num);
++		return -EINVAL;
++	}
++
++	if (freq_type != CLK_FREQ_TYPE_XTAL &&
++	    freq_type != CLK_FREQ_TYPE_PLL) {
++		pr_err("wrong clock type\n");
++		return -EINVAL;
++	}
++
++	if (!pmc_base) {
++		pr_err("memio map is not set\n");
++		return -EINVAL;
++	}
++
++	addr = pmc_base + PLT_CLK_CTL_OFFSET(clk_num);
++
++	mutex_lock(&clk_mutex);
++	writel(REG_SET_FIELD(readl(addr), CLK_FREQ_TYPE, freq_type), addr);
++	mutex_unlock(&clk_mutex);
++
++	return 0;
++}
++EXPORT_SYMBOL_GPL(vlv2_plat_set_clock_freq);
++
++/*
++ * vlv2_plat_get_clock_freq - Get the status of specified platform clock
++ * @clk_num: Platform clock number (i.e. 0, 1, 2, ...,5)
++ *
++ * Returns 0 for 25 MHz(XTAL) and 1 for 19.2 MHz(PLL)
++ */
++int vlv2_plat_get_clock_freq(int clk_num)
++{
++	u32 ret;
++
++	if (clk_num < 0 && clk_num > MAX_CLK_COUNT) {
++		pr_err("Clock number out of range (%d)\n", clk_num);
++		return -EINVAL;
++	}
++
++	if (!pmc_base) {
++		pr_err("memio map is not set\n");
++		return -EINVAL;
++	}
++
++	mutex_lock(&clk_mutex);
++	ret = REG_GET_FIELD(readl(pmc_base + PLT_CLK_CTL_OFFSET(clk_num)),
++			    CLK_FREQ_TYPE);
++	mutex_unlock(&clk_mutex);
++	return ret;
++}
++EXPORT_SYMBOL_GPL(vlv2_plat_get_clock_freq);
++
++/*
++ * vlv2_plat_configure_clock - Configure the specified platform clock
++ * @clk_num: Platform clock number (i.e. 0, 1, 2, ...,5)
++ * @conf:      Clock gating:
++ *		0   - Clock gated on D3 state
++ *		1   - Force on
++ *		2,3 - Force off
++ */
++int vlv2_plat_configure_clock(int clk_num, u32 conf)
++{
++	void __iomem *addr;
++
++	if (clk_num < 0 && clk_num > MAX_CLK_COUNT) {
++		pr_err("Clock number out of range (%d)\n", clk_num);
++		return -EINVAL;
++	}
++
++	if (conf != CLK_CONFG_D3_GATED &&
++	    conf != CLK_CONFG_FORCE_ON &&
++	    conf != CLK_CONFG_FORCE_OFF) {
++		pr_err("Invalid clock configuration requested\n");
++		return -EINVAL;
++	}
++
++	if (!pmc_base) {
++		pr_err("memio map is not set\n");
++		return -EINVAL;
++	}
++
++	addr = pmc_base + PLT_CLK_CTL_OFFSET(clk_num);
++
++	mutex_lock(&clk_mutex);
++	writel(REG_SET_FIELD(readl(addr), CLK_CONFG, conf), addr);
++	mutex_unlock(&clk_mutex);
++	return 0;
++}
++EXPORT_SYMBOL_GPL(vlv2_plat_configure_clock);
++
++/*
++ * vlv2_plat_get_clock_status - Get the status of specified platform clock
++ * @clk_num: Platform clock number (i.e. 0, 1, 2, ...,5)
++ *
++ * Returns 1 - On, 0 - Off
++ */
++int vlv2_plat_get_clock_status(int clk_num)
++{
++	int ret;
++
++	if (clk_num < 0 && clk_num > MAX_CLK_COUNT) {
++		pr_err("Clock number out of range (%d)\n", clk_num);
++		return -EINVAL;
++	}
++
++	if (!pmc_base) {
++		pr_err("memio map is not set\n");
++		return -EINVAL;
++	}
++
++	mutex_lock(&clk_mutex);
++	ret = (int)REG_GET_FIELD(readl(pmc_base + PLT_CLK_CTL_OFFSET(clk_num)),
++				 CLK_CONFG);
++	mutex_unlock(&clk_mutex);
++	return ret;
++}
++EXPORT_SYMBOL_GPL(vlv2_plat_get_clock_status);
++
++static int vlv2_plat_clk_probe(struct platform_device *pdev)
++{
++	pmc_base = ioremap_nocache(VLV2_PMC_CLK_BASE_ADDRESS, PMC_MAP_SIZE);
++	if (!pmc_base) {
++		dev_err(&pdev->dev, "I/O memory remapping failed\n");
++		return -ENOMEM;
++	}
++
++	dev_info(&pdev->dev, "vlv2_plat_clk initialized\n");
++	return 0;
++}
++
++static int vlv2_plat_clk_remove(struct platform_device *pdev)
++{
++	iounmap(pmc_base);
++	pmc_base = NULL;
++	return 0;
++}
++
++static const struct platform_device_id vlv2_plat_clk_id[] = {
++	{"vlv2_plat_clk", 0},
++	{}
++};
++MODULE_DEVICE_TABLE(platform, vlv2_plat_clk_id);
++
++static struct platform_driver vlv2_plat_clk_driver = {
++	.probe = vlv2_plat_clk_probe,
++	.remove = vlv2_plat_clk_remove,
++	.id_table = vlv2_plat_clk_id,
++	.driver = {
++		.name = "vlv2_plat_clk",
++		.owner = THIS_MODULE,
++	},
++};
++
++static int __init vlv2_plat_clk_init(void)
++{
++	return platform_driver_register(&vlv2_plat_clk_driver);
++}
++arch_initcall(vlv2_plat_clk_init);
++
++static void __exit vlv2_plat_clk_exit(void)
++{
++	platform_driver_unregister(&vlv2_plat_clk_driver);
++}
++module_exit(vlv2_plat_clk_exit);
++
++MODULE_AUTHOR("Asutosh Pathak <asutosh.pathak@intel.com>");
++MODULE_DESCRIPTION("Intel VLV2 platform clock driver");
++MODULE_LICENSE("GPL v2");
+diff --git a/include/linux/vlv2_plat_clock.h b/include/linux/vlv2_plat_clock.h
+new file mode 100644
+index 0000000..ed709bd
+--- /dev/null
++++ b/include/linux/vlv2_plat_clock.h
+@@ -0,0 +1,30 @@
++/*
++ * vlv2_plat_clock.h
++ *
++ * Copyright (C) 2013 Intel Corp
++ * Author: Asutosh Pathak <asutosh.pathak@intel.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; version 2 of the License.
++ *
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
++ */
++
++#ifndef __VLV2_PLAT_CLOCK_H
++#define __VLV2_PLAT_CLOCK_H
++
++int vlv2_plat_set_clock_freq(int clock_num, int freq_type);
++int vlv2_plat_get_clock_freq(int clock_num);
++
++int vlv2_plat_configure_clock(int clock_num, u32 conf);
++int vlv2_plat_get_clock_status(int clock_num);
++
++#endif /* __VLV2_PLAT_CLOCK_H */
+
+From f1dc14bd1e88f7c1fafa70094c254e609d84eb49 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Thu, 17 Dec 2015 21:05:56 -0600
+Subject: [PATCH 29/38] drivers/misc: move vlv2 platform clock definitions to
+ header file
+
+Make it easier for users of this driver to set clocks and control
+on/off/d3_gated status
+---
+ drivers/misc/vlv2_plat_clock.c  | 15 +++++----------
+ include/linux/vlv2_plat_clock.h |  9 +++++++++
+ 2 files changed, 14 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/misc/vlv2_plat_clock.c b/drivers/misc/vlv2_plat_clock.c
+index b3821f9..36ae9f6 100644
+--- a/drivers/misc/vlv2_plat_clock.c
++++ b/drivers/misc/vlv2_plat_clock.c
+@@ -32,14 +32,9 @@
+ 
+ #define CLK_CONFG_BIT_POS		0
+ #define CLK_CONFG_BIT_LEN		2
+-#define CLK_CONFG_D3_GATED		0
+-#define CLK_CONFG_FORCE_ON		1
+-#define CLK_CONFG_FORCE_OFF		2
+ 
+ #define CLK_FREQ_TYPE_BIT_POS		2
+ #define CLK_FREQ_TYPE_BIT_LEN		1
+-#define CLK_FREQ_TYPE_XTAL		0	/* 25 MHz */
+-#define CLK_FREQ_TYPE_PLL		1	/* 19.2 MHz */
+ 
+ #define MAX_CLK_COUNT			5
+ 
+@@ -71,8 +66,8 @@ int vlv2_plat_set_clock_freq(int clk_num, int freq_type)
+ 		return -EINVAL;
+ 	}
+ 
+-	if (freq_type != CLK_FREQ_TYPE_XTAL &&
+-	    freq_type != CLK_FREQ_TYPE_PLL) {
++	if (freq_type != VLV2_PLT_CLK_FREQ_TYPE_XTAL &&
++	    freq_type != VLV2_PLT_CLK_FREQ_TYPE_PLL) {
+ 		pr_err("wrong clock type\n");
+ 		return -EINVAL;
+ 	}
+@@ -137,9 +132,9 @@ int vlv2_plat_configure_clock(int clk_num, u32 conf)
+ 		return -EINVAL;
+ 	}
+ 
+-	if (conf != CLK_CONFG_D3_GATED &&
+-	    conf != CLK_CONFG_FORCE_ON &&
+-	    conf != CLK_CONFG_FORCE_OFF) {
++	if (conf != VLV2_PLT_CLK_CONFG_D3_GATED &&
++	    conf != VLV2_PLT_CLK_CONFG_FORCE_ON &&
++	    conf != VLV2_PLT_CLK_CONFG_FORCE_OFF) {
+ 		pr_err("Invalid clock configuration requested\n");
+ 		return -EINVAL;
+ 	}
+diff --git a/include/linux/vlv2_plat_clock.h b/include/linux/vlv2_plat_clock.h
+index ed709bd..a9adf6b 100644
+--- a/include/linux/vlv2_plat_clock.h
++++ b/include/linux/vlv2_plat_clock.h
+@@ -21,6 +21,15 @@
+ #ifndef __VLV2_PLAT_CLOCK_H
+ #define __VLV2_PLAT_CLOCK_H
+ 
++#define VLV2_PLT_CLK_CONFG_D3_GATED		0
++#define VLV2_PLT_CLK_CONFG_FORCE_ON		1
++#define VLV2_PLT_CLK_CONFG_FORCE_OFF		2
++
++#define VLV2_PLT_CLK_FREQ_TYPE_XTAL		0	/* 25 MHz */
++#define VLV2_PLT_CLK_FREQ_TYPE_PLL		1	/* 19.2 MHz */
++
++#define VLV2_PLT_CLK_AUDIO                      3
++
+ int vlv2_plat_set_clock_freq(int clock_num, int freq_type);
+ int vlv2_plat_get_clock_freq(int clock_num);
+ 
+
+From 44bba6917655599d954c5a2992f8d75c61a47402 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Thu, 17 Dec 2015 21:09:56 -0600
+Subject: [PATCH 30/38] ASoC: Intel: boards: add VLV2_PLAT_CLK dependencies
+
+Make sure VLV2 platform clock driver is selected for all baytrail
+machine drivers
+---
+ sound/soc/intel/Kconfig | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/sound/soc/intel/Kconfig b/sound/soc/intel/Kconfig
+index d589107..79deb48 100644
+--- a/sound/soc/intel/Kconfig
++++ b/sound/soc/intel/Kconfig
+@@ -96,6 +96,7 @@ config SND_SOC_INTEL_BYTCR_RT5640_MACH
+ 	select SND_SOC_RT5640
+ 	select SND_SST_MFLD_PLATFORM
+ 	select SND_SST_IPC_ACPI
++	select VLV2_PLAT_CLK
+ 	help
+           This adds support for ASoC machine driver for Intel(R) Baytrail and Baytrail-CR
+           platforms with RT5640 audio codec.
+@@ -108,6 +109,7 @@ config SND_SOC_INTEL_BYTCR_RT5651_MACH
+ 	select SND_SOC_RT5651
+ 	select SND_SST_MFLD_PLATFORM
+ 	select SND_SST_IPC_ACPI
++	select VLV2_PLAT_CLK
+ 	help
+           This adds support for ASoC machine driver for Intel(R) Baytrail and Baytrail-CR
+           platforms with RT5651 audio codec.
+@@ -119,6 +121,7 @@ config SND_SOC_INTEL_BYTCR_NOCODEC_MACH
+ 	depends on X86 && I2C
+ 	select SND_SST_MFLD_PLATFORM
+ 	select SND_SST_IPC_ACPI
++	select VLV2_PLAT_CLK
+ 	help
+           This adds support for ASoC machine driver for the MinnowBoard Max
+ 	  and provides access to I2S signals on the Low-Speed connector
+
+From 8dd173e2245a02df476d6627f9a0521411293893 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Mon, 14 Dec 2015 11:23:13 -0600
+Subject: [PATCH 31/38] ASoC: Intel: bytcr_rt5640: add MCLK support
+
+Use vlv2 platform clocks when MCLK quirk is defined
+By default always enable the 19.2 MHz PLL, keep the xtal-based
+option for debug/tests.
+---
+ sound/soc/intel/boards/bytcr_rt5640.c | 188 ++++++++++++++++++++++++++++++----
+ 1 file changed, 166 insertions(+), 22 deletions(-)
+
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index d2b9de0..42e3d2d 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -24,6 +24,7 @@
+ #include <linux/device.h>
+ #include <linux/dmi.h>
+ #include <linux/slab.h>
++#include <linux/vlv2_plat_clock.h>
+ #include <sound/pcm.h>
+ #include <sound/pcm_params.h>
+ #include <sound/soc.h>
+@@ -32,11 +33,108 @@
+ #include "../atom/sst-atom-controls.h"
+ #include "../common/sst-acpi.h"
+ 
++enum {
++	BYT_RT5640_DMIC1_MAP,
++	BYT_RT5640_DMIC2_MAP,
++	BYT_RT5640_IN1_MAP,
++};
++
++#define BYT_RT5640_MAP(quirk)	((quirk) & 0xff)
++#define BYT_RT5640_DMIC_EN	BIT(16)
++#define BYT_RT5640_MCLK_EN	BIT(17)
++#define BYT_RT5640_MCLK_25MHZ	BIT(18)
++
++
++static unsigned long byt_rt5640_quirk = BYT_RT5640_DMIC1_MAP |
++					BYT_RT5640_DMIC_EN;
++
++#define BYT_CODEC_DAI	"rt5640-aif1"
++
++static inline struct snd_soc_dai *byt_get_codec_dai(struct snd_soc_card *card)
++{
++        int i;
++
++	for (i = 0; i < card->num_rtd; i++) {
++		struct snd_soc_pcm_runtime *rtd;
++
++		rtd = card->rtd + i;
++		if (!strncmp(rtd->codec_dai->name, BYT_CODEC_DAI,
++			     strlen(BYT_CODEC_DAI)))
++			return rtd->codec_dai;
++	}
++	return NULL;
++}
++
++static int platform_clock_control(struct snd_soc_dapm_widget *w,
++				struct snd_kcontrol *k, int  event)
++{
++	struct snd_soc_dapm_context *dapm = w->dapm;
++	struct snd_soc_card *card = dapm->card;
++	struct snd_soc_dai *codec_dai;
++	int ret;
++
++	codec_dai = byt_get_codec_dai(card);
++	if (!codec_dai) {
++		dev_err(card->dev,
++			"Codec dai not found; Unable to set platform clock\n");
++		return -EIO;
++	}
++
++	if (SND_SOC_DAPM_EVENT_ON(event)) {
++
++		if (byt_rt5640_quirk & BYT_RT5640_MCLK_EN) {
++			ret = vlv2_plat_configure_clock(VLV2_PLT_CLK_AUDIO,
++						VLV2_PLT_CLK_CONFG_FORCE_ON);
++			if (ret < 0) {
++				dev_err(card->dev,
++					"could not configure MCLK state");
++				return ret;
++			}
++		}
++		ret = snd_soc_dai_set_sysclk(codec_dai, RT5640_SCLK_S_PLL1,
++					48000 * 512,
++					SND_SOC_CLOCK_IN);
++	} else {
++		/* Set codec clock source to internal clock before
++		   turning off the platform clock. Codec needs clock
++		   for Jack detection and button press */
++
++		ret = snd_soc_dai_set_sysclk(codec_dai, RT5640_SCLK_S_RCCLK,
++					0,
++					SND_SOC_CLOCK_IN);
++		if (!ret) {
++			if (byt_rt5640_quirk & BYT_RT5640_MCLK_EN) {
++				ret = vlv2_plat_configure_clock(
++					VLV2_PLT_CLK_AUDIO,
++					VLV2_PLT_CLK_CONFG_FORCE_OFF);
++				if (ret) {
++					dev_err(card->dev,
++						"could not configure MCLK state");
++					return ret;
++				}
++			}
++		}
++	}
++
++	if (ret < 0) {
++		dev_err(card->dev, "can't set codec sysclk: %d\n", ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++
++
+ static const struct snd_soc_dapm_widget byt_rt5640_widgets[] = {
+ 	SND_SOC_DAPM_HP("Headphone", NULL),
+ 	SND_SOC_DAPM_MIC("Headset Mic", NULL),
+ 	SND_SOC_DAPM_MIC("Internal Mic", NULL),
+ 	SND_SOC_DAPM_SPK("Speaker", NULL),
++	SND_SOC_DAPM_SUPPLY("Platform Clock", SND_SOC_NOPM, 0, 0,
++			platform_clock_control, SND_SOC_DAPM_PRE_PMU |
++			SND_SOC_DAPM_POST_PMD),
++
+ };
+ 
+ static const struct snd_soc_dapm_route byt_rt5640_audio_map[] = {
+@@ -47,6 +145,11 @@ static const struct snd_soc_dapm_route byt_rt5640_audio_map[] = {
+ 	{"codec_in1", NULL, "ssp2 Rx"},
+ 	{"ssp2 Rx", NULL, "AIF1 Capture"},
+ 
++	{"Headphone", NULL, "Platform Clock"},
++	{"Headset Mic", NULL, "Platform Clock"},
++	{"Internal Mic", NULL, "Platform Clock"},
++	{"Speaker", NULL, "Platform Clock"},
++
+ 	{"Headset Mic", NULL, "MICBIAS1"},
+ 	{"IN2P", NULL, "Headset Mic"},
+ 	{"Headphone", NULL, "HPOL"},
+@@ -70,18 +173,6 @@ static const struct snd_soc_dapm_route byt_rt5640_intmic_in1_map[] = {
+ 	{"IN1P", NULL, "Internal Mic"},
+ };
+ 
+-enum {
+-	BYT_RT5640_DMIC1_MAP,
+-	BYT_RT5640_DMIC2_MAP,
+-	BYT_RT5640_IN1_MAP,
+-};
+-
+-#define BYT_RT5640_MAP(quirk)	((quirk) & 0xff)
+-#define BYT_RT5640_DMIC_EN	BIT(16)
+-
+-static unsigned long byt_rt5640_quirk = BYT_RT5640_DMIC1_MAP |
+-					BYT_RT5640_DMIC_EN;
+-
+ static const struct snd_kcontrol_new byt_rt5640_controls[] = {
+ 	SOC_DAPM_PIN_SWITCH("Headphone"),
+ 	SOC_DAPM_PIN_SWITCH("Headset Mic"),
+@@ -96,19 +187,34 @@ static int byt_rt5640_aif1_hw_params(struct snd_pcm_substream *substream,
+ 	struct snd_soc_dai *codec_dai = rtd->codec_dai;
+ 	int ret;
+ 
+-	snd_soc_dai_set_bclk_ratio(codec_dai, 50);
+-
+ 	ret = snd_soc_dai_set_sysclk(codec_dai, RT5640_SCLK_S_PLL1,
+ 				     params_rate(params) * 512,
+ 				     SND_SOC_CLOCK_IN);
++
+ 	if (ret < 0) {
+ 		dev_err(rtd->dev, "can't set codec clock %d\n", ret);
+ 		return ret;
+ 	}
+ 
+-	ret = snd_soc_dai_set_pll(codec_dai, 0, RT5640_PLL1_S_BCLK1,
+-				  params_rate(params) * 50,
+-				  params_rate(params) * 512);
++	if (!(byt_rt5640_quirk & BYT_RT5640_MCLK_EN)) {
++		/* use bitclock as PLL input */
++		ret = snd_soc_dai_set_pll(codec_dai, 0, RT5640_PLL1_S_BCLK1,
++					params_rate(params) * 50,
++					params_rate(params) * 512);
++	} else {
++		if (byt_rt5640_quirk & BYT_RT5640_MCLK_25MHZ) {
++			ret = snd_soc_dai_set_pll(codec_dai, 0,
++						RT5640_PLL1_S_MCLK,
++						25000000,
++						params_rate(params) * 512);
++		} else {
++			ret = snd_soc_dai_set_pll(codec_dai, 0,
++				RT5640_PLL1_S_MCLK,
++				19200000,
++				params_rate(params) * 512);
++		}
++	}
++
+ 	if (ret < 0) {
+ 		dev_err(rtd->dev, "can't set codec pll: %d\n", ret);
+ 		return ret;
+@@ -130,7 +236,8 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
+ 			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "T100TA"),
+ 		},
+-		.driver_data = (unsigned long *)BYT_RT5640_IN1_MAP,
++		.driver_data = (unsigned long *)(BYT_RT5640_IN1_MAP |
++						 BYT_RT5640_MCLK_EN),
+ 	},
+ 	{
+ 		.callback = byt_rt5640_quirk_cb,
+@@ -138,7 +245,8 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
+ 			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "T100TAF"),
+ 		},
+-		.driver_data = (unsigned long *)BYT_RT5640_IN1_MAP,
++		.driver_data = (unsigned long *)(BYT_RT5640_IN1_MAP |
++						 BYT_RT5640_MCLK_EN),
+ 	},
+ 	{
+ 		.callback = byt_rt5640_quirk_cb,
+@@ -147,7 +255,8 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "Venue 8 Pro 5830"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_DMIC2_MAP |
+-						 BYT_RT5640_DMIC_EN),
++						 BYT_RT5640_DMIC_EN   |
++						 BYT_RT5640_MCLK_EN),
+ 	},
+ 	{
+ 		.callback = byt_rt5640_quirk_cb,
+@@ -155,7 +264,8 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Hewlett-Packard"),
+ 			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "HP ElitePad 1000 G2"),
+ 		},
+-		.driver_data = (unsigned long *)BYT_RT5640_IN1_MAP,
++		.driver_data = (unsigned long *)(BYT_RT5640_IN1_MAP |
++						 BYT_RT5640_MCLK_EN),
+ 	},
+ 	{}
+ };
+@@ -172,7 +282,11 @@ static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
+ 
+ 	rt5640_sel_asrc_clk_src(codec,
+ 				RT5640_DA_STEREO_FILTER |
+-				RT5640_AD_STEREO_FILTER,
++				RT5640_DA_MONO_L_FILTER	|
++				RT5640_DA_MONO_R_FILTER	|
++				RT5640_AD_STEREO_FILTER	|
++				RT5640_AD_MONO_L_FILTER	|
++				RT5640_AD_MONO_R_FILTER,
+ 				RT5640_CLK_SEL_ASRC);
+ 
+ 	ret = snd_soc_add_card_controls(card, byt_rt5640_controls,
+@@ -210,6 +324,26 @@ static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
+ 	snd_soc_dapm_ignore_suspend(&card->dapm, "Headphone");
+ 	snd_soc_dapm_ignore_suspend(&card->dapm, "Speaker");
+ 
++	if (byt_rt5640_quirk & BYT_RT5640_MCLK_EN) {
++		ret = vlv2_plat_configure_clock(VLV2_PLT_CLK_AUDIO,
++						VLV2_PLT_CLK_CONFG_FORCE_OFF);
++		if (ret) {
++			dev_err(card->dev, "could not configure MCLK state");
++			return ret;
++		}
++
++		if (byt_rt5640_quirk & BYT_RT5640_MCLK_25MHZ) {
++			ret = vlv2_plat_set_clock_freq(VLV2_PLT_CLK_AUDIO,
++						VLV2_PLT_CLK_FREQ_TYPE_XTAL);
++		} else {
++			ret = vlv2_plat_set_clock_freq(VLV2_PLT_CLK_AUDIO,
++						VLV2_PLT_CLK_FREQ_TYPE_PLL);
++		}
++
++		if (ret)
++			dev_err(card->dev, "unable to set MCLK rate \n");
++	}
++
+ 	return ret;
+ }
+ 
+@@ -359,6 +493,16 @@ static int snd_byt_rt5640_mc_probe(struct platform_device *pdev)
+ {
+ 	int ret_val = 0;
+ 	struct sst_acpi_mach *mach;
++	struct platform_device *pdev_mclk;
++
++	pdev_mclk = platform_device_register_simple("vlv2_plat_clk", -1,
++						NULL, 0);
++	if (IS_ERR(pdev_mclk)) {
++		dev_err(&pdev->dev,
++			"platform_vlv2_plat_clk:register failed: %ld\n",
++			PTR_ERR(pdev_mclk));
++		return PTR_ERR(pdev_mclk);
++	}
+ 
+ 	/* register the soc card */
+ 	byt_rt5640_card.dev = &pdev->dev;
+
+From 1a0fc9c56ab2455cadbd6b91344ff66503354e41 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Fri, 18 Dec 2015 11:08:41 -0600
+Subject: [PATCH 32/38] ASoC: Intel: bytcr_rt5640: move quirk definitions
+
+Move all quirks definition to .h file to make code more manageable
+Also add Baytrail-CR platform quirks and jack detection definitions
+---
+ sound/soc/intel/boards/byt_cr_board_configs.h | 266 ++++++++++++++++++++++++++
+ sound/soc/intel/boards/bytcr_rt5640.c         |  63 +-----
+ 2 files changed, 267 insertions(+), 62 deletions(-)
+ create mode 100644 sound/soc/intel/boards/byt_cr_board_configs.h
+
+diff --git a/sound/soc/intel/boards/byt_cr_board_configs.h b/sound/soc/intel/boards/byt_cr_board_configs.h
+new file mode 100644
+index 0000000..8d0bd34
+--- /dev/null
++++ b/sound/soc/intel/boards/byt_cr_board_configs.h
+@@ -0,0 +1,266 @@
++/*
++ *  byt_cr_board_configs.h - Intel SST Driver for audio engine
++ *
++ *  Copyright (C) 2014 Intel Corporation
++ *  Authors:	Ola Lilja <ola.lilja@intel.com>
++ * 
++ *  Modified for upstream to use masks for board configurations
++ * 
++ *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; version 2 of the License.
++ *
++ *  This program is distributed in the hope that it will be useful, but
++ *  WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ *  General Public License for more details.
++ *
++ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++ *
++ *  Board-specific hardware-configurations
++ */
++
++#ifndef __BYT_CR_BOARD_CONFIGS_H__
++#define __BYT_CR_BOARD_CONFIGS_H__
++
++enum {
++	BYT_RT5640_DMIC1_MAP,
++	BYT_RT5640_DMIC2_MAP,
++	BYT_RT5640_IN1_MAP,
++	BYT_RT5640_IN3_MAP,
++};
++
++#define BYT_RT5640_MAP(quirk)	((quirk) & 0xff)
++#define BYT_RT5640_DMIC_EN	BIT(16)
++#define BYT_RT5640_MCLK_EN	BIT(17)
++#define BYT_RT5640_MCLK_25MHZ	BIT(18)
++#define BYT_RT5640_JACK_DET_EN	        BIT(19)
++#define BYT_RT5640_JACK_ACTIVE_LOW	BIT(20)  /* default 0 */
++#define BYT_RT5640_JACK_INT1	        BIT(21)
++#define BYT_RT5640_JACK_INT2	        BIT(22)
++#define BYT_RT5640_JACK_BP_CODEC	BIT(23)
++#define BYT_RT5640_JACK_BP_MICBIAS	BIT(24)
++
++
++static unsigned long byt_rt5640_quirk = BYT_RT5640_DMIC1_MAP |
++					BYT_RT5640_DMIC_EN;
++
++static int byt_rt5640_quirk_cb(const struct dmi_system_id *id)
++{
++	byt_rt5640_quirk = (unsigned long)id->driver_data;
++	return 1;
++}
++
++static const struct dmi_system_id byt_rt5640_quirk_table[] = {
++	{
++		.callback = byt_rt5640_quirk_cb,
++		.matches = {
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
++			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "T100TA"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN1_MAP |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.callback = byt_rt5640_quirk_cb,
++		.matches = {
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
++			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "T100TAF"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN1_MAP |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.callback = byt_rt5640_quirk_cb,
++		.matches = {
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "DellInc."),
++			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "Venue 8 Pro 5830"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_DMIC2_MAP |
++						 BYT_RT5640_DMIC_EN   |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.callback = byt_rt5640_quirk_cb,
++		.matches = {
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Hewlett-Packard"),
++			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "HP ElitePad 1000 G2"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN1_MAP |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.ident = "MRD7",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "TABLET"),
++			DMI_MATCH(DMI_BOARD_VERSION, "MRD 7"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_INT1 |
++						 BYT_RT5640_JACK_BP_MICBIAS |
++						 BYT_RT5640_MCLK_EN),
++	},
++	/* Malata variants */
++	{
++		.ident = "MALATA",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "MALATA8"),
++			DMI_MATCH(DMI_BOARD_VERSION, "0"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT2 |
++						 BYT_RT5640_JACK_BP_CODEC |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.ident = "A82i",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "A82i"),
++			DMI_MATCH(DMI_BOARD_VERSION, "2"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT2 |
++						 BYT_RT5640_JACK_BP_CODEC |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.ident = "A8Low",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "MALATA8Low"),
++			DMI_MATCH(DMI_BOARD_VERSION, "2"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT2 |
++						 BYT_RT5640_JACK_BP_CODEC |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.ident = "A10",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "MALATA10"),
++			DMI_MATCH(DMI_BOARD_VERSION, "0"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT2 |
++						 BYT_RT5640_JACK_BP_CODEC |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.ident = "A105i",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "A105i"),
++			DMI_MATCH(DMI_BOARD_VERSION, "1"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT2 |
++						 BYT_RT5640_JACK_BP_CODEC |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.ident = "CHIPHD",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "CHIPHD8"),
++			DMI_MATCH(DMI_BOARD_VERSION, "0"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT2 |
++						 BYT_RT5640_JACK_BP_CODEC |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.ident = "IRA101",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "IRA101"),
++			DMI_MATCH(DMI_BOARD_VERSION, "0"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT1 |
++						 BYT_RT5640_JACK_BP_MICBIAS |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.ident = "IP3-T85",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "T85"),
++			DMI_MATCH(DMI_BOARD_VERSION, "0"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT2 |
++						 BYT_RT5640_JACK_BP_CODEC |
++						 BYT_RT5640_MCLK_EN),
++	},
++	/* Emdoor variants */
++	{
++		.ident = "VTA0705",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "VTA0705"),
++			DMI_MATCH(DMI_BOARD_VERSION, "0"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT1 |
++						 BYT_RT5640_JACK_BP_MICBIAS |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.ident = "VTA0803",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "VTA0803"),
++			DMI_MATCH(DMI_BOARD_VERSION, "0"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT1 |
++						 BYT_RT5640_JACK_BP_MICBIAS |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.ident = "Emdoor-i8811",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "I8811"),
++			DMI_MATCH(DMI_BOARD_VERSION, "0"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT1 |
++						 BYT_RT5640_JACK_BP_MICBIAS |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.ident = "Emdoor-i8889",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "I8889"),
++			DMI_MATCH(DMI_BOARD_VERSION, "0"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT1 |
++						 BYT_RT5640_JACK_BP_MICBIAS |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{
++		.ident = "TongFang-TF16",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "TF16"),
++			DMI_MATCH(DMI_BOARD_VERSION, "0"),
++		},
++		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_ACTIVE_LOW |
++						 BYT_RT5640_JACK_INT1 |
++						 BYT_RT5640_JACK_BP_MICBIAS |
++						 BYT_RT5640_MCLK_EN),
++	},
++	{}
++};
++
++#endif
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index 42e3d2d..469dae5 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -32,21 +32,7 @@
+ #include "../../codecs/rt5640.h"
+ #include "../atom/sst-atom-controls.h"
+ #include "../common/sst-acpi.h"
+-
+-enum {
+-	BYT_RT5640_DMIC1_MAP,
+-	BYT_RT5640_DMIC2_MAP,
+-	BYT_RT5640_IN1_MAP,
+-};
+-
+-#define BYT_RT5640_MAP(quirk)	((quirk) & 0xff)
+-#define BYT_RT5640_DMIC_EN	BIT(16)
+-#define BYT_RT5640_MCLK_EN	BIT(17)
+-#define BYT_RT5640_MCLK_25MHZ	BIT(18)
+-
+-
+-static unsigned long byt_rt5640_quirk = BYT_RT5640_DMIC1_MAP |
+-					BYT_RT5640_DMIC_EN;
++#include "byt_cr_board_configs.h"
+ 
+ #define BYT_CODEC_DAI	"rt5640-aif1"
+ 
+@@ -223,53 +209,6 @@ static int byt_rt5640_aif1_hw_params(struct snd_pcm_substream *substream,
+ 	return 0;
+ }
+ 
+-static int byt_rt5640_quirk_cb(const struct dmi_system_id *id)
+-{
+-	byt_rt5640_quirk = (unsigned long)id->driver_data;
+-	return 1;
+-}
+-
+-static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+-	{
+-		.callback = byt_rt5640_quirk_cb,
+-		.matches = {
+-			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
+-			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "T100TA"),
+-		},
+-		.driver_data = (unsigned long *)(BYT_RT5640_IN1_MAP |
+-						 BYT_RT5640_MCLK_EN),
+-	},
+-	{
+-		.callback = byt_rt5640_quirk_cb,
+-		.matches = {
+-			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "ASUSTeK COMPUTER INC."),
+-			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "T100TAF"),
+-		},
+-		.driver_data = (unsigned long *)(BYT_RT5640_IN1_MAP |
+-						 BYT_RT5640_MCLK_EN),
+-	},
+-	{
+-		.callback = byt_rt5640_quirk_cb,
+-		.matches = {
+-			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "DellInc."),
+-			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "Venue 8 Pro 5830"),
+-		},
+-		.driver_data = (unsigned long *)(BYT_RT5640_DMIC2_MAP |
+-						 BYT_RT5640_DMIC_EN   |
+-						 BYT_RT5640_MCLK_EN),
+-	},
+-	{
+-		.callback = byt_rt5640_quirk_cb,
+-		.matches = {
+-			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Hewlett-Packard"),
+-			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "HP ElitePad 1000 G2"),
+-		},
+-		.driver_data = (unsigned long *)(BYT_RT5640_IN1_MAP |
+-						 BYT_RT5640_MCLK_EN),
+-	},
+-	{}
+-};
+-
+ static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
+ {
+ 	int ret;
+
+From 921f023f33022c8608dab257bed387bd9df9d72c Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Fri, 18 Dec 2015 11:56:22 -0600
+Subject: [PATCH 33/38] ASoC: Intel: bytcr_rt5640: add IN3 map
+
+Some platforms have the analog mic connected to IN3,
+add route accordingly
+---
+ sound/soc/intel/boards/bytcr_rt5640.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index 469dae5..c6839bd 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -159,6 +159,11 @@ static const struct snd_soc_dapm_route byt_rt5640_intmic_in1_map[] = {
+ 	{"IN1P", NULL, "Internal Mic"},
+ };
+ 
++static const struct snd_soc_dapm_route byt_rt5640_intmic_in3_map[] = {
++	{"Internal Mic", NULL, "MICBIAS1"},
++	{"IN3P", NULL, "Internal Mic"},
++};
++
+ static const struct snd_kcontrol_new byt_rt5640_controls[] = {
+ 	SOC_DAPM_PIN_SWITCH("Headphone"),
+ 	SOC_DAPM_PIN_SWITCH("Headset Mic"),
+@@ -241,6 +246,10 @@ static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
+ 		custom_map = byt_rt5640_intmic_in1_map;
+ 		num_routes = ARRAY_SIZE(byt_rt5640_intmic_in1_map);
+ 		break;
++	case BYT_RT5640_IN3_MAP:
++		custom_map = byt_rt5640_intmic_in3_map;
++		num_routes = ARRAY_SIZE(byt_rt5640_intmic_in3_map);
++		break;
+ 	case BYT_RT5640_DMIC2_MAP:
+ 		custom_map = byt_rt5640_intmic_dmic2_map;
+ 		num_routes = ARRAY_SIZE(byt_rt5640_intmic_dmic2_map);
+
+From 3521ea186eee37ef9452c84f9b25117968df4714 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Mon, 21 Dec 2015 10:03:36 -0600
+Subject: [PATCH 34/38] ASoC: rt5640: add internal clock source support
+
+Adding missing definitions and flags to select internal
+clock source as system clock, needed for jack detection.
+---
+ sound/soc/codecs/rt5640.c | 3 +++
+ sound/soc/codecs/rt5640.h | 1 +
+ 2 files changed, 4 insertions(+)
+
+diff --git a/sound/soc/codecs/rt5640.c b/sound/soc/codecs/rt5640.c
+index 11d032c..6f0e18e 100644
+--- a/sound/soc/codecs/rt5640.c
++++ b/sound/soc/codecs/rt5640.c
+@@ -1861,6 +1861,9 @@ static int rt5640_set_dai_sysclk(struct snd_soc_dai *dai,
+ 	case RT5640_SCLK_S_PLL1:
+ 		reg_val |= RT5640_SCLK_SRC_PLL1;
+ 		break;
++	case RT5640_SCLK_S_RCCLK:
++		reg_val |= RT5640_SCLK_SRC_RCCLK;
++		break;
+ 	default:
+ 		dev_err(codec->dev, "Invalid clock id (%d)\n", clk_id);
+ 		return -EINVAL;
+diff --git a/sound/soc/codecs/rt5640.h b/sound/soc/codecs/rt5640.h
+index 83a7150d..a6bb41b 100644
+--- a/sound/soc/codecs/rt5640.h
++++ b/sound/soc/codecs/rt5640.h
+@@ -983,6 +983,7 @@
+ #define RT5640_SCLK_SRC_SFT			14
+ #define RT5640_SCLK_SRC_MCLK			(0x0 << 14)
+ #define RT5640_SCLK_SRC_PLL1			(0x1 << 14)
++#define RT5640_SCLK_SRC_RCCLK			(0x2 << 14)
+ #define RT5640_PLL1_SRC_MASK			(0x3 << 12)
+ #define RT5640_PLL1_SRC_SFT			12
+ #define RT5640_PLL1_SRC_MCLK			(0x0 << 12)
+
+From a0005cd7e2187cefd52d3e2f81a047f4f2dd4f80 Mon Sep 17 00:00:00 2001
+From: francisco mendez <francisco.mendez@intel.com>
+Date: Tue, 24 Nov 2015 16:35:18 -0600
+Subject: [PATCH 35/38] Realtek add some functions used for jack detection
+
+some functions are needed for baytrail machine driver
+in order to enable jack detection, these functions
+has to be implemented in codec driver
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Signed-off-by: francisco mendez <francisco.mendez@intel.com>
+---
+ sound/soc/codecs/rt5640.c | 146 ++++++++++++++++++++++++++++++++++++++++++++++
+ sound/soc/codecs/rt5640.h |  33 +++++++++++
+ 2 files changed, 179 insertions(+)
+
+diff --git a/sound/soc/codecs/rt5640.c b/sound/soc/codecs/rt5640.c
+index 6f0e18e..a01bc439 100644
+--- a/sound/soc/codecs/rt5640.c
++++ b/sound/soc/codecs/rt5640.c
+@@ -34,6 +34,9 @@
+ #include "rl6231.h"
+ #include "rt5640.h"
+ 
++#define HEADSET_DET_DELAY    20 /* Delay(ms) before reading over current
++				    status for headset detection */
++
+ #define RT5640_DEVICE_ID 0x6231
+ 
+ #define RT5640_PR_RANGE_BASE (0xff + 1)
+@@ -171,6 +174,38 @@ static int rt5640_reset(struct snd_soc_codec *codec)
+ 	return snd_soc_write(codec, RT5640_RESET, 0);
+ }
+ 
++/**
++ * rt5640_index_write - Write private register.
++ * @codec: SoC audio codec device.
++ * @reg: Private register index.
++ * @value: Private register Data.
++ *
++ * Modify private register for advanced setting. It can be written through
++ * private index (0x6a) and data (0x6c) register.
++ *
++ * Returns 0 for success or negative error code.
++ */
++static int rt5640_index_write(struct snd_soc_codec *codec,
++			      unsigned int reg, unsigned int value)
++{
++	int ret;
++
++	ret = snd_soc_write(codec, RT5640_PRIV_INDEX, reg);
++	if (ret < 0) {
++		dev_err(codec->dev, "Failed to set private addr: %d\n", ret);
++		goto err;
++	}
++	ret = snd_soc_write(codec, RT5640_PRIV_DATA, value);
++	if (ret < 0) {
++		dev_err(codec->dev, "Failed to set private value: %d\n", ret);
++		goto err;
++	}
++	return 0;
++
++err:
++	return ret;
++}
++
+ static bool rt5640_volatile_register(struct device *dev, unsigned int reg)
+ {
+ 	int i;
+@@ -1990,6 +2025,117 @@ static int rt5640_set_bias_level(struct snd_soc_codec *codec,
+ 	return 0;
+ }
+ 
++int rt5640_check_jd_status(struct snd_soc_codec *codec)
++{
++	return snd_soc_read(codec, RT5640_INT_IRQ_ST) & 0x0010;
++}
++EXPORT_SYMBOL(rt5640_check_jd_status);
++
++int rt5640_check_bp_status(struct snd_soc_codec *codec)
++{
++	return  snd_soc_read(codec, RT5640_IRQ_CTRL2) & 0x8;
++}
++EXPORT_SYMBOL(rt5640_check_bp_status);
++
++/* Function to enable/disable overcurrent detection(OVCD) and button
++   press interrupts (based on OVCD) in the codec*/
++void rt5640_enable_ovcd_interrupt(struct snd_soc_codec *codec,
++							bool enable)
++{
++	unsigned int ovcd_en; /* OVCD circuit enable/disable */
++	unsigned int bp_en;/* Button interrupt enable/disable*/
++	if (enable) {
++		pr_debug("enabling ovc detection and button intr");
++		ovcd_en = RT5640_MIC1_OVCD_EN;
++		bp_en = RT5640_IRQ_MB1_OC_NOR;
++	} else {
++		pr_debug("disabling ovc detection and button intr");
++		ovcd_en = RT5640_MIC1_OVCD_DIS;
++		bp_en = RT5640_IRQ_MB1_OC_BP;
++	}
++	snd_soc_update_bits(codec, RT5640_MICBIAS,
++			RT5640_MIC1_OVCD_MASK, ovcd_en);
++	snd_soc_update_bits(codec, RT5640_IRQ_CTRL2,
++			RT5640_IRQ_MB1_OC_MASK, bp_en);
++	return;
++}
++EXPORT_SYMBOL(rt5640_enable_ovcd_interrupt);
++
++/* Function to set the overcurrent detection threshold base and scale
++   factor. The codec uses these values to set an internal value of
++   effective threshold = threshold base * scale factor*/
++void rt5640_config_ovcd_thld(struct snd_soc_codec *codec,
++				int base, int scale_factor)
++{
++	struct rt5640_priv *rt5640 = snd_soc_codec_get_drvdata(codec);
++	rt5640->ovcd_th_base = base;
++	rt5640->ovcd_th_sf = scale_factor;
++}
++EXPORT_SYMBOL(rt5640_config_ovcd_thld);
++
++/**
++ * rt5640_detect_hs_type - Detect accessory as headset/headphone/none .
++ * @codec: SoC audio codec device.
++ * @jack_insert: Jack insert or not.
++ *
++ * Returns detect status.
++ */
++int rt5640_detect_hs_type(struct snd_soc_codec *codec, int jack_insert)
++{
++	struct snd_soc_dapm_context *dapm = snd_soc_codec_get_dapm(codec);
++	struct rt5640_priv *rt5640 = snd_soc_codec_get_drvdata(codec);
++	unsigned int ovcd_th_base;
++	unsigned int ovcd_th_sf;
++	if (jack_insert) {
++		if (SND_SOC_BIAS_OFF == dapm->bias_level)
++			snd_soc_write(codec, RT5640_PWR_ANLG1, 0xa814);
++		/* Use the ovcd threshold base and scale factor from context
++		   stucture to configure the threshold */
++		ovcd_th_base = rt5640->ovcd_th_base & RT5640_MIC1_OVTH_MASK;
++		ovcd_th_sf =  rt5640->ovcd_th_sf & RT5640_MIC_OVCD_SF_MASK;
++		rt5640_index_write(codec, RT5640_BIAS_CUR4, 0xa800 | ovcd_th_sf);
++
++		snd_soc_update_bits(codec, RT5640_PWR_ANLG1,
++			RT5640_PWR_LDO2, RT5640_PWR_LDO2);
++		snd_soc_update_bits(codec, RT5640_PWR_ANLG2,
++			RT5640_PWR_MB1, RT5640_PWR_MB1);
++		snd_soc_update_bits(codec, RT5640_MICBIAS,
++				    RT5640_MIC1_OVCD_MASK | RT5640_MIC1_OVTH_MASK
++				    | RT5640_PWR_CLK25M_MASK,
++				    RT5640_MIC1_OVCD_EN | ovcd_th_base
++				    | RT5640_PWR_CLK25M_PU);
++		snd_soc_update_bits(codec, RT5640_DUMMY1, 0x1, 0x1);
++		/* After turning on over current detection, wait for a while before
++		   checking the status. */
++		msleep(HEADSET_DET_DELAY);
++		/* Make sure jack is still connected at this point before checking for HS*/
++		if (rt5640_check_bp_status(codec)) {
++			/*Over current detected;i.e there is a  short between mic and
++			  ground ring. i.e the accessory does not have mic. i.e accessory
++			  is Headphone*/
++			rt5640->jack_type = RT5640_HEADPHO_DET;
++			pr_debug("%s:detected headphone", __func__);
++		} else {
++			rt5640->jack_type = RT5640_HEADSET_DET;
++			pr_debug("%s:detected headset", __func__);
++		}
++		snd_soc_update_bits(codec, RT5640_IRQ_CTRL2,
++				    RT5640_MB1_OC_CLR, 0);
++
++		/* Disable overcurrent detection. If headset was detected, let the
++		   machine driver enable the overcurrent detection for button events */
++		rt5640_enable_ovcd_interrupt(codec, false);
++	} else {
++		rt5640_enable_ovcd_interrupt(codec, false);
++		pr_debug("%s:NO Jack detected", __func__);
++		rt5640->jack_type = RT5640_NO_JACK;
++	}
++
++	return rt5640->jack_type;
++}
++EXPORT_SYMBOL(rt5640_detect_hs_type);
++
++
+ int rt5640_dmic_enable(struct snd_soc_codec *codec,
+ 		       bool dmic1_data_pin, bool dmic2_data_pin)
+ {
+diff --git a/sound/soc/codecs/rt5640.h b/sound/soc/codecs/rt5640.h
+index a6bb41b..6ff9985 100644
+--- a/sound/soc/codecs/rt5640.h
++++ b/sound/soc/codecs/rt5640.h
+@@ -145,6 +145,9 @@
+ 
+ 
+ /* Index of Codec Private Register definition */
++#define RT5640_BIAS_CUR1			0x12
++#define RT5640_BIAS_CUR3			0x14
++#define RT5640_BIAS_CUR4			0x15
+ #define RT5640_CHPUMP_INT_REG1			0x24
+ #define RT5640_MAMP_INT_REG2			0x37
+ #define RT5640_3D_SPK				0x63
+@@ -192,6 +195,14 @@
+ #define RT5640_R_VOL_MASK			(0x3f)
+ #define RT5640_R_VOL_SFT			0
+ 
++/* MIC Over current threshold scale factor (0x15) */
++#define RT5640_MIC_OVCD_SF_MASK                 (0x3 << 8)
++#define RT5640_MIC_OVCD_SF_SFT                  8
++#define RT5640_MIC_OVCD_SF_0P5                  (0x0 << 8)
++#define RT5640_MIC_OVCD_SF_0P75                 (0x1 << 8)
++#define RT5640_MIC_OVCD_SF_1P0                  (0x2 << 8)
++#define RT5640_MIC_OVCD_SF_1P5                  (0x3 << 8)
++
+ /* SW Reset & Device ID (0x00) */
+ #define RT5640_ID_MASK				(0x3 << 1)
+ #define RT5640_ID_5639				(0x0 << 1)
+@@ -201,7 +212,9 @@
+ 
+ /* IN1 and IN2 Control (0x0d) */
+ /* IN3 and IN4 Control (0x0e) */
++#define RT5640_BST_MASK1			(0xf<<12)
+ #define RT5640_BST_SFT1				12
++#define RT5640_BST_MASK2			(0xf<<8)
+ #define RT5640_BST_SFT2				8
+ #define RT5640_IN_DF1				(0x1 << 7)
+ #define RT5640_IN_SFT1				7
+@@ -2084,6 +2097,15 @@ enum {
+ 	RT5640_DMIC2,
+ };
+ 
++enum {
++	RT5640_J_IN_EVENT, /* Jack insert */
++	RT5640_J_OUT_EVENT, /* Jack evulse */
++	RT5640_BP_EVENT, /* Button Press */
++	RT5640_BR_EVENT, /* Button Release */
++	RT5640_UN_EVENT, /* Unknown */
++};
++
++
+ /* filter mask */
+ enum {
+ 	RT5640_DA_STEREO_FILTER = 0x1,
+@@ -2109,10 +2131,21 @@ struct rt5640_priv {
+ 	int pll_in;
+ 	int pll_out;
+ 
++	int jack_type;
++
++	unsigned int ovcd_th_base; /* OVCD threshold base value*/
++	unsigned int ovcd_th_sf; /* OVCD threshold scale factor */
++
+ 	bool hp_mute;
+ 	bool asrc_en;
+ };
+ 
++int rt5640_detect_hs_type(struct snd_soc_codec *codec, int jack_insert);
++int rt5640_check_jd_status(struct snd_soc_codec *codec);
++int rt5640_check_bp_status(struct snd_soc_codec *codec);
++void rt5640_enable_ovcd_interrupt(struct snd_soc_codec *codec, bool enable);
++void rt5640_config_ovcd_thld(struct snd_soc_codec *codec,
++						int base, int scale_factor);
+ int rt5640_dmic_enable(struct snd_soc_codec *codec,
+ 		       bool dmic1_data_pin, bool dmic2_data_pin);
+ int rt5640_sel_asrc_clk_src(struct snd_soc_codec *codec,
+
+From a0afd386a529caa2d738eca33fa6218a4ca125b4 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Fri, 18 Dec 2015 15:35:57 -0600
+Subject: [PATCH 36/38] ASoC: Intel: bytcr_rt5640: add jack detection support
+
+---
+ sound/soc/intel/boards/bytcr_rt5640.c | 607 +++++++++++++++++++++++++++++++++-
+ 1 file changed, 604 insertions(+), 3 deletions(-)
+
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index c6839bd..fada748 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -24,6 +24,8 @@
+ #include <linux/device.h>
+ #include <linux/dmi.h>
+ #include <linux/slab.h>
++#include <linux/gpio.h>
++#include <linux/gpio/consumer.h>
+ #include <linux/vlv2_plat_clock.h>
+ #include <sound/pcm.h>
+ #include <sound/pcm_params.h>
+@@ -34,6 +36,58 @@
+ #include "../common/sst-acpi.h"
+ #include "byt_cr_board_configs.h"
+ 
++#define BYT_JD_INTR_DEBOUNCE		0
++
++#define BYT_T_JACK_RECHECK		100 /* ms */
++#define BYT_N_JACK_RECHECK		5
++#define BYT_T_BUTTONS_RECHECK		100 /* ms */
++
++#define RT5640_GPIO_NA			-1
++
++enum jack_int_select {
++	JACK_INT1, /* AUDIO_INT */
++	JACK_INT2, /* JACK_DET */
++};
++
++enum jack_bp_select {
++	JACK_BP_CODEC,
++	JACK_BP_MICBIAS,
++};
++
++enum {
++	RT5640_GPIO_JD_INT,
++	RT5640_GPIO_JD_INT2,
++	RT5640_GPIO_JD_JACK_SWITCH,
++	RT5640_GPIO_JD_BUTTONS,
++	RT5640_GPIO_I2S_TRISTATE,
++};
++
++struct rt5640_gpios {
++	int jd_int_gpio;
++	int jd_int2_gpio;
++	int jd_buttons_gpio;
++	int debug_mux_gpio;
++	int i2s_tristate_en_gpio;
++	int int_count;
++};
++
++struct byt_drvdata {
++	struct snd_soc_codec *codec;
++
++	int jack_active_low;
++	enum jack_int_select jack_int_sel;
++	enum jack_bp_select jack_bp_sel;
++
++	struct snd_soc_jack jack;
++	struct delayed_work jack_recheck;
++	struct delayed_work bp_recheck;
++	int t_jack_recheck;
++	int t_buttons_recheck;
++	int jack_hp_count;
++	struct mutex jack_mlock;
++	struct rt5640_gpios gpios;
++};
++
+ #define BYT_CODEC_DAI	"rt5640-aif1"
+ 
+ static inline struct snd_soc_dai *byt_get_codec_dai(struct snd_soc_card *card)
+@@ -171,6 +225,408 @@ static const struct snd_kcontrol_new byt_rt5640_controls[] = {
+ 	SOC_DAPM_PIN_SWITCH("Speaker"),
+ };
+ 
++static inline void byt_force_enable_pin(struct snd_soc_codec *codec,
++		const char *bias_widget, bool enable)
++{
++	struct snd_soc_dapm_context *dapm;
++	dapm = snd_soc_codec_get_dapm(codec);
++	if (enable)
++		snd_soc_dapm_force_enable_pin(dapm, bias_widget);
++	else
++		snd_soc_dapm_disable_pin(dapm, bias_widget);
++
++	pr_debug("%s: %s widget %s.\n", __func__,
++			enable ? "Enabled" : "Disabled", bias_widget);
++}
++
++static inline void byt_set_mic_bias_ldo(struct snd_soc_codec *codec,
++		bool enable)
++{
++	struct snd_soc_dapm_context *dapm;
++	dapm = snd_soc_codec_get_dapm(codec);
++	if (enable) {
++		byt_force_enable_pin(codec, "micbias1", true);
++		byt_force_enable_pin(codec, "LDO2", true);
++	} else {
++		byt_force_enable_pin(codec, "micbias1", false);
++		byt_force_enable_pin(codec, "LDO2", false);
++	}
++
++	snd_soc_dapm_sync(dapm);
++}
++
++static inline bool byt_hs_inserted(struct byt_drvdata *drvdata)
++{
++	bool val;
++	const struct gpio_desc *desc;
++	int gpio;
++
++	if (drvdata->jack_int_sel == JACK_INT1)
++		gpio = drvdata->gpios.jd_int_gpio;
++	else /* JACK_INT2 */
++		gpio = drvdata->gpios.jd_int2_gpio;
++
++	desc = gpio_to_desc(gpio);
++	val = (bool)gpiod_get_value(desc);
++
++	if (drvdata->jack_active_low)
++		val = !val;
++
++	pr_info("%s: val = %d (pin = %d, active_low = %d, jack_int_sel = %d)\n",
++			__func__, val, gpio, drvdata->jack_active_low,
++			drvdata->jack_int_sel);
++
++	return val;
++}
++
++static bool byt_jack_check(struct byt_drvdata *drvdata, bool is_recheck,
++		bool is_resume_check)
++{
++	struct snd_soc_jack *jack = &drvdata->jack;
++	struct snd_soc_codec *codec = drvdata->codec;
++	int inserted, status;
++	bool changed = false;
++
++	pr_debug("%s: Enter (jack->status = %d).\n", __func__, jack->status);
++
++	if (codec == NULL) {
++		pr_debug("%s: codec is not initialized, something went wrong\n", __func__);
++		return false;
++	}
++
++	inserted = byt_hs_inserted(drvdata);
++	if (inserted) {
++		if (!(jack->status & SND_JACK_HEADPHONE)) {
++			status = rt5640_detect_hs_type(codec, true);
++			if (status == RT5640_HEADPHO_DET) {
++				if (drvdata->jack_hp_count > 0) {
++					pr_debug("%s: Headphones detected (preliminary, %d).\n",
++							__func__,
++							drvdata->jack_hp_count);
++					drvdata->jack_hp_count--;
++					schedule_delayed_work(
++							&drvdata->jack_recheck,
++							drvdata->t_jack_recheck);
++				} else {
++					pr_info("%s: Headphones present.\n",
++							__func__);
++					jack->status |= SND_JACK_HEADPHONE;
++					changed = true;
++					drvdata->jack_hp_count =
++						BYT_N_JACK_RECHECK;
++				}
++			} else if (status == RT5640_HEADSET_DET) {
++				pr_info("%s: Headset present.\n", __func__);
++				byt_set_mic_bias_ldo(codec, true);
++				if (drvdata->jack_bp_sel ==
++						JACK_BP_CODEC)
++					rt5640_enable_ovcd_interrupt(codec,
++							true);
++				jack->status |= SND_JACK_HEADSET;
++				changed = true;
++				drvdata->jack_hp_count = BYT_N_JACK_RECHECK;
++			} else
++				pr_warn("%s: No valid accessory present!\n",
++						__func__);
++		}
++	} else {
++		if (jack->status & SND_JACK_HEADPHONE) {
++			if (jack->status & SND_JACK_MICROPHONE) {
++				jack->status &= ~SND_JACK_HEADSET;
++				changed = true;
++				byt_set_mic_bias_ldo(codec, false);
++				if (drvdata->jack_bp_sel ==
++						JACK_BP_CODEC)
++					rt5640_enable_ovcd_interrupt(codec,
++							false);
++				pr_info("%s: Headset removed.\n", __func__);
++			} else {
++				jack->status &= ~SND_JACK_HEADPHONE;
++				pr_info("%s: Headphone removed.\n", __func__);
++			}
++		} else if (!is_resume_check)
++			pr_warn("%s: Remove-interrupt while no accessory present!\n",
++					__func__);
++	}
++
++	return changed;
++}
++
++static void byt_jack_recheck(struct work_struct *work)
++{
++	struct byt_drvdata *drvdata =
++		container_of(work, struct byt_drvdata, jack_recheck.work);
++	struct snd_soc_jack *jack = &drvdata->jack;
++
++	mutex_lock(&drvdata->jack_mlock);
++	pr_debug("%s: Enter.\n", __func__);
++
++	if (byt_jack_check(drvdata, true, false))
++		snd_soc_jack_report(jack, jack->status, SND_JACK_HEADSET);
++
++	mutex_unlock(&drvdata->jack_mlock);
++}
++
++/* Interrupt on micbias (JACK_DET_BAK/HOOK_INT) */
++#if 0
++static int byt_micbias_interrupt(void *data)
++{
++	struct byt_drvdata *drvdata = (struct byt_drvdata *)data;
++	struct snd_soc_jack *jack = &drvdata->jack;
++
++	mutex_lock(&drvdata->jack_mlock);
++	pr_debug("%s: Enter.\n", __func__);
++
++	if (cancel_delayed_work_sync(&drvdata->bp_recheck))
++		pr_debug("%s: bp-recheck interrupted!\n", __func__);
++
++	/*if (jack->status & SND_JACK_MICROPHONE)
++	  if (byt_bp_check(drvdata, false))
++	  snd_soc_jack_report(jack, jack->status, SND_JACK_BTN_0);*/
++
++	mutex_unlock(&drvdata->jack_mlock);
++	return jack->status;
++}
++#endif
++
++/* Interrupt on int2 (JACK_DET) */
++static int byt_jack_int2_interrupt(void *data)
++{
++	struct byt_drvdata *drvdata = (struct byt_drvdata *)data;
++	struct snd_soc_jack *jack = &drvdata->jack;
++
++	if ((drvdata->jack_bp_sel == JACK_BP_MICBIAS) &&
++			(drvdata->jack_int_sel == JACK_INT1)) {
++		pr_debug("%s: INT2 not used. Returning...\n", __func__);
++		return jack->status;
++	}
++
++	mutex_lock(&drvdata->jack_mlock);
++	pr_debug("%s: Enter (jack->status = %d).\n", __func__, jack->status);
++
++	if (cancel_delayed_work_sync(&drvdata->bp_recheck))
++		pr_debug("%s: bp-recheck interrupted!\n", __func__);
++	if (cancel_delayed_work_sync(&drvdata->jack_recheck))
++		pr_debug("%s: jack-recheck interrupted!\n", __func__);
++
++	/* Check for jack-events */
++	byt_jack_check(drvdata, false, false);
++
++	mutex_unlock(&drvdata->jack_mlock);
++	return jack->status;
++}
++
++/* Interrupt on int1 (AUDIO_INT) */
++static int byt_jack_int1_interrupt(void *data)
++{
++	struct byt_drvdata *drvdata = (struct byt_drvdata *)data;
++	struct snd_soc_jack *jack = &drvdata->jack;
++
++	if ((drvdata->jack_bp_sel == JACK_BP_MICBIAS) &&
++			(drvdata->jack_int_sel == JACK_INT2)) {
++		pr_debug("%s: INT1 not used. Returning...\n", __func__);
++		return jack->status;
++	}
++
++	mutex_lock(&drvdata->jack_mlock);
++	pr_debug("%s: Enter (jack->status = %d).\n", __func__, jack->status);
++
++	if (cancel_delayed_work_sync(&drvdata->bp_recheck))
++		pr_debug("%s: bp-recheck interrupted!\n", __func__);
++	if (drvdata->jack_bp_sel == JACK_BP_MICBIAS)
++		if (cancel_delayed_work_sync(&drvdata->jack_recheck))
++			pr_debug("%s: jack-recheck interrupted!\n", __func__);
++
++	/* Check for button-events if a headset is present (codec-mode only) */
++	if (drvdata->jack_bp_sel == JACK_BP_CODEC) {
++		/*if (jack->status & SND_JACK_MICROPHONE)
++		  if (byt_bp_check(drvdata, false))
++		  snd_soc_jack_report(jack, jack->status,
++		  SND_JACK_BTN_0);*/
++	} else /* In micbias-mode we use int1 for jack-check */
++		byt_jack_check(drvdata, false, false);
++
++	mutex_unlock(&drvdata->jack_mlock);
++	return jack->status;
++}
++
++static void byt_export_gpio(struct gpio_desc *desc, char *name)
++{
++	int ret = gpiod_export(desc, true);
++	if (ret)
++		pr_debug("%s: Unable to export GPIO%d (%s)! Returned %d.\n",
++				__func__, desc_to_gpio(desc), name, ret);
++}
++
++static void byt_init_gpios(struct snd_soc_codec *codec,
++		struct byt_drvdata *drvdata)
++{
++	int ret;
++	struct gpio_desc *desc;
++	desc = devm_gpiod_get_index(codec->dev, NULL, RT5640_GPIO_JD_INT, GPIOD_IN);
++	if (!IS_ERR(desc)) {
++		drvdata->gpios.jd_int_gpio = desc_to_gpio(desc);
++		byt_export_gpio(desc, "JD-int");
++
++		pr_info("%s: GPIOs - JD-int: %d (pol = %d, val = %d)\n",
++				__func__, drvdata->gpios.jd_int_gpio,
++				gpiod_is_active_low(desc), gpiod_get_value(desc));
++
++		devm_gpiod_put(codec->dev, desc);
++	} else {
++		drvdata->gpios.jd_int_gpio = RT5640_GPIO_NA;
++		pr_err("%s: GPIOs - JD-int: Not present!\n", __func__);
++	}
++
++	desc = devm_gpiod_get_index(codec->dev, NULL, RT5640_GPIO_JD_INT2, GPIOD_ASIS);
++	if (!IS_ERR(desc)) {
++		drvdata->gpios.jd_int2_gpio = desc_to_gpio(desc);
++		byt_export_gpio(desc, "JD-int2");
++
++		pr_info("%s: GPIOs - JD-int2: %d (pol = %d, val = %d)\n",
++				__func__, drvdata->gpios.jd_int2_gpio,
++				gpiod_is_active_low(desc), gpiod_get_value(desc));
++
++		devm_gpiod_put(codec->dev, desc);
++	} else {
++		drvdata->gpios.jd_int2_gpio = RT5640_GPIO_NA;
++		pr_warn("%s: GPIOs - JD-int2: Not present!\n", __func__);
++	}
++
++	desc = devm_gpiod_get_index(codec->dev, NULL, RT5640_GPIO_JD_BUTTONS, GPIOD_ASIS);
++	if (!IS_ERR(desc)) {
++		drvdata->gpios.jd_buttons_gpio = desc_to_gpio(desc);
++		byt_export_gpio(desc, "JD-buttons");
++
++		pr_info("%s: GPIOs - JD-buttons: %d (pol = %d, val = %d)\n",
++				__func__, drvdata->gpios.jd_buttons_gpio,
++				gpiod_is_active_low(desc), gpiod_get_value(desc));
++
++		devm_gpiod_put(codec->dev, desc);
++	} else {
++		drvdata->gpios.jd_buttons_gpio = RT5640_GPIO_NA;
++		pr_warn("%s: GPIOs - JD-buttons: Not present!\n", __func__);
++	}
++
++	desc = devm_gpiod_get_index(codec->dev, NULL, RT5640_GPIO_I2S_TRISTATE, GPIOD_ASIS);
++	if (!IS_ERR(desc)) {
++		drvdata->gpios.i2s_tristate_en_gpio = desc_to_gpio(desc);
++
++		ret = gpiod_direction_output(desc, 0);
++		if (ret)
++			pr_warn("%s: Failed to set direction for GPIO%d (err = %d)!\n",
++					__func__, drvdata->gpios.i2s_tristate_en_gpio,
++					ret);
++
++		byt_export_gpio(desc, "I2S-Tristate-En");
++
++		pr_info("%s: GPIOs - I2S-Tristate-En: %d (pol = %d, val = %d)\n",
++				__func__, drvdata->gpios.i2s_tristate_en_gpio,
++				gpiod_is_active_low(desc), gpiod_get_value(desc));
++
++		devm_gpiod_put(codec->dev, desc);
++	} else {
++		drvdata->gpios.i2s_tristate_en_gpio = RT5640_GPIO_NA;
++		pr_warn("%s: GPIOs - i2s_tristate_en-mux: Not present!\n",
++				__func__);
++	}
++}
++
++/* ASoC Jack-definitions */
++static struct snd_soc_jack_gpio jack_gpio_int1[] = {
++	{
++		.name                   = "byt-int1-int",
++		.report                 = 0, /* Set dynamically */
++		.debounce_time          = BYT_JD_INTR_DEBOUNCE,
++		.jack_status_check      = byt_jack_int1_interrupt,
++	},
++};
++
++static struct snd_soc_jack_gpio jack_gpio_int2[] = {
++	{/*jack detection*/
++		.name                   = "byt-int2-int",
++		.report                 = SND_JACK_HEADSET,
++		.debounce_time          = BYT_JD_INTR_DEBOUNCE,
++		.jack_status_check      = byt_jack_int2_interrupt,
++	},
++};
++
++/*static struct snd_soc_jack_gpio jack_gpio_micbias[] = {
++	{
++		.name                   = "byt-micbias-int",
++		.report                 = SND_JACK_BTN_0,
++		.debounce_time          = BYT_JD_INTR_DEBOUNCE,
++		.jack_status_check      = byt_micbias_interrupt,
++	},
++};*/
++
++static int byt_config_jack_gpios(struct byt_drvdata *drvdata)
++{
++	int int_sel = drvdata->jack_int_sel;
++	int bp_sel = drvdata->jack_bp_sel;
++	int int1_gpio = drvdata->gpios.jd_int_gpio;
++	int int2_gpio = drvdata->gpios.jd_int2_gpio;
++	//int bp_gpio = drvdata->gpios.jd_buttons_gpio;
++
++	pr_info("%s: Jack-GPIO config: jack_bp_sel = %d, jack_int_sel = %d\n",
++		__func__, bp_sel, int_sel);
++
++	if ((bp_sel == JACK_BP_CODEC) && (int_sel == JACK_INT1)) {
++		pr_err("%s: Unsupported jack-config (jack_bp_sel = %d, jack_int_sel = %d)!\n",
++			__func__, JACK_BP_CODEC, JACK_INT1);
++		return -EINVAL;
++	}
++
++	/*if ((bp_sel == JACK_BP_MICBIAS) && (bp_gpio == RT5640_GPIO_NA)) {
++		pr_err("%s: Micbias-GPIO missing (jack_bp_sel = %d, jack_int_sel = %d)!\n",
++			__func__, JACK_BP_MICBIAS, int_sel);
++		return -EINVAL;
++	}*/
++
++	if (((int_sel == JACK_INT1) && (int1_gpio == RT5640_GPIO_NA)) ||
++		((int_sel == JACK_INT2) && (int2_gpio == RT5640_GPIO_NA))) {
++		pr_err("%s: Missing jack-GPIO (jack_bp_sel = %d, jack_int_sel = %d, )\n",
++			__func__, bp_sel, int_sel);
++		return -EINVAL;
++	}
++
++
++	if ((int_sel == JACK_INT1) || (bp_sel == JACK_BP_CODEC)) {
++		jack_gpio_int1[0].gpio = int1_gpio;
++		jack_gpio_int1[0].data = drvdata;
++		jack_gpio_int1[0].report = (int_sel == JACK_INT1) ?
++				SND_JACK_HEADSET : SND_JACK_BTN_0;
++		pr_err("%s: Add jack-GPIO 1 (%d).\n", __func__, int1_gpio);
++		if (snd_soc_jack_add_gpios(&drvdata->jack, 1,
++					&jack_gpio_int1[0])) {
++			pr_err("%s: Failed to add jack-GPIO 1!\n", __func__);
++			return -EIO;
++		}
++	}
++	if (int_sel == JACK_INT2) {
++		jack_gpio_int2[0].gpio = int2_gpio;
++		jack_gpio_int2[0].data = drvdata;
++		pr_err("%s: Add jack-GPIO 2 (%d).\n", __func__, int2_gpio);
++		if (snd_soc_jack_add_gpios(&drvdata->jack, 1,
++					&jack_gpio_int2[0])) {
++			pr_err("%s: Failed to add jack-GPIO 2!\n", __func__);
++			return -EIO;
++		}
++	}
++
++	/*if (bp_sel == JACK_BP_MICBIAS) {
++		jack_gpio_micbias[0].gpio = bp_gpio;
++		jack_gpio_micbias[0].data = drvdata;
++		pr_err("%s: Add micbias-GPIO (%d).\n", __func__, bp_gpio);
++		if (snd_soc_jack_add_gpios(&drvdata->jack, 1,
++					&jack_gpio_micbias[0])) {
++			pr_err("%s: Failed to add micbias-GPIO!\n", __func__);
++			return -EIO;
++		}
++	}*/
++	return 0;
++}
++
+ static int byt_rt5640_aif1_hw_params(struct snd_pcm_substream *substream,
+ 					struct snd_pcm_hw_params *params)
+ {
+@@ -219,9 +675,13 @@ static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
+ 	int ret;
+ 	struct snd_soc_codec *codec = runtime->codec;
+ 	struct snd_soc_card *card = runtime->card;
++	struct byt_drvdata *drvdata;
+ 	const struct snd_soc_dapm_route *custom_map;
+ 	int num_routes;
+ 
++	drvdata = snd_soc_card_get_drvdata(card);
++	drvdata->codec = codec; /* needed for jack detection */
++
+ 	card->dapm.idle_bias_off = true;
+ 
+ 	rt5640_sel_asrc_clk_src(codec,
+@@ -233,6 +693,70 @@ static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
+ 				RT5640_AD_MONO_R_FILTER,
+ 				RT5640_CLK_SEL_ASRC);
+ 
++	if (byt_rt5640_quirk & BYT_RT5640_JACK_DET_EN) {
++		/* Init GPIOs */
++		byt_init_gpios(codec, drvdata);
++
++		/* Add ASoC-jack */
++		ret = snd_soc_card_jack_new(card, "BYT-CR Audio Jack",
++					SND_JACK_HEADSET | SND_JACK_BTN_0,
++					&drvdata->jack, NULL, 0);
++		if (ret) {
++			pr_err("%s: snd_soc_card_jack_new failed (ret = %d)!\n",
++				__func__, ret);
++			return ret;
++		}
++
++		mutex_init(&drvdata->jack_mlock);
++
++		/* Handle jack/bp GPIOs */
++		ret = byt_config_jack_gpios(drvdata);
++		if (ret) {
++			pr_err("%s: byt_config_jack_gpios failed (ret = %d)!\n",
++				__func__, ret);
++			return ret;
++		}
++		/* Other jack/bp stuff */
++
++		/* JACK_DET_N signal as JD-source */
++		//snd_soc_update_bits(byt_get_codec(card), RT5640_JD_CTRL,
++		//		RT5640_JD_MASK, RT5640_JD_JD2_IN4N);
++		snd_soc_write(codec, RT5640_JD_CTRL, 0x6003);
++		snd_soc_write(codec, RT5640_IN3_IN4, 0x0000);
++		snd_soc_write(codec, RT5640_IN1_IN2, 0x51c0);
++
++		/* selecting pin as an interrupt */
++		snd_soc_write(codec, RT5640_GPIO_CTRL1, 0x8400);
++		/* set GPIO1 output */
++		snd_soc_write(codec, RT5640_GPIO_CTRL3, 0x0004);
++
++		/* enabling jd2 in general control 1 */
++		snd_soc_write(codec, RT5640_DUMMY1, 0x3f41);
++
++		/* enabling jd2 in general control 2 */
++		snd_soc_write(codec, RT5640_DUMMY2, 0x4001);
++
++		snd_soc_write(codec, RT5640_REC_L2_MIXER, 0x007f);
++
++		/* Prevent sta_jd_internal to trigger IRQ in CODEC-mode */
++		if (drvdata->jack_bp_sel == JACK_BP_CODEC)
++			snd_soc_write(codec, RT5640_IRQ_CTRL1, 0x0000);
++		else
++			/*TODO: 0x8800 is jack active but polarity inverted, why do I need to invert it?*/
++			snd_soc_write(codec, RT5640_IRQ_CTRL1, 0x8800);
++		//snd_soc_write(codec, RT5640_IRQ_CTRL1, 0x8000);
++
++		/* Set OVCD-threshold */
++		rt5640_config_ovcd_thld(codec, RT5640_MIC1_OVTH_1500UA,
++					RT5640_MIC_OVCD_SF_1P0);
++
++		drvdata->t_jack_recheck = msecs_to_jiffies(BYT_T_JACK_RECHECK);
++		INIT_DELAYED_WORK(&drvdata->jack_recheck, byt_jack_recheck);
++		//drvdata->t_buttons_recheck = msecs_to_jiffies(BYT_T_BUTTONS_RECHECK);
++		//INIT_DELAYED_WORK(&drvdata->bp_recheck, byt_bp_recheck);
++		drvdata->jack_hp_count = 5;
++	}
++
+ 	ret = snd_soc_add_card_controls(card, byt_rt5640_controls,
+ 					ARRAY_SIZE(byt_rt5640_controls));
+ 	if (ret) {
+@@ -240,7 +764,6 @@ static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
+ 		return ret;
+ 	}
+ 
+-	dmi_check_system(byt_rt5640_quirk_table);
+ 	switch (BYT_RT5640_MAP(byt_rt5640_quirk)) {
+ 	case BYT_RT5640_IN1_MAP:
+ 		custom_map = byt_rt5640_intmic_in1_map;
+@@ -269,6 +792,13 @@ static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
+ 			return ret;
+ 	}
+ 
++	ret = snd_soc_dapm_sync(&card->dapm);
++	if (ret) {
++		pr_err("%s: snd_soc_dapm_sync failed!\n", __func__);
++		return ret;
++	}
++
++
+ 	snd_soc_dapm_ignore_suspend(&card->dapm, "Headphone");
+ 	snd_soc_dapm_ignore_suspend(&card->dapm, "Speaker");
+ 
+@@ -442,6 +972,16 @@ static int snd_byt_rt5640_mc_probe(struct platform_device *pdev)
+ 	int ret_val = 0;
+ 	struct sst_acpi_mach *mach;
+ 	struct platform_device *pdev_mclk;
++	struct byt_drvdata *drvdata;
++	struct snd_soc_card *card;
++
++	card = &byt_rt5640_card;
++
++	drvdata = devm_kzalloc(&pdev->dev, sizeof(*drvdata), GFP_ATOMIC);
++	if (!drvdata) {
++		pr_err("Allocation failed!\n");
++		return -ENOMEM;
++	}
+ 
+ 	pdev_mclk = platform_device_register_simple("vlv2_plat_clk", -1,
+ 						NULL, 0);
+@@ -461,23 +1001,84 @@ static int snd_byt_rt5640_mc_probe(struct platform_device *pdev)
+ 		 "%s%s%s", "i2c-", mach->id, ":00");
+ 	byt_rt5640_dais[MERR_DPCM_COMPR+1].codec_name = byt_rt5640_codec_name;
+ 
+-	ret_val = devm_snd_soc_register_card(&pdev->dev, &byt_rt5640_card);
++	/* Get board-specific HW-settings, fill up drvdata */
++	dmi_check_system(byt_rt5640_quirk_table);
++
++	if (byt_rt5640_quirk & BYT_RT5640_JACK_DET_EN) {
++		if (byt_rt5640_quirk & BYT_RT5640_JACK_ACTIVE_LOW)
++			drvdata->jack_active_low = 1;
++		else
++			drvdata->jack_active_low = 0;
++
++		if (byt_rt5640_quirk & BYT_RT5640_JACK_INT1)
++			drvdata->jack_int_sel = JACK_INT1;
++		else
++			drvdata->jack_int_sel = JACK_INT2;
++
++		if (byt_rt5640_quirk & BYT_RT5640_JACK_BP_CODEC)
++			drvdata->jack_bp_sel = JACK_BP_CODEC;
++		else
++			drvdata->jack_bp_sel = JACK_BP_MICBIAS;
++	}
++
++	/* register the soc card */
++	card->dev = &pdev->dev;
++
++	snd_soc_card_set_drvdata(card, drvdata);
++	ret_val = devm_snd_soc_register_card(&pdev->dev, card);
+ 
+ 	if (ret_val) {
+ 		dev_err(&pdev->dev, "devm_snd_soc_register_card failed %d\n",
+ 			ret_val);
+ 		return ret_val;
+ 	}
+-	platform_set_drvdata(pdev, &byt_rt5640_card);
++	platform_set_drvdata(pdev, card);
+ 	return ret_val;
+ }
+ 
++static void snd_byt_unregister_jack(struct byt_drvdata *drvdata)
++{
++	cancel_delayed_work_sync(&drvdata->jack_recheck);
++	snd_soc_jack_free_gpios(&drvdata->jack, drvdata->gpios.int_count,
++				jack_gpio_int1);
++
++}
++static int snd_byt_rt5640_mc_remove(struct platform_device *pdev)
++{
++	struct snd_soc_card *soc_card = platform_get_drvdata(pdev);
++	struct byt_drvdata *drv = snd_soc_card_get_drvdata(soc_card);
++
++	pr_debug("%s: Enter.\n", __func__);
++
++	if (byt_rt5640_quirk & BYT_RT5640_JACK_DET_EN) {
++		snd_byt_unregister_jack(drv);
++	}
++	snd_soc_card_set_drvdata(soc_card, NULL);
++	snd_soc_unregister_card(soc_card);
++	platform_set_drvdata(pdev, NULL);
++	return 0;
++}
++
++static void snd_byt_rt5640_mc_shutdown(struct platform_device *pdev)
++{
++	struct snd_soc_card *soc_card = platform_get_drvdata(pdev);
++	struct byt_drvdata *drv = snd_soc_card_get_drvdata(soc_card);
++
++	pr_debug("In %s\n", __func__);
++
++	if (byt_rt5640_quirk & BYT_RT5640_JACK_DET_EN) {
++		snd_byt_unregister_jack(drv);
++	}
++}
++
+ static struct platform_driver snd_byt_rt5640_mc_driver = {
+ 	.driver = {
+ 		.name = "bytcr_rt5640",
+ 		.pm = &snd_soc_pm_ops,
+ 	},
+ 	.probe = snd_byt_rt5640_mc_probe,
++	.remove = snd_byt_rt5640_mc_remove,
++	.shutdown = snd_byt_rt5640_mc_shutdown,
+ };
+ 
+ module_platform_driver(snd_byt_rt5640_mc_driver);
+
+From 70a229bb03e31c60d4fe9c18919d4a1bf7d72af1 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Fri, 18 Dec 2015 16:18:13 -0600
+Subject: [PATCH 37/38] ASoC: Intel: bytcr_rt5640: enable jack detection quirks
+
+Add jack detection on platforms where it was verified to work.
+---
+ sound/soc/intel/boards/byt_cr_board_configs.h | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/sound/soc/intel/boards/byt_cr_board_configs.h b/sound/soc/intel/boards/byt_cr_board_configs.h
+index 8d0bd34..50de4b50 100644
+--- a/sound/soc/intel/boards/byt_cr_board_configs.h
++++ b/sound/soc/intel/boards/byt_cr_board_configs.h
+@@ -61,6 +61,9 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "T100TA"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN1_MAP |
++						 BYT_RT5640_JACK_DET_EN |
++						 BYT_RT5640_JACK_INT1 |
++						 BYT_RT5640_JACK_BP_MICBIAS |
+ 						 BYT_RT5640_MCLK_EN),
+ 	},
+ 	{
+@@ -98,6 +101,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "MRD 7"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_INT1 |
+ 						 BYT_RT5640_JACK_BP_MICBIAS |
+ 						 BYT_RT5640_MCLK_EN),
+@@ -110,6 +114,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "0"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT2 |
+ 						 BYT_RT5640_JACK_BP_CODEC |
+@@ -122,6 +127,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "2"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT2 |
+ 						 BYT_RT5640_JACK_BP_CODEC |
+@@ -134,6 +140,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "2"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT2 |
+ 						 BYT_RT5640_JACK_BP_CODEC |
+@@ -146,6 +153,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "0"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT2 |
+ 						 BYT_RT5640_JACK_BP_CODEC |
+@@ -158,6 +166,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "1"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT2 |
+ 						 BYT_RT5640_JACK_BP_CODEC |
+@@ -170,6 +179,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "0"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT2 |
+ 						 BYT_RT5640_JACK_BP_CODEC |
+@@ -182,6 +192,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "0"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT1 |
+ 						 BYT_RT5640_JACK_BP_MICBIAS |
+@@ -194,6 +205,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "0"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT2 |
+ 						 BYT_RT5640_JACK_BP_CODEC |
+@@ -207,6 +219,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "0"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT1 |
+ 						 BYT_RT5640_JACK_BP_MICBIAS |
+@@ -219,6 +232,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "0"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT1 |
+ 						 BYT_RT5640_JACK_BP_MICBIAS |
+@@ -231,6 +245,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "0"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT1 |
+ 						 BYT_RT5640_JACK_BP_MICBIAS |
+@@ -243,6 +258,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "0"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT1 |
+ 						 BYT_RT5640_JACK_BP_MICBIAS |
+@@ -255,6 +271,7 @@ static const struct dmi_system_id byt_rt5640_quirk_table[] = {
+ 			DMI_MATCH(DMI_BOARD_VERSION, "0"),
+ 		},
+ 		.driver_data = (unsigned long *)(BYT_RT5640_IN3_MAP |
++						 BYT_RT5640_JACK_DET_EN |
+ 						 BYT_RT5640_JACK_ACTIVE_LOW |
+ 						 BYT_RT5640_JACK_INT1 |
+ 						 BYT_RT5640_JACK_BP_MICBIAS |
+
+From d4bf78051424b605861655e9398bb4ea5dcb1168 Mon Sep 17 00:00:00 2001
+From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+Date: Mon, 21 Dec 2015 11:14:19 -0600
+Subject: [PATCH 38/38] ASoC: Intel: bytcr_rt5640: more jack detection fixes
+
+Align with GMIN kernel, add button press suppoort.
+DO NO SUBMIT UPSTREAM, needs to be squashed
+---
+ sound/soc/intel/boards/bytcr_rt5640.c | 107 +++++++++++++++++++++++++++-------
+ 1 file changed, 87 insertions(+), 20 deletions(-)
+
+diff --git a/sound/soc/intel/boards/bytcr_rt5640.c b/sound/soc/intel/boards/bytcr_rt5640.c
+index fada748..2023355 100644
+--- a/sound/soc/intel/boards/bytcr_rt5640.c
++++ b/sound/soc/intel/boards/bytcr_rt5640.c
+@@ -22,6 +22,7 @@
+ #include <linux/platform_device.h>
+ #include <linux/acpi.h>
+ #include <linux/device.h>
++#include <linux/input.h> /* FIXME ? needed for KEY_MEDIA */
+ #include <linux/dmi.h>
+ #include <linux/slab.h>
+ #include <linux/gpio.h>
+@@ -279,6 +280,68 @@ static inline bool byt_hs_inserted(struct byt_drvdata *drvdata)
+ 	return val;
+ }
+ 
++static int byt_bp_check(struct byt_drvdata *drvdata, bool is_recheck)
++{
++	struct snd_soc_jack *jack = &drvdata->jack;
++	struct snd_soc_codec *codec = drvdata->codec;
++	int val;
++	struct gpio_desc *desc;
++
++	pr_debug("%s: Enter.\n", __func__);
++
++	if (drvdata->jack_bp_sel == JACK_BP_CODEC)
++		val = rt5640_check_bp_status(codec);
++	else { /* JACK_BP_MICBIAS */
++		desc = gpio_to_desc(drvdata->gpios.jd_buttons_gpio);
++		val = gpiod_get_value(desc);
++	}
++
++	if (((val == 0) && !(jack->status & SND_JACK_BTN_0)) ||
++		((val > 0) && (jack->status & SND_JACK_BTN_0))) {
++		pr_debug("%s: No change (%d).\n", __func__, val);
++		return false;
++	}
++
++	if (val == 0) {
++		if (!is_recheck) {
++			pr_info("%s: Button release.\n", __func__);
++			jack->status &= ~SND_JACK_BTN_0;
++			return true;
++		} else {
++			pr_warn("%s: Fishy interrupt detected.\n", __func__);
++			return false;
++		}
++	} else {
++		if (!is_recheck) {
++			pr_debug("%s: Button press (preliminary).\n", __func__);
++			schedule_delayed_work(&drvdata->bp_recheck,
++				drvdata->t_buttons_recheck);
++			return false;
++		} else {
++			jack->status |= SND_JACK_BTN_0;
++			pr_info("%s: Button press.\n", __func__);
++			return true;
++		}
++	}
++
++	return true;
++}
++
++static void byt_bp_recheck(struct work_struct *work)
++{
++	struct byt_drvdata *drvdata =
++		container_of(work, struct byt_drvdata, bp_recheck.work);
++	struct snd_soc_jack *jack = &drvdata->jack;
++
++	mutex_lock(&drvdata->jack_mlock);
++	pr_debug("%s: Enter.\n", __func__);
++
++	if (byt_bp_check(drvdata, true))
++		snd_soc_jack_report(jack, jack->status, SND_JACK_BTN_0);
++
++	mutex_unlock(&drvdata->jack_mlock);
++}
++
+ static bool byt_jack_check(struct byt_drvdata *drvdata, bool is_recheck,
+ 		bool is_resume_check)
+ {
+@@ -368,7 +431,6 @@ static void byt_jack_recheck(struct work_struct *work)
+ }
+ 
+ /* Interrupt on micbias (JACK_DET_BAK/HOOK_INT) */
+-#if 0
+ static int byt_micbias_interrupt(void *data)
+ {
+ 	struct byt_drvdata *drvdata = (struct byt_drvdata *)data;
+@@ -380,14 +442,14 @@ static int byt_micbias_interrupt(void *data)
+ 	if (cancel_delayed_work_sync(&drvdata->bp_recheck))
+ 		pr_debug("%s: bp-recheck interrupted!\n", __func__);
+ 
+-	/*if (jack->status & SND_JACK_MICROPHONE)
+-	  if (byt_bp_check(drvdata, false))
+-	  snd_soc_jack_report(jack, jack->status, SND_JACK_BTN_0);*/
++	if (jack->status & SND_JACK_MICROPHONE)
++		if (byt_bp_check(drvdata, false))
++			snd_soc_jack_report(jack, jack->status,
++					SND_JACK_BTN_0);
+ 
+ 	mutex_unlock(&drvdata->jack_mlock);
+ 	return jack->status;
+ }
+-#endif
+ 
+ /* Interrupt on int2 (JACK_DET) */
+ static int byt_jack_int2_interrupt(void *data)
+@@ -439,10 +501,10 @@ static int byt_jack_int1_interrupt(void *data)
+ 
+ 	/* Check for button-events if a headset is present (codec-mode only) */
+ 	if (drvdata->jack_bp_sel == JACK_BP_CODEC) {
+-		/*if (jack->status & SND_JACK_MICROPHONE)
+-		  if (byt_bp_check(drvdata, false))
+-		  snd_soc_jack_report(jack, jack->status,
+-		  SND_JACK_BTN_0);*/
++		if (jack->status & SND_JACK_MICROPHONE)
++			if (byt_bp_check(drvdata, false))
++				snd_soc_jack_report(jack, jack->status,
++						SND_JACK_BTN_0);
+ 	} else /* In micbias-mode we use int1 for jack-check */
+ 		byt_jack_check(drvdata, false, false);
+ 
+@@ -551,14 +613,14 @@ static struct snd_soc_jack_gpio jack_gpio_int2[] = {
+ 	},
+ };
+ 
+-/*static struct snd_soc_jack_gpio jack_gpio_micbias[] = {
++static struct snd_soc_jack_gpio jack_gpio_micbias[] = {
+ 	{
+ 		.name                   = "byt-micbias-int",
+ 		.report                 = SND_JACK_BTN_0,
+ 		.debounce_time          = BYT_JD_INTR_DEBOUNCE,
+ 		.jack_status_check      = byt_micbias_interrupt,
+ 	},
+-};*/
++};
+ 
+ static int byt_config_jack_gpios(struct byt_drvdata *drvdata)
+ {
+@@ -566,7 +628,7 @@ static int byt_config_jack_gpios(struct byt_drvdata *drvdata)
+ 	int bp_sel = drvdata->jack_bp_sel;
+ 	int int1_gpio = drvdata->gpios.jd_int_gpio;
+ 	int int2_gpio = drvdata->gpios.jd_int2_gpio;
+-	//int bp_gpio = drvdata->gpios.jd_buttons_gpio;
++	int bp_gpio = drvdata->gpios.jd_buttons_gpio;
+ 
+ 	pr_info("%s: Jack-GPIO config: jack_bp_sel = %d, jack_int_sel = %d\n",
+ 		__func__, bp_sel, int_sel);
+@@ -577,11 +639,11 @@ static int byt_config_jack_gpios(struct byt_drvdata *drvdata)
+ 		return -EINVAL;
+ 	}
+ 
+-	/*if ((bp_sel == JACK_BP_MICBIAS) && (bp_gpio == RT5640_GPIO_NA)) {
++	if ((bp_sel == JACK_BP_MICBIAS) && (bp_gpio == RT5640_GPIO_NA)) {
+ 		pr_err("%s: Micbias-GPIO missing (jack_bp_sel = %d, jack_int_sel = %d)!\n",
+ 			__func__, JACK_BP_MICBIAS, int_sel);
+ 		return -EINVAL;
+-	}*/
++	}
+ 
+ 	if (((int_sel == JACK_INT1) && (int1_gpio == RT5640_GPIO_NA)) ||
+ 		((int_sel == JACK_INT2) && (int2_gpio == RT5640_GPIO_NA))) {
+@@ -614,16 +676,17 @@ static int byt_config_jack_gpios(struct byt_drvdata *drvdata)
+ 		}
+ 	}
+ 
+-	/*if (bp_sel == JACK_BP_MICBIAS) {
++	if (bp_sel == JACK_BP_MICBIAS) {
+ 		jack_gpio_micbias[0].gpio = bp_gpio;
+ 		jack_gpio_micbias[0].data = drvdata;
+-		pr_err("%s: Add micbias-GPIO (%d).\n", __func__, bp_gpio);
++		pr_debug("%s: Add micbias-GPIO (%d).\n", __func__, bp_gpio);
+ 		if (snd_soc_jack_add_gpios(&drvdata->jack, 1,
+ 					&jack_gpio_micbias[0])) {
+ 			pr_err("%s: Failed to add micbias-GPIO!\n", __func__);
+ 			return -EIO;
+ 		}
+-	}*/
++	}
++
+ 	return 0;
+ }
+ 
+@@ -719,6 +782,7 @@ static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
+ 		/* Other jack/bp stuff */
+ 
+ 		/* JACK_DET_N signal as JD-source */
++		/* FIXME start */
+ 		//snd_soc_update_bits(byt_get_codec(card), RT5640_JD_CTRL,
+ 		//		RT5640_JD_MASK, RT5640_JD_JD2_IN4N);
+ 		snd_soc_write(codec, RT5640_JD_CTRL, 0x6003);
+@@ -738,13 +802,13 @@ static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
+ 
+ 		snd_soc_write(codec, RT5640_REC_L2_MIXER, 0x007f);
+ 
++		/* FIXME end */
+ 		/* Prevent sta_jd_internal to trigger IRQ in CODEC-mode */
+ 		if (drvdata->jack_bp_sel == JACK_BP_CODEC)
+ 			snd_soc_write(codec, RT5640_IRQ_CTRL1, 0x0000);
+ 		else
+ 			/*TODO: 0x8800 is jack active but polarity inverted, why do I need to invert it?*/
+ 			snd_soc_write(codec, RT5640_IRQ_CTRL1, 0x8800);
+-		//snd_soc_write(codec, RT5640_IRQ_CTRL1, 0x8000);
+ 
+ 		/* Set OVCD-threshold */
+ 		rt5640_config_ovcd_thld(codec, RT5640_MIC1_OVTH_1500UA,
+@@ -752,9 +816,12 @@ static int byt_rt5640_init(struct snd_soc_pcm_runtime *runtime)
+ 
+ 		drvdata->t_jack_recheck = msecs_to_jiffies(BYT_T_JACK_RECHECK);
+ 		INIT_DELAYED_WORK(&drvdata->jack_recheck, byt_jack_recheck);
+-		//drvdata->t_buttons_recheck = msecs_to_jiffies(BYT_T_BUTTONS_RECHECK);
+-		//INIT_DELAYED_WORK(&drvdata->bp_recheck, byt_bp_recheck);
++		drvdata->t_buttons_recheck = msecs_to_jiffies(BYT_T_BUTTONS_RECHECK);
++		INIT_DELAYED_WORK(&drvdata->bp_recheck, byt_bp_recheck);
+ 		drvdata->jack_hp_count = 5;
++
++		/* FIXME? */
++		snd_jack_set_key(drvdata->jack.jack, SND_JACK_BTN_0, KEY_MEDIA);
+ 	}
+ 
+ 	ret = snd_soc_add_card_controls(card, byt_rt5640_controls,
