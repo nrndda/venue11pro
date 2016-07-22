@@ -700,8 +700,8 @@ state.bytcrrt5640 {
 	control.70 {
 		iface MIXER
 		name 'media1_in Gain 0 Volume'
-		value.0 1
-		value.1 1
+		value.0 -247
+		value.1 -247
 		comment {
 			access 'read write'
 			type INTEGER
@@ -709,8 +709,8 @@ state.bytcrrt5640 {
 			range '-1440 - 360'
 			dbmin -14400
 			dbmax 3600
-			dbvalue.0 10
-			dbvalue.1 10
+			dbvalue.0 -2470
+			dbvalue.1 -2470
 		}
 	}
 	control.71 {
@@ -811,8 +811,8 @@ state.bytcrrt5640 {
 	control.79 {
 		iface MIXER
 		name 'pcm0_in Gain 0 Volume'
-		value.0 1
-		value.1 1
+		value.0 51
+		value.1 51
 		comment {
 			access 'read write'
 			type INTEGER
@@ -820,8 +820,8 @@ state.bytcrrt5640 {
 			range '-1440 - 360'
 			dbmin -14400
 			dbmax 3600
-			dbvalue.0 10
-			dbvalue.1 10
+			dbvalue.0 510
+			dbvalue.1 510
 		}
 	}
 	control.80 {
@@ -848,8 +848,8 @@ state.bytcrrt5640 {
 	control.82 {
 		iface MIXER
 		name 'pcm1_in Gain 0 Volume'
-		value.0 -815
-		value.1 -815
+		value.0 -1436
+		value.1 -1436
 		comment {
 			access 'read write'
 			type INTEGER
@@ -857,8 +857,8 @@ state.bytcrrt5640 {
 			range '-1440 - 360'
 			dbmin -14400
 			dbmax 3600
-			dbvalue.0 -8150
-			dbvalue.1 -8150
+			dbvalue.0 -14360
+			dbvalue.1 -14360
 		}
 	}
 	control.83 {
@@ -885,8 +885,8 @@ state.bytcrrt5640 {
 	control.85 {
 		iface MIXER
 		name 'pcm1_out Gain 0 Volume'
-		value.0 -53
-		value.1 -53
+		value.0 -5
+		value.1 -5
 		comment {
 			access 'read write'
 			type INTEGER
@@ -894,8 +894,8 @@ state.bytcrrt5640 {
 			range '-1440 - 360'
 			dbmin -14400
 			dbmax 3600
-			dbvalue.0 -530
-			dbvalue.1 -530
+			dbvalue.0 -50
+			dbvalue.1 -50
 		}
 	}
 	control.86 {
@@ -959,8 +959,8 @@ state.bytcrrt5640 {
 	control.91 {
 		iface MIXER
 		name 'codec_in0 Gain 0 Volume'
-		value.0 0
-		value.1 0
+		value.0 50
+		value.1 50
 		comment {
 			access 'read write'
 			type INTEGER
@@ -968,8 +968,8 @@ state.bytcrrt5640 {
 			range '-1440 - 360'
 			dbmin -14400
 			dbmax 3600
-			dbvalue.0 0
-			dbvalue.1 0
+			dbvalue.0 500
+			dbvalue.1 500
 		}
 	}
 	control.92 {
@@ -1033,8 +1033,8 @@ state.bytcrrt5640 {
 	control.97 {
 		iface MIXER
 		name 'codec_out0 Gain 0 Volume'
-		value.0 0
-		value.1 0
+		value.0 121
+		value.1 121
 		comment {
 			access 'read write'
 			type INTEGER
@@ -1042,8 +1042,8 @@ state.bytcrrt5640 {
 			range '-1440 - 360'
 			dbmin -14400
 			dbmax 3600
-			dbvalue.0 0
-			dbvalue.1 0
+			dbvalue.0 1210
+			dbvalue.1 1210
 		}
 	}
 	control.98 {
@@ -1481,8 +1481,8 @@ state.bytcrrt5640 {
 	control.133 {
 		iface MIXER
 		name 'Speaker Playback Volume'
-		value.0 21
-		value.1 21
+		value.0 26
+		value.1 26
 		comment {
 			access 'read write'
 			type INTEGER
@@ -1490,8 +1490,8 @@ state.bytcrrt5640 {
 			range '0 - 39'
 			dbmin -4650
 			dbmax 1200
-			dbvalue.0 -1500
-			dbvalue.1 -1500
+			dbvalue.0 -750
+			dbvalue.1 -750
 		}
 	}
 	control.134 {
@@ -1508,8 +1508,8 @@ state.bytcrrt5640 {
 	control.135 {
 		iface MIXER
 		name 'HP Playback Volume'
-		value.0 14
-		value.1 14
+		value.0 3
+		value.1 3
 		comment {
 			access 'read write'
 			type INTEGER
@@ -1517,8 +1517,8 @@ state.bytcrrt5640 {
 			range '0 - 39'
 			dbmin -4650
 			dbmax 1200
-			dbvalue.0 -2550
-			dbvalue.1 -2550
+			dbvalue.0 -4200
+			dbvalue.1 -4200
 		}
 	}
 	control.136 {
@@ -1733,9 +1733,9 @@ state.bytcrrt5640 {
 			type ENUMERATED
 			count 1
 			item.0 Normal
-			item.1 'left copy to right'
-			item.2 'right copy to left'
-			item.3 Swap
+			item.1 Swap
+			item.2 'left copy to right'
+			item.3 'right copy to left'
 		}
 	}
 	control.151 {
@@ -1747,9 +1747,9 @@ state.bytcrrt5640 {
 			type ENUMERATED
 			count 1
 			item.0 Normal
-			item.1 'left copy to right'
-			item.2 'right copy to left'
-			item.3 Swap
+			item.1 Swap
+			item.2 'left copy to right'
+			item.3 'right copy to left'
 		}
 	}
 	control.152 {
@@ -1761,9 +1761,9 @@ state.bytcrrt5640 {
 			type ENUMERATED
 			count 1
 			item.0 Normal
-			item.1 'left copy to right'
-			item.2 'right copy to left'
-			item.3 Swap
+			item.1 Swap
+			item.2 'left copy to right'
+			item.3 'right copy to left'
 		}
 	}
 	control.153 {
@@ -1775,9 +1775,9 @@ state.bytcrrt5640 {
 			type ENUMERATED
 			count 1
 			item.0 Normal
-			item.1 'left copy to right'
-			item.2 'right copy to left'
-			item.3 Swap
+			item.1 Swap
+			item.2 'left copy to right'
+			item.3 'right copy to left'
 		}
 	}
 	control.154 {
