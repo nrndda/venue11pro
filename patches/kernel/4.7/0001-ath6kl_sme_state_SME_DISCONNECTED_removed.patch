@@ -1,0 +1,34 @@
+From 42e54152e7070f53294fc41d7f12749ba8bf9aab Mon Sep 17 00:00:00 2001
+From: Dan Kephart <dan.kephart@lairdtech.com>
+Date: Fri, 8 Jul 2016 21:04:19 -0400
+Subject: ath6kl: sme_state shortcut to SME_DISCONNECTED removed
+
+When an NL80211_DISCONNECT is sent to cfg80211, the driver's cfg80211
+disconnect function sets the sme_state to SME_DISCONNECTED before receiving
+a WMI_DISCONNECT_EVENT from the firmware.  This caused cfg80211 to not know
+that the connection is disconnected because the driver fails to notify
+cfg80211 upon receiving WMI_DISCONNECT_EVENT from the firmware believing
+it is already disconnected.
+
+Signed-off-by: Dan Kephart <dan.kephart@lairdtech.com>
+Signed-off-by: Kalle Valo <kvalo@qca.qualcomm.com>
+---
+ drivers/net/wireless/ath/ath6kl/cfg80211.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/net/wireless/ath/ath6kl/cfg80211.c b/drivers/net/wireless/ath/ath6kl/cfg80211.c
+index 62354ec..4ad6284 100644
+--- a/drivers/net/wireless/ath/ath6kl/cfg80211.c
++++ b/drivers/net/wireless/ath/ath6kl/cfg80211.c
+@@ -847,8 +847,6 @@ static int ath6kl_cfg80211_disconnect(struct wiphy *wiphy,
+ 
+ 	up(&ar->sem);
+ 
+-	vif->sme_state = SME_DISCONNECTED;
+-
+ 	return 0;
+ }
+ 
+-- 
+cgit v0.12
+
