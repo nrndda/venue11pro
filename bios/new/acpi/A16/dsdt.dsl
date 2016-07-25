@@ -5,7 +5,7 @@
  * 
  * Disassembling to symbolic ASL+ operators
  *
- * Disassembly of dsdt.dat, Wed Jun 29 20:06:12 2016
+ * Disassembly of dsdt.dat, Mon Jul 25 10:51:02 2016
  *
  * Original Table Header:
  *     Signature        "DSDT"
@@ -1090,7 +1090,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                     DSEN = (Arg0 & 0x07)
                 }
 
-                Method (_DOD, 0, NotSerialized)  // _DOD: Display Output Devices
+                Method (_DOD, 0, Serialized)  // _DOD: Display Output Devices
                 {
                     NDID = Zero
                     If ((DIDL != Zero))
@@ -5559,7 +5559,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                 }
             }
 
-            Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+            Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
             {
                 Name (RBUF, ResourceTemplate ()
                 {
@@ -5576,7 +5576,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                 Return (0x0F)
             }
 
-            Method (_AEI, 0, NotSerialized)  // _AEI: ACPI Event Interrupts
+            Method (_AEI, 0, Serialized)  // _AEI: ACPI Event Interrupts
             {
                 Name (RBUF, ResourceTemplate ()
                 {
@@ -5680,7 +5680,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
             Name (_CID, "INT33FC" /* Intel Baytrail GPIO Controller */)  // _CID: Compatible ID
             Name (_DDN, "ValleyView General Purpose Input/Output (GPIO) controller")  // _DDN: DOS Device Name
             Name (_UID, One)  // _UID: Unique ID
-            Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+            Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
             {
                 Name (RBUF, ResourceTemplate ()
                 {
@@ -5750,7 +5750,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
             Name (_CID, "INT33FC" /* Intel Baytrail GPIO Controller */)  // _CID: Compatible ID
             Name (_DDN, "ValleyView GPNCORE controller")  // _DDN: DOS Device Name
             Name (_UID, 0x02)  // _UID: Unique ID
-            Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+            Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
             {
                 Name (RBUF, ResourceTemplate ()
                 {
@@ -5779,7 +5779,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
             Name (_CID, "INT33FC" /* Intel Baytrail GPIO Controller */)  // _CID: Compatible ID
             Name (_DDN, "ValleyView GPSUS controller")  // _DDN: DOS Device Name
             Name (_UID, 0x03)  // _UID: Unique ID
-            Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+            Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
             {
                 Name (RBUF, ResourceTemplate ()
                 {
@@ -5800,7 +5800,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                 Return (0x0F)
             }
 
-            Method (_AEI, 0, NotSerialized)  // _AEI: ACPI Event Interrupts
+            Method (_AEI, 0, Serialized)  // _AEI: ACPI Event Interrupts
             {
                 Name (RBUF, ResourceTemplate ()
                 {
@@ -6993,7 +6993,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                 })
                 Name (_S4W, 0x02)  // _S4W: S4 Device Wake State
                 Name (_S0W, 0x02)  // _S0W: S0 Device Wake State
-                Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+                Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
                 {
                     Name (RBUF, ResourceTemplate ()
                     {
@@ -7301,7 +7301,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                 })
                 Name (_S4W, 0x02)  // _S4W: S4 Device Wake State
                 Name (_S0W, 0x02)  // _S0W: S0 Device Wake State
-                Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+                Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
                 {
                     Name (UBUF, ResourceTemplate ()
                     {
@@ -7470,7 +7470,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
             {
                 Name (_HID, "AUTH2750" /* AuthenTec AES2750 */)  // _HID: Hardware ID
                 Name (_DDN, "AuthenTec AES2750")  // _DDN: DOS Device Name
-                Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+                Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
                 {
                     Name (UBUF, ResourceTemplate ()
                     {
@@ -7654,7 +7654,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                 Name (_CID, "10EC5640" /* Realtek I2S Audio Codec */)  // _CID: Compatible ID
                 Name (_DDN, "RTEK Codec Controller ")  // _DDN: DOS Device Name
                 Name (_UID, One)  // _UID: Unique ID
-                Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+                Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
                 {
                     Name (SBUF, ResourceTemplate ()
                     {
@@ -8019,7 +8019,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                     Return (0x0F)
                 }
 
-                Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+                Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
                 {
                     Name (SBUF, ResourceTemplate ()
                     {
@@ -8180,7 +8180,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                     Return (0x0F)
                 }
 
-                Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+                Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
                 {
                     Name (SBUF, ResourceTemplate ()
                     {
@@ -8425,7 +8425,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                     }
                 }
 
-                Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+                Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
                 {
                     Name (SBUF, ResourceTemplate ()
                     {
@@ -8579,7 +8579,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                     GPO0, 
                     I2C7
                 })
-                Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+                Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
                 {
                     Name (RBUF, ResourceTemplate ()
                     {
@@ -8743,7 +8743,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                 {
                     I2C7
                 })
-                Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+                Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
                 {
                     Name (SBUF, ResourceTemplate ()
                     {
@@ -9493,7 +9493,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                 I2C7, 
                 ^I2C7.PMIC
             })
-            Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+            Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
             {
                 Name (RBUF, ResourceTemplate ()
                 {
@@ -9744,7 +9744,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
             {
                 GPO0
             })
-            Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+            Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
             {
                 Name (RBUF, ResourceTemplate ()
                 {
@@ -10700,7 +10700,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
         Return (VAL) /* \BDRD.VAL_ */
     }
 
-    Method (STRE, 2, NotSerialized)
+    Method (STRE, 2, Serialized)
     {
         Name (STR1, Buffer (0x50) {})
         Name (STR2, Buffer (0x50) {})
@@ -10723,7 +10723,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
         Return (One)
     }
 
-    Method (XPTB, 1, NotSerialized)
+    Method (XPTB, 1, Serialized)
     {
         Local0 = SizeOf (Arg0)
         If ((ObjectType (Arg0) == 0x02))
@@ -10757,7 +10757,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
         Return (Arg2)
     }
 
-    Method (XPTS, 1, NotSerialized)
+    Method (XPTS, 1, Serialized)
     {
         Name (LBUF, Buffer (0x20) {})
         Local0 = STDG (Arg0, LBUF, Zero)
@@ -10773,7 +10773,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
         Mutex (SMIX, 0x01)
         Name (SMBA, 0x79C2F000)
         Name (PSMI, 0x000000B2)
-        Method (SNVC, 1, NotSerialized)
+        Method (SNVC, 1, Serialized)
         {
             OperationRegion (WWPR, SystemMemory, SMBA, 0x04)
             Field (WWPR, DWordAcc, Lock, Preserve)
@@ -10784,7 +10784,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
             SCDW = Arg0
         }
 
-        Method (SNWB, 2, NotSerialized)
+        Method (SNWB, 2, Serialized)
         {
             Local0 = SMBA /* \SMBA */
             Local0 += Arg1
@@ -10799,7 +10799,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
             SBY0 = SVAL /* \SNWB.SVAL */
         }
 
-        Method (SNRB, 2, NotSerialized)
+        Method (SNRB, 2, Serialized)
         {
             Local0 = SMBA /* \SMBA */
             Local0 += Arg1
@@ -10815,7 +10815,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
             Return (Arg0)
         }
 
-        Method (SNVP, 2, NotSerialized)
+        Method (SNVP, 2, Serialized)
         {
             Local0 = SMBA /* \SMBA */
             Local0 += Arg1
@@ -10830,7 +10830,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
             SDW0 = SVAL /* \SNVP.SVAL */
         }
 
-        Method (SNVG, 2, NotSerialized)
+        Method (SNVG, 2, Serialized)
         {
             Local0 = SMBA /* \SMBA */
             Local0 += Arg1
@@ -10864,7 +10864,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
             Return (Local0)
         }
 
-        Method (SMBI, 2, NotSerialized)
+        Method (SMBI, 2, Serialized)
         {
             SNVC (Arg0)
             Local0 = (SMBA + 0x04)
@@ -10923,7 +10923,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
             Return (Arg1)
         }
 
-        Method (ASMI, 0, NotSerialized)
+        Method (ASMI, 0, Serialized)
         {
             OperationRegion (SMIR, SystemIO, PSMI, One)
             Field (SMIR, ByteAcc, Lock, Preserve)
