@@ -4736,13 +4736,13 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                         })
                         Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
                         {
-                            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                             If ((Arg0 == ToUUID ("a5fc708f-8775-4ba6-bd0c-ba90a1ec72f8")))
                             {
                                 While (One)
                                 {
-                                    _T_0 = ToInteger (Arg2)
-                                    If ((_T_0 == Zero))
+                                    T_0 = ToInteger (Arg2)
+                                    If ((T_0 == Zero))
                                     {
                                         If ((Arg1 == One))
                                         {
@@ -4761,7 +4761,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                                     }
                                     Else
                                     {
-                                        If ((_T_0 == One))
+                                        If ((T_0 == One))
                                         {
                                             If ((SDGV == 0xFF))
                                             {
@@ -4774,7 +4774,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                                         }
                                         Else
                                         {
-                                            If ((_T_0 == 0x02))
+                                            If ((T_0 == 0x02))
                                             {
                                                 Return (SDGV) /* \SDGV */
                                             }
@@ -4833,13 +4833,13 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                         })
                         Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
                         {
-                            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                             If ((Arg0 == ToUUID ("a5fc708f-8775-4ba6-bd0c-ba90a1ec72f8")))
                             {
                                 While (One)
                                 {
-                                    _T_0 = ToInteger (Arg2)
-                                    If ((_T_0 == Zero))
+                                    T_0 = ToInteger (Arg2)
+                                    If ((T_0 == Zero))
                                     {
                                         If ((Arg1 == One))
                                         {
@@ -4858,7 +4858,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                                     }
                                     Else
                                     {
-                                        If ((_T_0 == One))
+                                        If ((T_0 == One))
                                         {
                                             If ((SDGV == 0xFF))
                                             {
@@ -4871,7 +4871,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                                         }
                                         Else
                                         {
-                                            If ((_T_0 == 0x02))
+                                            If ((T_0 == 0x02))
                                             {
                                                 Return (SDGV) /* \SDGV */
                                             }
@@ -4930,13 +4930,13 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                         })
                         Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
                         {
-                            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                             If ((Arg0 == ToUUID ("a5fc708f-8775-4ba6-bd0c-ba90a1ec72f8")))
                             {
                                 While (One)
                                 {
-                                    _T_0 = ToInteger (Arg2)
-                                    If ((_T_0 == Zero))
+                                    T_0 = ToInteger (Arg2)
+                                    If ((T_0 == Zero))
                                     {
                                         If ((Arg1 == One))
                                         {
@@ -4955,7 +4955,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                                     }
                                     Else
                                     {
-                                        If ((_T_0 == One))
+                                        If ((T_0 == One))
                                         {
                                             If ((SDGV == 0xFF))
                                             {
@@ -4968,7 +4968,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                                         }
                                         Else
                                         {
-                                            If ((_T_0 == 0x02))
+                                            If ((T_0 == 0x02))
                                             {
                                                 Return (SDGV) /* \SDGV */
                                             }
@@ -5027,13 +5027,13 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                         })
                         Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
                         {
-                            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                             If ((Arg0 == ToUUID ("a5fc708f-8775-4ba6-bd0c-ba90a1ec72f8")))
                             {
                                 While (One)
                                 {
-                                    _T_0 = ToInteger (Arg2)
-                                    If ((_T_0 == Zero))
+                                    T_0 = ToInteger (Arg2)
+                                    If ((T_0 == Zero))
                                     {
                                         If ((Arg1 == One))
                                         {
@@ -5052,7 +5052,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                                     }
                                     Else
                                     {
-                                        If ((_T_0 == One))
+                                        If ((T_0 == One))
                                         {
                                             If ((SDGV == 0xFF))
                                             {
@@ -5065,7 +5065,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                                         }
                                         Else
                                         {
-                                            If ((_T_0 == 0x02))
+                                            If ((T_0 == 0x02))
                                             {
                                                 Return (SDGV) /* \SDGV */
                                             }
@@ -7698,26 +7698,26 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
 
                 Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
                 {
-                    Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-                    Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                    Name (T_1, Zero)  // _T_x: Emitted by ASL Compiler
+                    Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                     If ((Arg0 == ToUUID ("a9240c44-f032-454d-80e5-7aeed80e9551")))
                     {
                         CreateByteField (Arg3, Zero, FARG)
                         While (One)
                         {
-                            _T_0 = Arg2
-                            If ((_T_0 == 0x03))
+                            T_0 = Arg2
+                            If ((T_0 == 0x03))
                             {
                                 While (One)
                                 {
-                                    _T_1 = Arg3
-                                    If ((_T_1 == Zero))
+                                    T_1 = Arg3
+                                    If ((T_1 == Zero))
                                     {
                                         Return (0x1D)
                                     }
                                     Else
                                     {
-                                        If ((_T_1 == 0x04))
+                                        If ((T_1 == 0x04))
                                         {
                                             Return (Buffer (0x2C)
                                             {
@@ -7731,7 +7731,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                                         }
                                         Else
                                         {
-                                            If ((_T_1 == 0x02))
+                                            If ((T_1 == 0x02))
                                             {
                                                 Return (Buffer (0xF6)
                                                 {
@@ -7770,7 +7770,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                                             }
                                             Else
                                             {
-                                                If ((_T_1 == 0x03))
+                                                If ((T_1 == 0x03))
                                                 {
                                                     Return (Buffer (0x42)
                                                     {
@@ -8597,20 +8597,20 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
 
                 Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
                 {
-                    Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-                    Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                    Name (T_1, Zero)  // _T_x: Emitted by ASL Compiler
+                    Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                     Debug = "Method _DSM begin"
                     If ((Arg0 == ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
                     {
                         While (One)
                         {
-                            _T_0 = ToInteger (Arg2)
-                            If ((_T_0 == Zero))
+                            T_0 = ToInteger (Arg2)
+                            If ((T_0 == Zero))
                             {
                                 While (One)
                                 {
-                                    _T_1 = ToInteger (Arg1)
-                                    If ((_T_1 == One))
+                                    T_1 = ToInteger (Arg1)
+                                    If ((T_1 == One))
                                     {
                                         Debug = "Method _DSM Function Query"
                                         Return (Buffer (One)
@@ -8631,7 +8631,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                             }
                             Else
                             {
-                                If ((_T_0 == One))
+                                If ((T_0 == One))
                                 {
                                     Debug = "Method _DSM Function HID"
                                     Return (0x20)
@@ -9589,7 +9589,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
 
             Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 If ((OSYS == 0x07DD))
                 {
                     ^^I2C7.PMIC.FCOT = One
@@ -9603,8 +9603,8 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                 {
                     While (One)
                     {
-                        _T_0 = ToInteger (Arg2)
-                        If ((_T_0 == Zero))
+                        T_0 = ToInteger (Arg2)
+                        If ((T_0 == Zero))
                         {
                             Return (Buffer (One)
                             {
@@ -9613,7 +9613,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                         }
                         Else
                         {
-                            If ((_T_0 == One))
+                            If ((T_0 == One))
                             {
                                 Return (0x07)
                             }
