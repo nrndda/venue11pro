@@ -3839,6 +3839,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                 PDBM &= 0xFFFFFFFFFFFFFFFD
                 MEMB = Local2
                 PDBM = Local1
+                Return (Zero)
             }
 
             Method (_PS3, 0, Serialized)  // _PS3: Power State 3
@@ -3912,6 +3913,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                 PDBM &= 0xFFFFFFFFFFFFFFFD
                 MEMB = Local2
                 PDBM = Local1
+                Return (Zero)
             }
 
             Method (_DSW, 3, NotSerialized)  // _DSW: Device Sleep Wake
@@ -5926,6 +5928,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                         Notify (TCHG, 0x80) // Status Change
                     }
                 }
+                Return (Zero)
             }
 
             Name (AVBL, Zero)
@@ -10279,6 +10282,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                     BFFG = FGC1 /* \_SB_.I2C1.FGC1 */
                     Return (APWR) /* \_SB_.I2C1.BATC.APWR */
                 }
+                Return (Zero)
             }
 
             Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
