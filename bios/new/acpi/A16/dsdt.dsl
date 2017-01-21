@@ -1030,7 +1030,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                     0x00001000,         // Length
                     ,, _Y00, AddressRangeMemory, TypeStatic)
             })
-            Name (GUID, ToUUID ("33db4d5b-1ff7-401c-9657-7441c03dd766") /* PCI Host Bridge Device */)
+            Name (GUID, ToUUID ("4C4C4544-0052-4C10-8053-B8C04F523032") /* PCI Host Bridge Device */)
             Name (SUPP, Zero)
             Name (CTRL, Zero)
             Method (_OSC, 4, Serialized)  // _OSC: Operating System Capabilities
@@ -7309,7 +7309,7 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                     Name (UBUF, ResourceTemplate ()
                     {
                         UartSerialBus (0x0001C200, DataBitsEight, StopBitsOne,
-                            0xC0, LittleEndian, ParityTypeNone, FlowControlHardware,
+                            0xFC, LittleEndian, ParityTypeNone, FlowControlHardware,
                             0x0020, 0x0020, "\\_SB.URT1",
                             0x00, ResourceConsumer, ,
                             )
@@ -7317,13 +7317,13 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                         {
                             0x00000046,
                         }
-                        GpioIo (Exclusive, PullUp, 0x0000, 0x0000, IoRestrictionOutputOnly,
+                        GpioIo (Exclusive, PullDefault, 0x0000, 0x0000, IoRestrictionOutputOnly,
                             "\\_SB.GPO0", 0x00, ResourceConsumer, ,
                             )
                             {   // Pin list
                                 0x0034
                             }
-                        GpioIo (Exclusive, PullUp, 0x0000, 0x0000, IoRestrictionOutputOnly,
+                        GpioIo (Exclusive, PullDefault, 0x0000, 0x0000, IoRestrictionOutputOnly,
                             "\\_SB.GPO0", 0x00, ResourceConsumer, ,
                             )
                             {   // Pin list
@@ -7705,7 +7705,6 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
                     Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                     If ((Arg0 == ToUUID ("a9240c44-f032-454d-80e5-7aeed80e9551")))
                     {
-                        CreateByteField (Arg3, Zero, FARG)
                         While (One)
                         {
                             T_0 = Arg2
@@ -11322,8 +11321,8 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
         {
             If ((ACOS == Zero))
             {
-                ACOS = One
-                ACSE = Zero
+                ACOS = 0x80
+                ACSE = One
                 If (CondRefOf (\_OSI, Local0))
                 {
                     If (_OSI (WXP))
@@ -11349,7 +11348,8 @@ DefinitionBlock ("dsdt.aml", "DSDT", 2, "DELL  ", "CBX3   ", 0x00000003)
 
                     If (_OSI (LINX))
                     {
-                        ACOS = 0x40
+                        ACOS = 0x80
+                        ACSE = One
                     }
                 }
                 Else
