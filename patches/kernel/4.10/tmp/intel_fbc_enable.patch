@@ -1,0 +1,26 @@
+diff --git a/drivers/gpu/drm/i915/i915_pci.c b/drivers/gpu/drm/i915/i915_pci.c
+index fce8e198bc76..be5d28c64e16 100644
+--- a/drivers/gpu/drm/i915/i915_pci.c
++++ b/drivers/gpu/drm/i915/i915_pci.c
+@@ -258,6 +258,8 @@ static const struct intel_device_info intel_ivybridge_q_info = {
+ 	.has_hw_contexts = 1, \
+ 	.has_gmch_display = 1, \
+ 	.has_hotplug = 1, \
++	.has_fbc = 1, \
++	.has_rc6p = 1, \
+ 	.ring_mask = RENDER_RING | BSD_RING | BLT_RING, \
+ 	.display_mmio_offset = VLV_DISPLAY_BASE, \
+ 	GEN_DEFAULT_PIPEOFFSETS, \
+diff --git a/drivers/gpu/drm/i915/intel_fbc.c b/drivers/gpu/drm/i915/intel_fbc.c
+index 62f215b12eb5..93aa27194281 100644
+--- a/drivers/gpu/drm/i915/intel_fbc.c
++++ b/drivers/gpu/drm/i915/intel_fbc.c
+@@ -1317,7 +1317,7 @@ static int intel_sanitize_fbc_option(struct drm_i915_private *dev_priv)
+ 	if (!HAS_FBC(dev_priv))
+ 		return 0;
+ 
+-	if (IS_BROADWELL(dev_priv))
++	if (IS_BROADWELL(dev_priv) || IS_VALLEYVIEW(dev_priv))
+ 		return 1;
+ 
+ 	return 0;
