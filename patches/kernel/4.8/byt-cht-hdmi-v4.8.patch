@@ -1,30 +1,3 @@
-From 982a9c5bbe16cabc297e75d6d9e8d2926f5641b8 Mon Sep 17 00:00:00 2001
-From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
-Date: Wed, 2 Mar 2016 14:30:44 -0600
-Subject: [PATCH 01/13] drm: i915: remove intel_hdmi variable declaration
-
-'intel_hdmi' variable is redeclared, use same variable declared in
-function scope.
-
-Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
----
- drivers/gpu/drm/i915/intel_hdmi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/gpu/drm/i915/intel_hdmi.c b/drivers/gpu/drm/i915/intel_hdmi.c
-index 4df9f38..34e497f 100644
---- a/drivers/gpu/drm/i915/intel_hdmi.c
-+++ b/drivers/gpu/drm/i915/intel_hdmi.c
-@@ -1496,7 +1496,7 @@ intel_hdmi_detect(struct drm_connector *connector, bool force)
- 	intel_hdmi_unset_edid(connector);
- 
- 	if (intel_hdmi_set_edid(connector, live_status)) {
--		struct intel_hdmi *intel_hdmi = intel_attached_hdmi(connector);
-+		intel_hdmi = intel_attached_hdmi(connector);
- 
- 		hdmi_to_dig_port(intel_hdmi)->base.type = INTEL_OUTPUT_HDMI;
- 		status = connector_status_connected;
-
 From 9a4bb140fbca791441bcf93ddf0a2ae062bc9945 Mon Sep 17 00:00:00 2001
 From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
 Date: Tue, 1 Mar 2016 16:25:04 -0600
