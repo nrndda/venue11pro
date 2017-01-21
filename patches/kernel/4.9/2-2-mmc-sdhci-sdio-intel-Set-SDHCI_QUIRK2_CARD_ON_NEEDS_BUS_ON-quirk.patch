@@ -1,0 +1,24 @@
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 69c332b..92096db 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -288,6 +288,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
+ 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
++		   SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
+ 		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ 	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
+ 		   MMC_CAP_WAIT_WHILE_BUSY,
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 1d9e00a..166af7c 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -450,6 +450,7 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_emmc = {
+ static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
+ 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
++			SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
+ 			SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ 	.allow_runtime_pm = true,
+ 	.probe_slot	= byt_sdio_probe_slot,
