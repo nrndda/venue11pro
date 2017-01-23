@@ -1,0 +1,34 @@
+git bisect start
+# good: [c8d2bc9bc39ebea8437fd974fdbc21847bb897a3] Linux 4.8
+git bisect good c8d2bc9bc39ebea8437fd974fdbc21847bb897a3
+# bad: [69973b830859bc6529a7a0468ba0d80ee5117826] Linux 4.9
+git bisect bad 69973b830859bc6529a7a0468ba0d80ee5117826
+# bad: [a5af7e1fc69a46f29b977fd4b570e0ac414c2338] rxrpc: Fix loss of PING RESPONSE ACK production due to PING ACKs
+git bisect bad a5af7e1fc69a46f29b977fd4b570e0ac414c2338
+# bad: [d268dbe76a53d72cc41316eb59e7968db60e77ad] Merge tag 'pinctrl-v4.9-1' of git://git.kernel.org/pub/scm/linux/kernel/git/linusw/linux-pinctrl
+git bisect bad d268dbe76a53d72cc41316eb59e7968db60e77ad
+# bad: [02bafd96f3a5d8e610b19033ffec55b92459aaae] Merge tag 'docs-4.9' of git://git.lwn.net/linux
+git bisect bad 02bafd96f3a5d8e610b19033ffec55b92459aaae
+# bad: [9929780e86854833e649b39b290b5fe921eb1701] Merge tag 'driver-core-4.9-rc1' of git://git.kernel.org/pub/scm/linux/kernel/git/gregkh/driver-core
+git bisect bad 9929780e86854833e649b39b290b5fe921eb1701
+# bad: [12b7bcb43e6ea834ab2f5dc52d971e379a0ca109] Merge branch 'perf-core-for-linus' of git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip
+git bisect bad 12b7bcb43e6ea834ab2f5dc52d971e379a0ca109
+# good: [72d39926f098b0c4ad95e1461595a8d6d403c14d] Merge tag 'acpi-4.9-rc1' of git://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm
+git bisect good 72d39926f098b0c4ad95e1461595a8d6d403c14d
+# good: [98ba1609298ccc849ddfe727c675c3a7b48b8dbc] perf tools: Make several display functions global
+git bisect good 98ba1609298ccc849ddfe727c675c3a7b48b8dbc
+# bad: [de956b8f45b3338cfb66a725e22b4050109daf2a] Merge branch 'efi-core-for-linus' of git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip
+git bisect bad de956b8f45b3338cfb66a725e22b4050109daf2a
+# good: [d7a0dab82fef61bebd34f2bbb9314b075153b646] Merge branch 'core-smp-for-linus' of git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip
+git bisect good d7a0dab82fef61bebd34f2bbb9314b075153b646
+# bad: [ac0e94b63e65f9c6d2f3c49107118e2228236db4] x86/efi: Initialize status to ensure garbage is not returned on small size
+git bisect bad ac0e94b63e65f9c6d2f3c49107118e2228236db4
+# bad: [816e76129ed5fadd28e526c43397c79775194b5c] efi: Allow drivers to reserve boot services forever
+git bisect bad 816e76129ed5fadd28e526c43397c79775194b5c
+# bad: [dca0f971ea6fcf2f1bb78f7995adf80da9f4767f] efi: Add efi_memmap_init_late() for permanent EFI memmap
+git bisect bad dca0f971ea6fcf2f1bb78f7995adf80da9f4767f
+# good: [ab72a27da4c6c19b0e3d6d7556fdd4afb581c8ac] x86/efi: Consolidate region mapping logic
+git bisect good ab72a27da4c6c19b0e3d6d7556fdd4afb581c8ac
+# good: [9479c7cebfb568f8b8b424be7f1cac120e9eea95] efi: Refactor efi_memmap_init_early() into arch-neutral code
+git bisect good 9479c7cebfb568f8b8b424be7f1cac120e9eea95
+# first bad commit: [dca0f971ea6fcf2f1bb78f7995adf80da9f4767f] efi: Add efi_memmap_init_late() for permanent EFI memmap
