@@ -1,0 +1,40 @@
+From 9ca98bd077480473d075a2c50647da42d5ad6b50 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?J=C3=A9r=C3=A9my=20Lefaure?= <jeremy.lefaure@lse.epita.fr>
+Date: Thu, 16 Mar 2017 22:13:51 -0400
+Subject: Revert "staging: media: atomisp: fill properly hmm_bo_type_strings
+ when ION is disabled"
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This reverts commit fde469701c7efabebf885e785edf367bfb1a8f3f.
+
+Adding a preprocessor condition is not the best solution to fix this
+issue. Let's revert this commit before fixing this problem in a more
+appropriate way.
+
+Signed-off-by: Jérémy Lefaure <jeremy.lefaure@lse.epita.fr>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ drivers/staging/media/atomisp/pci/atomisp2/hmm/hmm.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+(limited to 'drivers/staging/media/atomisp')
+
+diff --git a/drivers/staging/media/atomisp/pci/atomisp2/hmm/hmm.c b/drivers/staging/media/atomisp/pci/atomisp2/hmm/hmm.c
+index e78f02f..a362b49 100644
+--- a/drivers/staging/media/atomisp/pci/atomisp2/hmm/hmm.c
++++ b/drivers/staging/media/atomisp/pci/atomisp2/hmm/hmm.c
+@@ -49,9 +49,7 @@ const char *hmm_bo_type_strings[HMM_BO_LAST] = {
+ 	"p", /* private */
+ 	"s", /* shared */
+ 	"u", /* user */
+-#ifdef CONFIG_ION
+ 	"i", /* ion */
+-#endif
+ };
+ 
+ static ssize_t bo_show(struct device *dev, struct device_attribute *attr,
+-- 
+cgit v1.1
+

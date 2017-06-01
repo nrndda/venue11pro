@@ -1,0 +1,15 @@
+diff --git a/sound/soc/intel/atom/sst-atom-controls.c b/sound/soc/intel/atom/sst-atom-controls.c
+index c7b3cbf92..916b2b8fe 100644
+--- a/sound/soc/intel/atom/sst-atom-controls.c
++++ b/sound/soc/intel/atom/sst-atom-controls.c
+@@ -47,8 +47,8 @@ static int sst_fill_byte_control(struct sst_data *drv,
+ 	}
+ 	byte_data->len = len;
+ 	memcpy(byte_data->bytes, cmd_data, len);
+-	print_hex_dump_bytes("writing to lpe: ", DUMP_PREFIX_OFFSET,
+-			     byte_data, len + sizeof(*byte_data));
++	//print_hex_dump_bytes("writing to lpe: ", DUMP_PREFIX_OFFSET,
++	//		     byte_data, len + sizeof(*byte_data));
+ 	return 0;
+ }
+ 

@@ -1,0 +1,45 @@
+From 2213a08b8e7c1743dfac35b1ffb932a32aefe3c5 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Sun, 28 May 2017 13:54:18 +0200
+Subject: [PATCH] staging: atomisp: Add support for alternative ccs2400
+ firmware
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ .../media/atomisp/pci/atomisp2/css2400/sh_css_firmware.c | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/staging/media/atomisp/pci/atomisp2/css2400/sh_css_firmware.c b/drivers/staging/media/atomisp/pci/atomisp2/css2400/sh_css_firmware.c
+index 34cc56f0b471a..47cd069cc0053 100644
+--- a/drivers/staging/media/atomisp/pci/atomisp2/css2400/sh_css_firmware.c
++++ b/drivers/staging/media/atomisp/pci/atomisp2/css2400/sh_css_firmware.c
+@@ -55,6 +55,7 @@ static struct firmware_header *firmware_header;
+  * during package generation. Please do not modify  */
+ #ifndef ISP2401
+ static const char *release_version = STR(irci_stable_candrpv_0415_20150521_0458);
++static const char *alt_release_version = STR(irci_stable_candrpv_0415_20150423_1753);
+ #else
+ static const char *release_version = STR(irci_ecr-master_20150911_0724);
+ #endif
+@@ -201,12 +202,15 @@ sh_css_check_firmware_version(const char *fw_data)
+ 	firmware_header = (struct firmware_header *)fw_data;
+ 	file_header = &firmware_header->file_header;
+ 
+-	if (strcmp(file_header->version, release_version) != 0) {
+-		return false;
+-	} else {
+-		/* firmware version matches */
+-		return true;
+-	}
++	if (strcmp(file_header->version, release_version) == 0)
++		return true; /* firmware version matches */
++
++#ifndef ISP2401
++	if (strcmp(file_header->version, alt_release_version) == 0)
++		return true; /* firmware version matches */
++#endif
++
++	return false;
+ }
+ 
+ enum ia_css_err

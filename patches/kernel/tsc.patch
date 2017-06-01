@@ -1,0 +1,22 @@
+From 93663492aab023da66bc5e04013b1cdee136c419 Mon Sep 17 00:00:00 2001
+From: meijjaa <jjmeijer88@gmail.com>
+Date: Wed, 4 Nov 2015 22:48:22 +0100
+Subject: [PATCH] x86/intel: force tsc to be reliable on Baytrail
+
+---
+ arch/x86/kernel/cpu/intel.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/x86/kernel/cpu/intel.c b/arch/x86/kernel/cpu/intel.c
+index 0631977..121c1c6 100644
+--- a/arch/x86/kernel/cpu/intel.c
++++ b/arch/x86/kernel/cpu/intel.c
+@@ -167,6 +167,8 @@ static void early_init_intel(struct cpuinfo_x86 *c)
+ 	/* Penwell and Cloverview have the TSC which doesn't sleep on S3 */
+ 	if (c->x86 == 6) {
+ 		switch (c->x86_model) {
++		case 0x37:	/* ValleyView */
++			set_cpu_cap(c, X86_FEATURE_TSC_RELIABLE);
+ 		case 0x27:	/* Penwell */
+ 		case 0x35:	/* Cloverview */
+ 		case 0x4a:	/* Merrifield */
