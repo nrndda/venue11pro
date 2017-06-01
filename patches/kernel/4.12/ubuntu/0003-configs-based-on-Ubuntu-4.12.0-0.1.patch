@@ -1,0 +1,361 @@
+From 7422dd90f55c7924c4a2d2803c6c02ebb0388ee3 Mon Sep 17 00:00:00 2001
+From: Kernel Mainline Builds <kernel-ppa+gomeisa@canonical.com>
+Date: Sun, 28 May 2017 21:31:53 -0400
+Subject: [PATCH 3/3] configs (based on Ubuntu-4.12.0-0.1)
+
+---
+ debian.master/config/amd64/config.common.amd64     |  2 --
+ debian.master/config/amd64/config.flavour.generic  |  1 -
+ .../config/amd64/config.flavour.lowlatency         |  1 -
+ debian.master/config/annotations                   |  4 +--
+ debian.master/config/arm64/config.common.arm64     |  5 +---
+ debian.master/config/armhf/config.common.armhf     |  3 --
+ debian.master/config/config.common.ubuntu          | 33 ++--------------------
+ debian.master/config/i386/config.common.i386       |  2 --
+ debian.master/config/i386/config.flavour.generic   |  1 -
+ .../config/i386/config.flavour.lowlatency          |  1 -
+ debian.master/config/ppc64el/config.common.ppc64el |  3 --
+ debian.master/config/s390x/config.common.s390x     |  1 -
+ 12 files changed, 5 insertions(+), 52 deletions(-)
+
+diff --git a/debian.master/config/amd64/config.common.amd64 b/debian.master/config/amd64/config.common.amd64
+index ae52af1..083cd23 100644
+--- a/debian.master/config/amd64/config.common.amd64
++++ b/debian.master/config/amd64/config.common.amd64
+@@ -125,7 +125,6 @@ CONFIG_HAVE_BOOTMEM_INFO_NODE=y
+ CONFIG_HFSPLUS_FS=m
+ CONFIG_HFS_FS=m
+ CONFIG_HIBERNATION=y
+-CONFIG_HIO=m
+ CONFIG_HOTPLUG_PCI=y
+ CONFIG_HOTPLUG_PCI_SHPC=m
+ CONFIG_HPET=y
+@@ -175,7 +174,6 @@ CONFIG_KERNEL_GZIP=y
+ CONFIG_KVM=m
+ CONFIG_LAPB=m
+ CONFIG_LDM_PARTITION=y
+-# CONFIG_LIBIO is not set
+ CONFIG_LIBNVDIMM=y
+ CONFIG_LLC2=m
+ CONFIG_LOG_BUF_SHIFT=18
+diff --git a/debian.master/config/amd64/config.flavour.generic b/debian.master/config/amd64/config.flavour.generic
+index d166237..5938d9b 100644
+--- a/debian.master/config/amd64/config.flavour.generic
++++ b/debian.master/config/amd64/config.flavour.generic
+@@ -4,7 +4,6 @@
+ CONFIG_HZ=250
+ # CONFIG_HZ_1000 is not set
+ CONFIG_HZ_250=y
+-# CONFIG_IRQ_FORCED_THREADING_DEFAULT is not set
+ # CONFIG_LATENCYTOP is not set
+ # CONFIG_PREEMPT is not set
+ CONFIG_PREEMPT_VOLUNTARY=y
+diff --git a/debian.master/config/amd64/config.flavour.lowlatency b/debian.master/config/amd64/config.flavour.lowlatency
+index 814348d..42de09f 100644
+--- a/debian.master/config/amd64/config.flavour.lowlatency
++++ b/debian.master/config/amd64/config.flavour.lowlatency
+@@ -4,7 +4,6 @@
+ CONFIG_HZ=1000
+ CONFIG_HZ_1000=y
+ # CONFIG_HZ_250 is not set
+-CONFIG_IRQ_FORCED_THREADING_DEFAULT=y
+ CONFIG_LATENCYTOP=y
+ CONFIG_PREEMPT=y
+ # CONFIG_PREEMPT_VOLUNTARY is not set
+diff --git a/debian.master/config/annotations b/debian.master/config/annotations
+index ab45050..5989325 100644
+--- a/debian.master/config/annotations
++++ b/debian.master/config/annotations
+@@ -1517,7 +1517,7 @@ CONFIG_DRM_VMWGFX                               policy<{'amd64': 'm', 'i386': 'm
+ CONFIG_DRM_VMWGFX_FBCON                         policy<{'amd64': 'y', 'i386': 'y'}>
+ CONFIG_DRM_UDL                                  policy<{'amd64': 'm', 'arm64': 'm', 'armhf': 'm', 'i386': 'm', 'ppc64el': 'm'}>
+ CONFIG_DRM_AST                                  policy<{'amd64': 'm', 'arm64': 'm', 'armhf': 'm', 'i386': 'm', 'ppc64el': 'm'}>
+-CONFIG_DRM_MGAG200                              policy<{'amd64': 'm', 'arm64': 'm', 'armhf': 'm', 'i386': 'm', 'ppc64el': 'm'}>
++CONFIG_DRM_MGAG200                              policy<{'amd64': 'n', 'arm64': 'n', 'armhf': 'n', 'i386': 'n', 'ppc64el': 'n'}>
+ CONFIG_DRM_CIRRUS_QEMU                          policy<{'amd64': 'm', 'arm64': 'm', 'armhf': 'm', 'i386': 'm', 'ppc64el': 'm'}>
+ CONFIG_DRM_ARMADA                               policy<{'armhf': 'm'}>
+ CONFIG_DRM_ATMEL_HLCDC                          policy<{'armhf': 'm'}>
+@@ -1544,7 +1544,7 @@ CONFIG_DRM_MEDIATEK_HDMI                        policy<{'arm64': 'm', 'armhf': '
+ CONFIG_DRM_MXSFB                                policy<{'arm64': 'm', 'armhf': 'm'}>
+ CONFIG_DRM_MESON                                policy<{'armhf': 'm'}>
+ #
+-CONFIG_DRM_MGAG200                              note<LP#1693337>
++CONFIG_DRM_MGAG200                              mark<ENFORCED> note<LP#1042903: CONFIG_DRM_MGAG200, experimental driver hangs boot on HP Proliant Gen8>
+ CONFIG_DRM_BOCHS                                note<LP#1378648>
+ CONFIG_DRM_STI                                  note<LP#1398458>
+ 
+diff --git a/debian.master/config/arm64/config.common.arm64 b/debian.master/config/arm64/config.common.arm64
+index bc1c1a1..9bca5ca 100644
+--- a/debian.master/config/arm64/config.common.arm64
++++ b/debian.master/config/arm64/config.common.arm64
+@@ -121,7 +121,7 @@ CONFIG_FIRMWARE_IN_KERNEL=y
+ CONFIG_FIXED_PHY=y
+ CONFIG_FMC=m
+ # CONFIG_FONTS is not set
+-CONFIG_FORCE_MAX_ZONEORDER=13
++CONFIG_FORCE_MAX_ZONEORDER=11
+ CONFIG_FRAME_WARN=1024
+ CONFIG_FUSION=y
+ CONFIG_GAMEPORT=m
+@@ -138,7 +138,6 @@ CONFIG_HAVE_GENERIC_DMA_COHERENT=y
+ CONFIG_HFSPLUS_FS=m
+ CONFIG_HFS_FS=m
+ # CONFIG_HIBERNATION is not set
+-# CONFIG_HIO is not set
+ CONFIG_HOTPLUG_PCI=y
+ CONFIG_HOTPLUG_PCI_SHPC=m
+ # CONFIG_HPET is not set
+@@ -182,7 +181,6 @@ CONFIG_IPMI_HANDLER=m
+ CONFIG_IPX=m
+ # CONFIG_IP_DCCP_CCID3 is not set
+ CONFIG_IRQ_BYPASS_MANAGER=m
+-# CONFIG_IRQ_FORCED_THREADING_DEFAULT is not set
+ # CONFIG_ISA_BUS_API is not set
+ CONFIG_JFS_FS=m
+ CONFIG_JME=m
+@@ -193,7 +191,6 @@ CONFIG_KVM=y
+ CONFIG_LAPB=m
+ # CONFIG_LATENCYTOP is not set
+ CONFIG_LDM_PARTITION=y
+-CONFIG_LIBIO=y
+ CONFIG_LIBNVDIMM=y
+ CONFIG_LLC2=m
+ CONFIG_LOG_BUF_SHIFT=14
+diff --git a/debian.master/config/armhf/config.common.armhf b/debian.master/config/armhf/config.common.armhf
+index 4377848..0c1fd5b 100644
+--- a/debian.master/config/armhf/config.common.armhf
++++ b/debian.master/config/armhf/config.common.armhf
+@@ -125,7 +125,6 @@ CONFIG_HAVE_GENERIC_DMA_COHERENT=y
+ CONFIG_HFSPLUS_FS=m
+ CONFIG_HFS_FS=m
+ CONFIG_HIBERNATION=y
+-# CONFIG_HIO is not set
+ # CONFIG_HOTPLUG_PCI is not set
+ CONFIG_HPFS_FS=m
+ CONFIG_HP_ILO=m
+@@ -163,7 +162,6 @@ CONFIG_IPMI_HANDLER=m
+ CONFIG_IPX=m
+ # CONFIG_IP_DCCP_CCID3 is not set
+ CONFIG_IRQ_BYPASS_MANAGER=m
+-# CONFIG_IRQ_FORCED_THREADING_DEFAULT is not set
+ # CONFIG_ISA_BUS_API is not set
+ CONFIG_JFS_FS=m
+ CONFIG_JME=m
+@@ -176,7 +174,6 @@ CONFIG_KVM=y
+ CONFIG_LAPB=m
+ # CONFIG_LATENCYTOP is not set
+ CONFIG_LDM_PARTITION=y
+-# CONFIG_LIBIO is not set
+ CONFIG_LIBNVDIMM=y
+ CONFIG_LLC2=m
+ CONFIG_LOG_BUF_SHIFT=17
+diff --git a/debian.master/config/config.common.ubuntu b/debian.master/config/config.common.ubuntu
+index e797d37..db94a9d 100644
+--- a/debian.master/config/config.common.ubuntu
++++ b/debian.master/config/config.common.ubuntu
+@@ -242,7 +242,6 @@ CONFIG_ALIM1535_WDT=m
+ CONFIG_ALIX=y
+ CONFIG_ALI_FIR=m
+ CONFIG_ALLOW_DEV_COREDUMP=y
+-CONFIG_ALLOW_LOCKDOWN_LIFT=y
+ CONFIG_ALPINE_MSI=y
+ CONFIG_ALTERA_MBOX=m
+ CONFIG_ALTERA_PR_IP_CORE=m
+@@ -571,6 +570,7 @@ CONFIG_ARM_CPUIDLE=y
+ CONFIG_ARM_CPU_SUSPEND=y
+ CONFIG_ARM_CPU_TOPOLOGY=y
+ CONFIG_ARM_CRYPTO=y
++# CONFIG_ARM_DB8500_CPUFREQ is not set
+ CONFIG_ARM_DMA_IOMMU_ALIGNMENT=8
+ CONFIG_ARM_DMA_MEM_BUFFERABLE=y
+ CONFIG_ARM_DMA_USE_IOMMU=y
+@@ -751,24 +751,6 @@ CONFIG_AUDIT_COMPAT_GENERIC=y
+ CONFIG_AUDIT_GENERIC=y
+ CONFIG_AUDIT_TREE=y
+ CONFIG_AUDIT_WATCH=y
+-CONFIG_AUFS_BDEV_LOOP=y
+-# CONFIG_AUFS_BRANCH_MAX_1023 is not set
+-CONFIG_AUFS_BRANCH_MAX_127=y
+-# CONFIG_AUFS_BRANCH_MAX_32767 is not set
+-# CONFIG_AUFS_BRANCH_MAX_511 is not set
+-# CONFIG_AUFS_BR_FUSE is not set
+-CONFIG_AUFS_BR_HFSPLUS=y
+-# CONFIG_AUFS_BR_RAMFS is not set
+-# CONFIG_AUFS_DEBUG is not set
+-CONFIG_AUFS_EXPORT=y
+-# CONFIG_AUFS_FHSM is not set
+-CONFIG_AUFS_FS=m
+-# CONFIG_AUFS_HNOTIFY is not set
+-CONFIG_AUFS_INO_T_64=y
+-# CONFIG_AUFS_RDU is not set
+-CONFIG_AUFS_SBILIST=y
+-# CONFIG_AUFS_SHWH is not set
+-CONFIG_AUFS_XATTR=y
+ CONFIG_AURORA_NB8800=m
+ CONFIG_AUTO_ZRELADDR=y
+ CONFIG_AX25=m
+@@ -2201,7 +2183,7 @@ CONFIG_DRM_MEDIATEK_HDMI=m
+ CONFIG_DRM_MEGACHIPS_STDPXXXX_GE_B850V3_FW=m
+ CONFIG_DRM_MESON=m
+ CONFIG_DRM_MESON_DW_HDMI=m
+-CONFIG_DRM_MGAG200=m
++# CONFIG_DRM_MGAG200 is not set
+ CONFIG_DRM_MIPI_DSI=y
+ CONFIG_DRM_MSM=m
+ CONFIG_DRM_MSM_DSI=y
+@@ -2534,7 +2516,6 @@ CONFIG_EEPROM_IDT_89HPESX=m
+ CONFIG_EEPROM_LEGACY=m
+ CONFIG_EEPROM_MAX6875=m
+ CONFIG_EFIVAR_FS=y
+-CONFIG_EFI_ALLOW_SECURE_BOOT_EXIT=y
+ CONFIG_EFI_ARMSTUB=y
+ CONFIG_EFI_BOOTLOADER_CONTROL=m
+ CONFIG_EFI_CAPSULE_LOADER=m
+@@ -2546,8 +2527,6 @@ CONFIG_EFI_PARTITION=y
+ # CONFIG_EFI_PGT_DUMP is not set
+ CONFIG_EFI_RUNTIME_MAP=y
+ CONFIG_EFI_RUNTIME_WRAPPERS=y
+-CONFIG_EFI_SECURE_BOOT_LOCK_DOWN=y
+-CONFIG_EFI_SIGNATURE_LIST_PARSER=y
+ CONFIG_EFI_STUB=y
+ CONFIG_EFI_TEST=m
+ CONFIG_EFI_VARS=y
+@@ -3458,7 +3437,6 @@ CONFIG_HISAX_TELES_CS=m
+ CONFIG_HISAX_W6692=y
+ CONFIG_HISILICON_ERRATUM_161010101=y
+ CONFIG_HISILICON_IRQ_MBIGEN=y
+-CONFIG_HISILICON_LPC=y
+ CONFIG_HISI_FEMAC=m
+ CONFIG_HISI_KIRIN_DW_DSI=m
+ CONFIG_HISI_THERMAL=m
+@@ -4471,7 +4449,6 @@ CONFIG_KGDB_LOW_LEVEL_TRAP=y
+ CONFIG_KGDB_SERIAL_CONSOLE=y
+ # CONFIG_KGDB_TESTS is not set
+ CONFIG_KINGSUN_DONGLE=m
+-CONFIG_KMSG_IDS=y
+ CONFIG_KMX61=m
+ CONFIG_KPROBES=y
+ CONFIG_KPROBES_ON_FTRACE=y
+@@ -4661,14 +4638,12 @@ CONFIG_LNET=m
+ CONFIG_LNET_MAX_PAYLOAD=1048576
+ CONFIG_LNET_SELFTEST=m
+ CONFIG_LNET_XPRT_IB=m
+-CONFIG_LOAD_UEFI_KEYS=y
+ CONFIG_LOCALVERSION=""
+ # CONFIG_LOCALVERSION_AUTO is not set
+ CONFIG_LOCKD=m
+ CONFIG_LOCKDEP_SUPPORT=y
+ CONFIG_LOCKD_V4=y
+ CONFIG_LOCKUP_DETECTOR=y
+-CONFIG_LOCK_DOWN_KERNEL=y
+ CONFIG_LOCK_SPIN_ON_OWNER=y
+ # CONFIG_LOCK_STAT is not set
+ # CONFIG_LOCK_TORTURE_TEST is not set
+@@ -7446,14 +7421,11 @@ CONFIG_SECURITY_APPARMOR_BOOTPARAM_VALUE=1
+ # CONFIG_SECURITY_APPARMOR_DEBUG is not set
+ CONFIG_SECURITY_APPARMOR_HASH=y
+ CONFIG_SECURITY_APPARMOR_HASH_DEFAULT=y
+-# CONFIG_SECURITY_APPARMOR_STATS is not set
+-CONFIG_SECURITY_APPARMOR_UNCONFINED_INIT=y
+ # CONFIG_SECURITY_DMESG_RESTRICT is not set
+ # CONFIG_SECURITY_LOADPIN is not set
+ CONFIG_SECURITY_NETWORK=y
+ CONFIG_SECURITY_NETWORK_XFRM=y
+ CONFIG_SECURITY_PATH=y
+-CONFIG_SECURITY_PERF_EVENTS_RESTRICT=y
+ CONFIG_SECURITY_SELINUX=y
+ CONFIG_SECURITY_SELINUX_AVC_STATS=y
+ CONFIG_SECURITY_SELINUX_BOOTPARAM_VALUE=0
+@@ -9437,7 +9409,6 @@ CONFIG_VCNL4000=m
+ CONFIG_VDSO=y
+ CONFIG_VECTORS_BASE=0xffff0000
+ CONFIG_VEML6070=m
+-CONFIG_VERSION_SIGNATURE=""
+ CONFIG_VETH=m
+ CONFIG_VEXPRESS_CONFIG=y
+ CONFIG_VEXPRESS_SYSCFG=y
+diff --git a/debian.master/config/i386/config.common.i386 b/debian.master/config/i386/config.common.i386
+index f0a2d95..3b5639f 100644
+--- a/debian.master/config/i386/config.common.i386
++++ b/debian.master/config/i386/config.common.i386
+@@ -122,7 +122,6 @@ CONFIG_HAVE_GENERIC_DMA_COHERENT=y
+ CONFIG_HFSPLUS_FS=m
+ CONFIG_HFS_FS=m
+ CONFIG_HIBERNATION=y
+-CONFIG_HIO=m
+ CONFIG_HOTPLUG_PCI=y
+ CONFIG_HOTPLUG_PCI_SHPC=m
+ CONFIG_HPET=y
+@@ -172,7 +171,6 @@ CONFIG_KVM=m
+ CONFIG_LAPB=m
+ # CONFIG_LATENCYTOP is not set
+ CONFIG_LDM_PARTITION=y
+-# CONFIG_LIBIO is not set
+ CONFIG_LIBNVDIMM=y
+ CONFIG_LLC2=m
+ CONFIG_LOG_BUF_SHIFT=17
+diff --git a/debian.master/config/i386/config.flavour.generic b/debian.master/config/i386/config.flavour.generic
+index 5c2e4e1..965113b 100644
+--- a/debian.master/config/i386/config.flavour.generic
++++ b/debian.master/config/i386/config.flavour.generic
+@@ -4,6 +4,5 @@
+ CONFIG_HZ=250
+ # CONFIG_HZ_1000 is not set
+ CONFIG_HZ_250=y
+-# CONFIG_IRQ_FORCED_THREADING_DEFAULT is not set
+ # CONFIG_PREEMPT is not set
+ CONFIG_PREEMPT_VOLUNTARY=y
+diff --git a/debian.master/config/i386/config.flavour.lowlatency b/debian.master/config/i386/config.flavour.lowlatency
+index 6b121e3..0af82e0 100644
+--- a/debian.master/config/i386/config.flavour.lowlatency
++++ b/debian.master/config/i386/config.flavour.lowlatency
+@@ -4,6 +4,5 @@
+ CONFIG_HZ=1000
+ CONFIG_HZ_1000=y
+ # CONFIG_HZ_250 is not set
+-CONFIG_IRQ_FORCED_THREADING_DEFAULT=y
+ CONFIG_PREEMPT=y
+ # CONFIG_PREEMPT_VOLUNTARY is not set
+diff --git a/debian.master/config/ppc64el/config.common.ppc64el b/debian.master/config/ppc64el/config.common.ppc64el
+index f57351c..ee97c86 100644
+--- a/debian.master/config/ppc64el/config.common.ppc64el
++++ b/debian.master/config/ppc64el/config.common.ppc64el
+@@ -127,7 +127,6 @@ CONFIG_HAVE_BOOTMEM_INFO_NODE=y
+ CONFIG_HFSPLUS_FS=m
+ CONFIG_HFS_FS=m
+ # CONFIG_HIBERNATION is not set
+-# CONFIG_HIO is not set
+ CONFIG_HOTPLUG_PCI=y
+ # CONFIG_HOTPLUG_PCI_SHPC is not set
+ CONFIG_HPFS_FS=m
+@@ -166,7 +165,6 @@ CONFIG_IPMI_HANDLER=m
+ CONFIG_IPX=m
+ # CONFIG_IP_DCCP_CCID3 is not set
+ CONFIG_IRQ_BYPASS_MANAGER=y
+-# CONFIG_IRQ_FORCED_THREADING_DEFAULT is not set
+ # CONFIG_ISA_BUS_API is not set
+ CONFIG_JFS_FS=m
+ CONFIG_JME=m
+@@ -179,7 +177,6 @@ CONFIG_KVM=y
+ CONFIG_LAPB=m
+ # CONFIG_LATENCYTOP is not set
+ CONFIG_LDM_PARTITION=y
+-# CONFIG_LIBIO is not set
+ CONFIG_LIBNVDIMM=y
+ CONFIG_LLC2=m
+ CONFIG_LOG_BUF_SHIFT=17
+diff --git a/debian.master/config/s390x/config.common.s390x b/debian.master/config/s390x/config.common.s390x
+index 7d6ac06..98ed352 100644
+--- a/debian.master/config/s390x/config.common.s390x
++++ b/debian.master/config/s390x/config.common.s390x
+@@ -155,7 +155,6 @@ CONFIG_KVM=y
+ # CONFIG_LAPB is not set
+ # CONFIG_LATENCYTOP is not set
+ # CONFIG_LDM_PARTITION is not set
+-# CONFIG_LIBIO is not set
+ # CONFIG_LIBNVDIMM is not set
+ # CONFIG_LLC2 is not set
+ CONFIG_LOG_BUF_SHIFT=17
+-- 
+2.7.4
+
