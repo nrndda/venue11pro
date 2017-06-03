@@ -1,0 +1,61 @@
+From 5e274c789fd8840f6607deb66dc58226344ce4f4 Mon Sep 17 00:00:00 2001
+From: Lv Zheng <lv.zheng@intel.com>
+Date: Mon, 27 Mar 2017 17:32:54 +0800
+Subject: [PATCH] ACPICA: Events: Add runtime stub support for event APIs
+
+It is reported that on Linux, RTC driver complains wrong errors on
+hardware reduced platform:
+  [    4.085420] ACPI Warning: Could not enable fixed event - real_time_clock (4) (20160422/evxface-654)
+
+This patch fixes this by correctly adding runtime reduced hardware check.
+Reported by tagorereddy <chandan@gmail.com>, fixed by Lv Zheng.
+
+Reported-and-tested-by: Chandan Tagore <tagore.chandan@gmail.com>
+Signed-off-by: Lv Zheng <lv.zheng@intel.com>
+---
+ drivers/acpi/acpica/evxfevnt.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/drivers/acpi/acpica/evxfevnt.c b/drivers/acpi/acpica/evxfevnt.c
+index 82e8971f23a43..c773ac4892cb7 100644
+--- a/drivers/acpi/acpica/evxfevnt.c
++++ b/drivers/acpi/acpica/evxfevnt.c
+@@ -180,6 +180,12 @@ acpi_status acpi_enable_event(u32 event, u32 flags)
+ 
+ 	ACPI_FUNCTION_TRACE(acpi_enable_event);
+ 
++	/* If Hardware Reduced flag is set, there are no fixed events */
++
++	if (acpi_gbl_reduced_hardware) {
++		return_ACPI_STATUS(AE_OK);
++	}
++
+ 	/* Decode the Fixed Event */
+ 
+ 	if (event > ACPI_EVENT_MAX) {
+@@ -237,6 +243,12 @@ acpi_status acpi_disable_event(u32 event, u32 flags)
+ 
+ 	ACPI_FUNCTION_TRACE(acpi_disable_event);
+ 
++	/* If Hardware Reduced flag is set, there are no fixed events */
++
++	if (acpi_gbl_reduced_hardware) {
++		return_ACPI_STATUS(AE_OK);
++	}
++
+ 	/* Decode the Fixed Event */
+ 
+ 	if (event > ACPI_EVENT_MAX) {
+@@ -290,6 +302,12 @@ acpi_status acpi_clear_event(u32 event)
+ 
+ 	ACPI_FUNCTION_TRACE(acpi_clear_event);
+ 
++	/* If Hardware Reduced flag is set, there are no fixed events */
++
++	if (acpi_gbl_reduced_hardware) {
++		return_ACPI_STATUS(AE_OK);
++	}
++
+ 	/* Decode the Fixed Event */
+ 
+ 	if (event > ACPI_EVENT_MAX) {

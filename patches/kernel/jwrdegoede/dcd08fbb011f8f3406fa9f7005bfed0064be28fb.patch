@@ -1,0 +1,80 @@
+From dcd08fbb011f8f3406fa9f7005bfed0064be28fb Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Fri, 25 Nov 2016 09:45:19 +0100
+Subject: [PATCH] pwm: lpss: Add get_state callback
+
+Add a get_state callback so that the initial state correctly reflects
+the actual hardware state.
+
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Acked-by: Jani Nikula <jani.nikula@intel.com>
+---
+Changes in v2:
+-Rebase on top of linux-pwm/for-next
+Changes in v3:
+-Invert on_time_div 255 means 0 brightness not max brightness
+-Use do_div to avoid issues with 64 bit division on 32 bit archs
+-Use !!foo instead of foo? true:fale
+Changes in v4:
+-Release our runtime pm-ref when enabled on pwm_lpss_remove()
+---
+ drivers/pwm/pwm-lpss.c | 36 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
+
+diff --git a/drivers/pwm/pwm-lpss.c b/drivers/pwm/pwm-lpss.c
+index 8db0d40ccacde..a386ef8b4a778 100644
+--- a/drivers/pwm/pwm-lpss.c
++++ b/drivers/pwm/pwm-lpss.c
+@@ -165,8 +165,41 @@ static int pwm_lpss_apply(struct pwm_chip *chip, struct pwm_device *pwm,
+ 	return 0;
+ }
+ 
++static void pwm_lpss_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
++			       struct pwm_state *state)
++{
++	struct pwm_lpss_chip *lpwm = to_lpwm(chip);
++	unsigned long base_unit_range;
++	unsigned long long base_unit, freq, on_time_div;
++	u32 ctrl;
++
++	base_unit_range = BIT(lpwm->info->base_unit_bits);
++
++	ctrl = pwm_lpss_read(pwm);
++	on_time_div = 255 - (ctrl & PWM_ON_TIME_DIV_MASK);
++	base_unit = (ctrl >> PWM_BASE_UNIT_SHIFT) & (base_unit_range - 1);
++
++	freq = base_unit * lpwm->info->clk_rate;
++	do_div(freq, base_unit_range);
++	if (freq == 0)
++		state->period = NSEC_PER_SEC;
++	else
++		state->period = NSEC_PER_SEC / (unsigned long)freq;
++
++	on_time_div *= state->period;
++	do_div(on_time_div, 255);
++	state->duty_cycle = on_time_div;
++
++	state->polarity = PWM_POLARITY_NORMAL;
++	state->enabled = !!(ctrl & PWM_ENABLE);
++
++	if (state->enabled)
++		pm_runtime_get_sync(chip->dev);
++}
++
+ static const struct pwm_ops pwm_lpss_ops = {
+ 	.apply = pwm_lpss_apply,
++	.get_state = pwm_lpss_get_state,
+ 	.owner = THIS_MODULE,
+ };
+ 
+@@ -208,6 +241,9 @@ EXPORT_SYMBOL_GPL(pwm_lpss_probe);
+ 
+ int pwm_lpss_remove(struct pwm_lpss_chip *lpwm)
+ {
++	if (pwm_is_enabled(&lpwm->chip.pwms[0]))
++		pm_runtime_put(lpwm->chip.dev);
++
+ 	return pwmchip_remove(&lpwm->chip);
+ }
+ EXPORT_SYMBOL_GPL(pwm_lpss_remove);
