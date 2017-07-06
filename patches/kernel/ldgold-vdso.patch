@@ -1,0 +1,11 @@
+
+--- a/arch/x86/entry/vdso/Makefile	2016-10-02 23:24:33.000000000 +0000
++++ b/arch/x86/entry/vdso/Makefile	2016-11-16 09:35:13.406216597 +0000
+@@ -97,6 +97,7 @@
+ 
+ CPPFLAGS_vdsox32.lds = $(CPPFLAGS_vdso.lds)
+ VDSO_LDFLAGS_vdsox32.lds = -Wl,-m,elf32_x86_64 \
++			   -fuse-ld=bfd \
+ 			   -Wl,-soname=linux-vdso.so.1 \
+ 			   -Wl,-z,max-page-size=4096 \
+ 			   -Wl,-z,common-page-size=4096

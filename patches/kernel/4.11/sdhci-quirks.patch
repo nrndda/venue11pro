@@ -12,7 +12,6 @@ index 9dcb7048e3b1..d814d1d54360 100644
 +		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
  	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
  		   MMC_CAP_WAIT_WHILE_BUSY,
- 	.flags   = SDHCI_ACPI_RUNTIME_PM,
 @@ -297,10 +322,11 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
  };
  

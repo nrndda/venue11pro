@@ -123308,13 +123308,18 @@ index 9dcb7048e3b15..237f318ce3ed0 100644
 -	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON,
 +	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
 +	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
++		   SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
 +		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
  	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
  		   MMC_CAP_WAIT_WHILE_BUSY,
  	.flags   = SDHCI_ACPI_RUNTIME_PM,
 @@ -301,6 +301,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
- 		   SDHCI_ACPI_RUNTIME_PM,
- 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+-	.flags   = SDHCI_ACPI_SD_CD | SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL |
+-		   SDHCI_ACPI_RUNTIME_PM,
+-	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
++ 	.flags   = SDHCI_ACPI_RUNTIME_PM,
++	.quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
++		   SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
  	.quirks2 = SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
 +		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
  		   SDHCI_QUIRK2_STOP_WITH_TC,
@@ -129798,15 +129803,6 @@ index 3664707950c7c..d4824702be4e7 100644
  	u32 stride = skl_plane_stride(fb, 0, rotation);
  	u32 surf_addr = plane_state->main.offset;
  	int scaler_id = plane_state->scaler_id;
-@@ -4735,7 +4736,7 @@ static int skl_update_scaler_plane(struct intel_crtc_state *crtc_state,
- 	ret = skl_update_scaler(crtc_state, force_detach,
- 				drm_plane_index(&intel_plane->base),
- 				&plane_state->scaler_id,
--				plane_state->base.rotation,
-+				intel_plane_get_rotation(plane_state),
- 				drm_rect_width(&plane_state->base.src) >> 16,
- 				drm_rect_height(&plane_state->base.src) >> 16,
- 				drm_rect_width(&plane_state->base.dst),
 @@ -8733,6 +8734,9 @@ i9xx_get_initial_plane_config(struct intel_crtc *crtc,
  			plane_config->tiling = I915_TILING_X;
  			fb->modifier = I915_FORMAT_MOD_X_TILED;
@@ -130020,19 +130016,6 @@ index 344f238b283f3..c060fc91a4cc9 100644
  u32 skl_plane_ctl_format(uint32_t pixel_format);
  u32 skl_plane_ctl_tiling(uint64_t fb_modifier);
  u32 skl_plane_ctl_rotation(unsigned int rotation);
-diff --git a/drivers/gpu/drm/i915/intel_fbc.c b/drivers/gpu/drm/i915/intel_fbc.c
-index 89fe5c8464df7..7dd2a0ab56f81 100644
---- a/drivers/gpu/drm/i915/intel_fbc.c
-+++ b/drivers/gpu/drm/i915/intel_fbc.c
-@@ -746,7 +746,7 @@ static void intel_fbc_update_state_cache(struct intel_crtc *crtc,
- 		cache->crtc.hsw_bdw_pixel_rate =
- 			ilk_pipe_pixel_rate(crtc_state);
- 
--	cache->plane.rotation = plane_state->base.rotation;
-+	cache->plane.rotation = intel_plane_get_rotation(plane_state);
- 	cache->plane.src_w = drm_rect_width(&plane_state->base.src) >> 16;
- 	cache->plane.src_h = drm_rect_height(&plane_state->base.src) >> 16;
- 	cache->plane.visible = plane_state->base.visible;
 diff --git a/drivers/gpu/drm/i915/intel_pm.c b/drivers/gpu/drm/i915/intel_pm.c
 index 6a29784d2b413..cd7c63793d0f4 100644
 --- a/drivers/gpu/drm/i915/intel_pm.c
